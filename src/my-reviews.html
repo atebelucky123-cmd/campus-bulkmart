@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png"><link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Reviews – Campus Bulkmart</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@700;800;900&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="tailwind.output.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="bg-gray-50 font-inter">
+
+  <nav class="bg-white border-b border-gray-100 z-40 shadow-sm" style="position:sticky; top:0;">
+    <div class="max-w-4xl mx-auto px-4 flex items-center gap-4" style="height:52px;">
+      <a href="index.html" class="flex items-center gap-2 flex-shrink-0">
+        <img src="logo.png" alt="Campus Bulkmart" class="h-8 w-auto object-contain" onerror="this.style.display='none'">
+        <span class="font-outfit text-base font-black leading-none" style="color:#000080;">Campus Bulkmart</span>
+      </a>
+      <div class="ml-auto flex items-center gap-3">
+        <a href="javascript:history.back()" class="inline-flex items-center justify-center text-xs font-semibold px-4 py-1.5 rounded-lg border transition hover:bg-gray-50" style="color:#000080; border-color:#000080;">back</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="max-w-4xl mx-auto px-4 py-8 page-content">
+    <div class="flex items-center gap-3 mb-6">
+      <div class="w-10 h-10 bg-yellow-100 rounded-xl flex items-center justify-center text-xl">⭐</div>
+      <div>
+        <h1 class="font-black text-2xl text-gray-900">My Reviews</h1>
+        <p class="text-gray-400 text-sm">All the product reviews you've written</p>
+      </div>
+    </div>
+
+    <div id="guestMsg" class="hidden text-center py-20">
+      <div class="text-5xl mb-4">🔒</div>
+      <h2 class="font-bold text-xl text-gray-800 mb-2">Sign In Required</h2>
+      <button onclick="openAuthModal()" class="text-white font-bold px-6 py-3 rounded-xl transition text-sm" style="background:#000080;">Sign In</button>
+    </div>
+
+    <div id="reviewsList" class="space-y-4">
+      <div class="text-center py-10 text-gray-400 text-sm">Loading reviews...</div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[80] hidden">
+    <div class="bg-gray-900 text-white px-5 py-3 rounded-2xl shadow-xl text-sm font-medium flex items-center gap-2">
+      <span id="toastMsg">Done!</span>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="auth-modal.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDkbAls30xJVY4k7W8GV1nk397Qyu1ymLM",
+      authDomain: "campusbulkmart.firebaseapp.com",
+      projectId: "campusbulkmart",
+      storageBucket: "campusbulkmart.firebasestorage.app",
+      messagingSenderId: "397276211409",
+      appId: "1:397276211409:web:c8881eae2f5c61b1d33df0",
+      measurementId: "G-KJKTC6GCXB"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    const SUPABASE_URL = "https://oiwgadfjrkuzjkvhugos.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9pd2dhZGZqcmt1emprdmh1Z29zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4ODU5MTUsImV4cCI6MjA5OTQ2MTkxNX0.QA0KFZLDbYZxT9wlPVRc2iz_-C7cnrAyFLGWdL9EcBM";
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      accessToken: async () => {
+        try {
+          const user = firebase.auth().currentUser;
+          return user ? await user.getIdToken() : null;
+        } catch (e) { return null; }
+      }
+    });
+
+    let toastTimer;
+    function showToast(msg) {
+      document.getElementById("toastMsg").textContent = msg;
+      const t = document.getElementById("toast");
+      t.classList.remove("hidden");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => t.classList.add("hidden"), 3000);
+    }
+
+    function escapeHtml(str) {
+      if (!str) return "";
+      return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
+    }
+
+    async function deleteReview(id) {
+      if (!confirm("Delete this review?")) return;
+      const { error } = await sb.from("reviews").delete().eq("id", id);
+      if (error) { showToast("❌ Failed to delete review"); return; }
+      showToast("✅ Review deleted");
+      loadMyReviews();
+    }
+
+    // ── Inline edit (own reviews only — every review on this page already
+    // belongs to the signed-in user, since the query below filters by
+    // userId == user.uid) ──
+    let editStars = {};
+
+    function startEditReview(id, currentStars) {
+      editStars[id] = currentStars;
+      const view = document.getElementById(`reviewView_${id}`);
+      const edit = document.getElementById(`reviewEdit_${id}`);
+      if (view) view.classList.add("hidden");
+      if (edit) edit.classList.remove("hidden");
+      renderEditStars(id);
+    }
+
+    function cancelEditReview(id) {
+      const view = document.getElementById(`reviewView_${id}`);
+      const edit = document.getElementById(`reviewEdit_${id}`);
+      if (edit) edit.classList.add("hidden");
+      if (view) view.classList.remove("hidden");
+    }
+
+    function selectEditStar(id, star) {
+      editStars[id] = star;
+      renderEditStars(id);
+    }
+
+    function renderEditStars(id) {
+      document.querySelectorAll(`#editStarPicker_${id} .star-btn`).forEach(btn => {
+        const s = parseInt(btn.dataset.star);
+        btn.textContent = s <= (editStars[id] || 0) ? "★" : "☆";
+        btn.classList.toggle("selected", s <= (editStars[id] || 0));
+      });
+    }
+
+    async function saveEditReview(id) {
+      const stars = editStars[id] || 0;
+      const textEl = document.getElementById(`editReviewText_${id}`);
+      const text = textEl?.value.trim();
+      if (!stars || !text) { showToast("⚠️ Please add a rating and review text"); return; }
+      try {
+        const { error } = await sb.from("reviews").update({
+          stars, text,
+          edited_at: new Date().toISOString()
+        }).eq("id", id);
+        if (error) throw error;
+        showToast("✅ Review updated");
+        // Re-fetch to re-render the list with the saved values, automatically
+        // closing the edit form (no live listener — see loadMyReviews below).
+        loadMyReviews();
+      } catch (err) {
+        showToast("❌ Failed to update review");
+      }
+    }
+
+    // ── Product name lookup ──
+    // Reviews only ever stored a raw productId. Fetch the product catalog
+    // once and build an id → name map so the page can show the actual
+    // product name instead of an opaque ID.
+    let productNameMap = {};
+    const productNamesReady = sb.from("products").select("id, name")
+      .then(({ data, error }) => {
+        if (error) throw error;
+        (data || []).forEach(row => { productNameMap[row.id] = row.name || null; });
+      })
+      .catch(() => {});
+
+    function getProductDisplayName(productId) {
+      return escapeHtml(productNameMap[productId] || "Deleted / Unknown Product");
+    }
+
+    let currentUid = null;
+
+    function loadMyReviews() {
+      if (!currentUid) return;
+      productNamesReady.then(() => {
+        sb.from("reviews").select("*").eq("user_id", currentUid).order("created_at", { ascending: false })
+          .then(({ data, error }) => {
+            if (error) throw error;
+            const el = document.getElementById("reviewsList");
+            if (!data || data.length === 0) {
+              el.innerHTML = `
+                <div class="text-center py-20">
+                  <div class="text-5xl mb-4">💬</div>
+                  <h2 class="font-bold text-xl text-gray-700 mb-2">No reviews yet</h2>
+                  <p class="text-gray-400 text-sm mb-6">Buy products and share your experience to see your reviews here</p>
+                  <a href="index.html" class="text-white font-bold px-6 py-3 rounded-xl transition text-sm" style="background:#000080;">Browse Products</a>
+                </div>`;
+              return;
+            }
+
+            el.innerHTML = data.map(d => {
+              const id = d.id;
+              const stars = "★".repeat(d.stars) + "☆".repeat(5 - (d.stars || 0));
+              const date = d.created_at ? new Date(d.created_at).toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" }) : "—";
+              const editedTag = d.edited_at ? '<span class="text-gray-400 text-xs">(edited)</span>' : '';
+              return `
+                <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+                  <div id="reviewView_${id}" class="flex items-start justify-between gap-4">
+                    <div class="flex-1">
+                      <p class="font-bold text-gray-800 text-sm mb-1">Product: <span style="color:#000080;">${getProductDisplayName(d.product_id)}</span></p>
+                      <div class="flex items-center gap-2 mb-2">
+                        <span class="text-yellow-500 text-lg leading-none">${stars}</span>
+                        <span class="text-gray-400 text-xs">${date}</span>
+                        ${editedTag}
+                      </div>
+                      <p class="text-gray-600 text-sm">${escapeHtml(d.text)}</p>
+                    </div>
+                    <div class="flex-shrink-0 flex items-center gap-2">
+                      <button onclick="startEditReview('${id}', ${d.stars || 0})" class="w-8 h-8 bg-blue-50 hover:bg-blue-100 rounded-full flex items-center justify-center transition text-sm" style="color:#000080;" title="Edit review">✎</button>
+                      <button onclick="deleteReview('${id}')" class="w-8 h-8 bg-red-50 hover:bg-red-100 text-red-500 rounded-full flex items-center justify-center transition text-sm font-bold" title="Delete review">×</button>
+                    </div>
+                  </div>
+                  <div id="reviewEdit_${id}" class="hidden">
+                    <div class="flex gap-1 mb-3" id="editStarPicker_${id}">
+                      ${[1,2,3,4,5].map(i => `<button class="star-btn" data-star="${i}" onclick="selectEditStar('${id}', ${i})">☆</button>`).join('')}
+                    </div>
+                    <textarea id="editReviewText_${id}" class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none resize-none mb-3" rows="3">${escapeHtml(d.text)}</textarea>
+                    <div class="flex gap-2">
+                      <button onclick="saveEditReview('${id}')" class="flex-1 text-white font-bold py-2 rounded-xl text-sm transition" style="background:#000080;">Save Changes</button>
+                      <button onclick="cancelEditReview('${id}')" class="px-4 rounded-xl text-sm font-semibold text-gray-600 border border-gray-200 hover:bg-gray-50 transition">Cancel</button>
+                    </div>
+                  </div>
+                </div>
+              `;
+            }).join("");
+          })
+          .catch(err => {
+            console.error(err);
+            document.getElementById("reviewsList").innerHTML = `<p class="text-gray-400 text-sm text-center py-10">Could not load reviews. Please try again.</p>`;
+          });
+      });
+    }
+
+    auth.onAuthStateChanged(user => {
+      if (!user) {
+        currentUid = null;
+        document.getElementById("guestMsg").classList.remove("hidden");
+        document.getElementById("reviewsList").innerHTML = "";
+        return;
+      }
+      currentUid = user.uid;
+      loadMyReviews();
+    });
+  </script>
+
+  <!-- AUTH MODAL -->
+  <div id="authModal" class="fixed inset-0 z-[70] hidden items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeAuthModal()"></div>
+    <div class="relative bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6">
+      <button onclick="closeAuthModal()" class="absolute top-4 right-4 w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center transition">
+        <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+      <div class="text-center mb-6">
+        <div class="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-3" style="background:#000080;">
+          <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+        </div>
+        <h2 class="font-bold text-xl text-gray-800" id="authTitle">Welcome Back</h2>
+        <p class="text-gray-400 text-sm mt-1" id="authSubtitle">Sign in to your account</p>
+      </div>
+      <button onclick="handleGoogleSignIn()" class="w-full flex items-center justify-center gap-3 border border-gray-200 rounded-xl py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition mb-3">
+        <svg class="w-5 h-5" viewBox="0 0 24 24">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+        </svg>
+        Continue with Google
+      </button>
+      <div class="flex items-center gap-3 mb-3">
+        <div class="flex-1 h-px bg-gray-200"></div>
+        <span class="text-gray-400 text-xs">or</span>
+        <div class="flex-1 h-px bg-gray-200"></div>
+      </div>
+      <div id="signUpFields" class="hidden space-y-3 mb-3">
+        <input id="authUsername" type="text" placeholder="Username" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none transition" onfocus="this.style.boxShadow='0 0 0 2px #000080'" onblur="this.style.boxShadow=''" />
+        <input id="authDisplayName" type="text" placeholder="Full Name" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none transition" onfocus="this.style.boxShadow='0 0 0 2px #000080'" onblur="this.style.boxShadow=''" />
+      </div>
+      <div class="space-y-3">
+        <input id="authEmail" type="email" placeholder="Email Address" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none transition" onfocus="this.style.boxShadow='0 0 0 2px #000080'" onblur="this.style.boxShadow=''" />
+        <div class="relative">
+          <input id="authPassword" type="password" placeholder="Password" class="w-full border border-gray-200 rounded-xl px-4 py-3 pr-11 text-sm focus:outline-none transition" onfocus="this.style.boxShadow='0 0 0 2px #000080'" onblur="this.style.boxShadow=''" />
+          <button type="button" class="auth-pw-toggle hidden absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition" tabindex="-1" aria-label="Show password">
+            <svg class="icon-eye w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg class="icon-eye-off w-4 h-4 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.94 17.94A10.94 10.94 0 0112 20c-7 0-11-8-11-8a21.8 21.8 0 015.06-6.94M9.9 4.24A10.94 10.94 0 0112 4c7 0 11 8 11 8a21.77 21.77 0 01-3.22 4.44M14.12 14.12a3 3 0 11-4.24-4.24"/><path stroke-linecap="round" stroke-linejoin="round" d="M1 1l22 22"/></svg>
+          </button>
+        </div>
+        <div id="confirmPasswordWrapper" class="hidden">
+          <div class="relative">
+            <input id="authConfirmPassword" type="password" placeholder="Confirm Password" class="w-full border border-gray-200 rounded-xl px-4 py-3 pr-11 text-sm focus:outline-none transition" onfocus="this.style.boxShadow='0 0 0 2px #000080'" onblur="this.style.boxShadow=''" />
+            <button type="button" class="auth-pw-toggle hidden absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition" tabindex="-1" aria-label="Show password">
+              <svg class="icon-eye w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg class="icon-eye-off w-4 h-4 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.94 17.94A10.94 10.94 0 0112 20c-7 0-11-8-11-8a21.8 21.8 0 015.06-6.94M9.9 4.24A10.94 10.94 0 0112 4c7 0 11 8 11 8a21.77 21.77 0 01-3.22 4.44M14.12 14.12a3 3 0 11-4.24-4.24"/><path stroke-linecap="round" stroke-linejoin="round" d="M1 1l22 22"/></svg>
+            </button>
+          </div>
+        </div>
+        <p id="authError" class="text-red-500 text-xs hidden"></p>
+        <button onclick="handleAuth()" class="w-full text-white font-bold py-3 rounded-xl transition text-sm" id="authSubmitBtn" style="background:#000080;">Sign In</button>
+      </div>
+      <div class="text-center mt-4">
+        <p class="text-gray-500 text-sm">
+          <span id="authToggleText">Don't have an account?</span>
+          <button onclick="toggleAuthMode()" class="font-semibold ml-1 hover:underline" id="authToggleBtn" style="color:#000080;">Sign Up</button>
+        </p>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

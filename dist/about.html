@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png"><link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About Us – Campus Bulkmart</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@700;800;900&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="tailwind.output.b89a00d9.css" />
+  <link rel="stylesheet" href="style.93d43a7c.css" />
+
+  <style>
+    :root {
+      --navy: #000080;
+      --navy-light: #0000cc;
+      --navy-dark: #00006a;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background: #f8f9ff;
+      overflow-x: hidden;
+    }
+
+    /* ── Nav ── */
+    .about-nav {
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid #e8ecff;
+      height: 52px;
+      display: flex; align-items: center;
+      padding: 0 20px;
+    }
+
+    /* ── Hero ── */
+    .hero-section {
+      background: linear-gradient(135deg, #000080 0%, #0000aa 60%, #00006a 100%);
+      position: relative;
+      overflow: hidden;
+      padding: 60px 20px 80px;
+      text-align: center;
+    }
+    .hero-section::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 30% 50%, rgba(100,120,255,0.25) 0%, transparent 60%),
+                  radial-gradient(ellipse at 70% 20%, rgba(0,180,255,0.12) 0%, transparent 50%);
+      pointer-events: none;
+    }
+    /* Floating dots */
+    .hero-dot {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.08);
+      animation: floatDot linear infinite;
+    }
+    @keyframes floatDot {
+      0%   { transform: translateY(0) scale(1); opacity: 0.08; }
+      50%  { opacity: 0.18; }
+      100% { transform: translateY(-60px) scale(1.1); opacity: 0; }
+    }
+
+    /* ── Section wrappers ── */
+    .section {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 64px 20px;
+    }
+
+    .section-label {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--navy);
+      background: #e8ecff;
+      border-radius: 20px;
+      padding: 4px 12px;
+      margin-bottom: 14px;
+    }
+
+    .section-title {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: clamp(22px, 4vw, 34px);
+      color: var(--navy);
+      line-height: 1.2;
+      margin: 0 0 16px;
+    }
+
+    .section-body {
+      font-size: 15px;
+      color: #6b7280;
+      line-height: 1.75;
+      max-width: 620px;
+    }
+
+    /* ── Story Anim ── */
+    .story-card {
+      background: #fff;
+      border-radius: 24px;
+      border: 1px solid #e8ecff;
+      padding: 36px;
+      position: relative;
+      overflow: hidden;
+    }
+    .story-card::after {
+      content: '';
+      position: absolute;
+      top: -40px; right: -40px;
+      width: 160px; height: 160px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #e8ecff, transparent);
+      pointer-events: none;
+    }
+
+    /* ── Animated illustration SVGs ── */
+    .anim-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Bounce */
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    /* Spin slow */
+    @keyframes spinSlow {
+      to { transform: rotate(360deg); }
+    }
+    /* Pulse glow */
+    @keyframes pulseGlow {
+      0%, 100% { opacity: 0.6; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.08); }
+    }
+    /* Wiggle */
+    @keyframes wiggle {
+      0%, 100% { transform: rotate(-4deg); }
+      50% { transform: rotate(4deg); }
+    }
+    /* Dash */
+    @keyframes dash {
+      to { stroke-dashoffset: 0; }
+    }
+    /* Float up */
+    @keyframes floatUp {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-8px); }
+    }
+    /* Appear */
+    @keyframes appear {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .appear { opacity: 0; }
+    .appear.visible { animation: appear 0.6s ease forwards; }
+
+    /* ── How it works steps ── */
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 20px;
+      margin-top: 36px;
+    }
+    .step-card {
+      background: #fff;
+      border: 1px solid #e8ecff;
+      border-radius: 20px;
+      padding: 28px 20px;
+      text-align: center;
+      position: relative;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .step-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(0,0,128,0.1);
+    }
+    .step-num {
+      position: absolute;
+      top: -12px; left: 50%; transform: translateX(-50%);
+      background: var(--navy);
+      color: #fff;
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      font-size: 12px;
+      font-weight: 900;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    /* ── Values ── */
+    .values-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+      margin-top: 32px;
+    }
+    .value-card {
+      background: #fff;
+      border: 1px solid #e8ecff;
+      border-radius: 20px;
+      padding: 28px 24px;
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .value-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 32px rgba(0,0,128,0.08);
+    }
+    .value-icon {
+      width: 48px; height: 48px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; flex-shrink: 0;
+    }
+
+    /* ── Stats banner ── */
+    .stats-banner {
+      background: linear-gradient(135deg, #000080 0%, #0000cc 100%);
+      padding: 52px 20px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+      text-align: center;
+      color: #fff;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .stat-item {
+      padding: 8px 12px;
+      border-right: 1px solid rgba(255,255,255,0.12);
+    }
+    .stat-item:last-child { border-right: none; }
+    .stat-val {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: clamp(24px, 4vw, 40px);
+      line-height: 1;
+      letter-spacing: -0.02em;
+    }
+    .stat-lbl {
+      font-size: 11px;
+      color: #93c5fd;
+      margin-top: 8px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    @media (max-width: 500px) {
+      .stats-banner {
+        grid-template-columns: repeat(2, 1fr);
+        padding: 36px 16px;
+      }
+      .stat-item:nth-child(2) { border-right: none; }
+      .stat-item:nth-child(3) { border-right: 1px solid rgba(255,255,255,0.12); border-top: 1px solid rgba(255,255,255,0.12); }
+      .stat-item:nth-child(4) { border-top: 1px solid rgba(255,255,255,0.12); }
+    }
+
+    /* ── CTA ── */
+    .cta-section {
+      background: #fff;
+      border: 1px solid #e8ecff;
+      border-radius: 28px;
+      padding: 56px 36px;
+      text-align: center;
+      margin: 0 20px 64px;
+    }
+
+    /* ── Footer ── */
+    .about-footer {
+      background: var(--navy-dark);
+      color: #fff;
+      padding: 40px 20px 24px;
+      text-align: center;
+    }
+
+    @media (max-width: 640px) {
+      .story-card { padding: 24px 20px; }
+      .cta-section { padding: 36px 20px; margin: 0 12px 40px; }
+    }
+
+    /* ── Mobile layout fixes ── */
+    @media (max-width: 480px) {
+      .section { padding: 40px 16px; }
+      .hero-section { padding: 40px 16px 56px; }
+      .anim-wrap svg { width: 100px !important; height: 100px !important; }
+      .steps-grid { grid-template-columns: 1fr 1fr; gap: 14px; }
+      .values-grid { grid-template-columns: 1fr; }
+      .stats-banner { grid-template-columns: repeat(2,1fr); padding: 28px 12px; }
+      .cta-section { padding: 28px 16px; margin: 0 8px 32px; }
+      .story-card { padding: 20px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="about-nav">
+    <div class="max-w-5xl mx-auto w-full flex items-center justify-between">
+      <a href="index.html" class="flex items-center gap-2">
+        <img src="logo.png" alt="Campus Bulkmart" class="h-7 w-auto object-contain" onerror="this.style.display='none'">
+        <span class="font-outfit text-sm font-black leading-none" style="color:#000080;">Campus Bulkmart</span>
+      </a>
+      <a href="javascript:history.back()"
+        class="text-xs font-semibold px-4 py-1.5 rounded-lg border transition hover:bg-gray-50"
+        style="color:#007BFF; border-color:#007BFF;">back</a>
+    </div>
+  </nav>
+
+  <!-- ═══════════ HERO ═══════════ -->
+  <section class="hero-section">
+    <!-- floating decoration dots -->
+    <div class="hero-dot" style="width:80px;height:80px;top:10%;left:5%;animation-duration:6s;animation-delay:0s;"></div>
+    <div class="hero-dot" style="width:40px;height:40px;top:60%;left:15%;animation-duration:8s;animation-delay:2s;"></div>
+    <div class="hero-dot" style="width:60px;height:60px;top:20%;right:8%;animation-duration:7s;animation-delay:1s;"></div>
+    <div class="hero-dot" style="width:30px;height:30px;bottom:20%;right:20%;animation-duration:5s;animation-delay:3s;"></div>
+
+    <!-- Animated hero illustration -->
+    <div class="anim-wrap mb-6" style="height:140px;">
+      <svg width="180" height="140" viewBox="0 0 180 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Cart body -->
+        <g style="animation: floatUp 3s ease-in-out infinite;">
+          <rect x="40" y="50" width="100" height="60" rx="10" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.5)" stroke-width="2"/>
+          <!-- Items in cart -->
+          <rect x="52" y="62" width="22" height="28" rx="5" fill="#60a5fa" opacity="0.9"/>
+          <rect x="79" y="66" width="18" height="24" rx="5" fill="#34d399" opacity="0.9"/>
+          <rect x="102" y="58" width="26" height="32" rx="5" fill="#fbbf24" opacity="0.9"/>
+          <!-- Cart front bar -->
+          <path d="M28 50 L40 50" stroke="rgba(255,255,255,0.7)" stroke-width="3" stroke-linecap="round"/>
+          <!-- Handle -->
+          <path d="M22 38 Q28 30 40 32 L140 32 Q155 32 155 50" stroke="rgba(255,255,255,0.7)" stroke-width="3" stroke-linecap="round" fill="none"/>
+          <!-- Wheels -->
+          <circle cx="60" cy="118" r="10" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.6)" stroke-width="2.5"/>
+          <circle cx="120" cy="118" r="10" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.6)" stroke-width="2.5"/>
+          <!-- Sparkles -->
+          <g style="animation: pulseGlow 2s ease-in-out infinite; transform-origin: 158px 30px;">
+            <text x="150" y="35" font-size="18" fill="#fbbf24">✨</text>
+          </g>
+          <g style="animation: pulseGlow 2.5s ease-in-out infinite 0.5s; transform-origin: 15px 60px;">
+            <text x="8" y="65" font-size="14" fill="#60a5fa">⭐</text>
+          </g>
+        </g>
+        <!-- Speed lines -->
+        <line x1="10" y1="75" x2="32" y2="75" stroke="rgba(255,255,255,0.25)" stroke-width="2" stroke-linecap="round"/>
+        <line x1="14" y1="85" x2="32" y2="85" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+
+    <div style="position:relative; z-index:1;">
+      <span style="display:inline-block; background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.3); color:#bfdbfe; font-size:11px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; border-radius:20px; padding:4px 14px; margin-bottom:16px; margin-right:6px; backdrop-filter:blur(8px);">
+        🎓 Built for LASU Students
+      </span>
+      <span style="display:inline-block; background:#3B592D; color:#fff; font-size:11px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; border-radius:20px; padding:4px 14px; margin-bottom:16px;">
+        🌱 Student-Run &amp; Trusted
+      </span>
+      <h1 class="font-outfit font-black text-white mb-3 js-about-hero-title" style="font-size:clamp(30px,6vw,52px); line-height:1.1;">
+        Our Story
+      </h1>
+      <p class="js-about-hero-subtitle" style="color:#bfdbfe; font-size:clamp(13px,2.5vw,17px); max-width:540px; margin:0 auto; line-height:1.7;">
+        From a simple idea to LASU's most trusted campus delivery platform — here's how Campus Bulkmart was born.
+      </p>
+    </div>
+  </section>
+
+  <!-- ═══════════ ORIGIN STORY ═══════════ -->
+  <div class="section appear">
+    <span class="section-label">The Origin</span>
+    <h2 class="section-title">We Solved Our Own Problem</h2>
+
+    <div class="story-card">
+      <div style="display:flex; flex-wrap:wrap; gap:24px; align-items:center; width:100%;">
+        <!-- Illustration -->
+        <div class="anim-wrap" style="flex:0 0 120px; min-width:0;">
+          <svg width="150" height="150" viewBox="0 0 150 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Student with lightbulb -->
+            <circle cx="75" cy="75" r="70" fill="#f0f4ff"/>
+            <!-- Body -->
+            <ellipse cx="75" cy="100" rx="28" ry="22" fill="#000080" opacity="0.9"/>
+            <!-- Head -->
+            <circle cx="75" cy="62" r="20" fill="#fbbf24"/>
+            <!-- Eyes -->
+            <circle cx="68" cy="60" r="3" fill="#1e1b4b"/>
+            <circle cx="82" cy="60" r="3" fill="#1e1b4b"/>
+            <!-- Smile -->
+            <path d="M68 68 Q75 74 82 68" stroke="#1e1b4b" stroke-width="2" stroke-linecap="round" fill="none"/>
+            <!-- Graduation cap -->
+            <rect x="60" y="42" width="30" height="5" rx="2" fill="#000080"/>
+            <polygon points="75,33 58,42 92,42" fill="#000080"/>
+            <line x1="92" y1="42" x2="96" y2="52" stroke="#000080" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="96" cy="54" r="3" fill="#fbbf24"/>
+            <!-- Lightbulb -->
+            <g style="animation: pulseGlow 2s ease-in-out infinite; transform-origin:112px 45px;">
+              <circle cx="112" cy="38" r="12" fill="#fef08a" stroke="#fbbf24" stroke-width="2"/>
+              <rect x="108" y="49" width="8" height="3" rx="1" fill="#fbbf24"/>
+              <rect x="109" y="53" width="6" height="2" rx="1" fill="#fbbf24"/>
+              <!-- rays -->
+              <line x1="112" y1="21" x2="112" y2="17" stroke="#fbbf24" stroke-width="2" stroke-linecap="round"/>
+              <line x1="125" y1="25" x2="128" y2="22" stroke="#fbbf24" stroke-width="2" stroke-linecap="round"/>
+              <line x1="128" y1="38" x2="132" y2="38" stroke="#fbbf24" stroke-width="2" stroke-linecap="round"/>
+              <line x1="99" y1="25" x2="96" y2="22" stroke="#fbbf24" stroke-width="2" stroke-linecap="round"/>
+              <line x1="96" y1="38" x2="92" y2="38" stroke="#fbbf24" stroke-width="2" stroke-linecap="round"/>
+            </g>
+          </svg>
+        </div>
+
+        <div style="flex:1; min-width:0;">
+          <p class="js-about-origin-p1" style="font-size:15px; color:#374151; line-height:1.8; margin:0 0 14px;">
+            Every LASU student knows the struggle — you're mid-assignment, your data runs out, your toiletries are empty, and the market feels a world away. 
+            <strong style="color:#000080;">Campus Bulkmart</strong> was born from exactly that frustration.
+          </p>
+          <p class="js-about-origin-p2" style="font-size:15px; color:#374151; line-height:1.8; margin:0 0 14px;">
+            We built a digital procurement platform that acts as your personal campus runner — you browse, you order, we go to the market and deliver straight to your hostel door. No hidden fees, no long waits, no stress.
+          </p>
+          <p class="js-about-origin-p3" style="font-size:15px; color:#374151; line-height:1.8; margin:0;">
+            What started as a simple idea has grown into a full-service campus superstore serving students across all LASU hostels daily.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ STATS ═══════════ -->
+  <div class="stats-banner appear">
+    <div class="stat-item">
+      <div class="stat-val">200+</div>
+      <div class="stat-lbl">Products Available</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-val">1–2hr</div>
+      <div class="stat-lbl">Delivery Turnaround</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-val">₦0</div>
+      <div class="stat-lbl">Hidden Fees</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-val">8AM–8PM</div>
+      <div class="stat-lbl">Daily Operations</div>
+    </div>
+  </div>
+
+  <!-- ═══════════ HOW IT WORKS ═══════════ -->
+  <div class="section appear">
+    <span class="section-label">The Process</span>
+    <h2 class="section-title">How Campus Bulkmart Works</h2>
+    <p class="section-body">
+      We're not a warehouse. We're your on-demand campus procurement team — we find it, buy it, and bring it to you.
+    </p>
+
+    <div class="steps-grid">
+
+      <!-- Step 1 -->
+      <div class="step-card appear">
+        <div class="step-num">1</div>
+        <div class="anim-wrap mb-3" style="height:80px;">
+          <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="40" cy="40" r="36" fill="#eff6ff"/>
+            <!-- Phone -->
+            <rect x="26" y="18" width="28" height="44" rx="5" fill="#000080"/>
+            <rect x="29" y="23" width="22" height="30" rx="2" fill="#93c5fd"/>
+            <circle cx="40" cy="57" r="2.5" fill="#bfdbfe"/>
+            <!-- Search icon on screen -->
+            <g style="animation: pulseGlow 2s ease-in-out infinite;">
+              <circle cx="38" cy="34" r="5" stroke="#fff" stroke-width="1.5" fill="none"/>
+              <line x1="42" y1="38" x2="45" y2="41" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>
+            </g>
+          </svg>
+        </div>
+        <h3 style="font-weight:800; font-size:14px; color:var(--navy); margin:0 0 6px;">Browse & Order</h3>
+        <p style="font-size:12px; color:#6b7280; line-height:1.6; margin:0;">Search our catalog and place your order right from your phone.</p>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step-card appear">
+        <div class="step-num">2</div>
+        <div class="anim-wrap mb-3" style="height:80px;">
+          <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="40" cy="40" r="36" fill="#fef3c7"/>
+            <!-- Market stall -->
+            <rect x="18" y="38" width="44" height="26" rx="4" fill="#fbbf24" opacity="0.8"/>
+            <rect x="14" y="32" width="52" height="8" rx="3" fill="#f59e0b"/>
+            <!-- Awning stripes -->
+            <rect x="18" y="32" width="6" height="8" fill="#fde68a"/>
+            <rect x="30" y="32" width="6" height="8" fill="#fde68a"/>
+            <rect x="42" y="32" width="6" height="8" fill="#fde68a"/>
+            <rect x="54" y="32" width="6" height="8" fill="#fde68a"/>
+            <!-- Items on shelf -->
+            <rect x="24" y="44" width="8" height="12" rx="2" fill="#ef4444" opacity="0.9"/>
+            <rect x="36" y="46" width="8" height="10" rx="2" fill="#10b981" opacity="0.9"/>
+            <rect x="48" y="43" width="8" height="13" rx="2" fill="#3b82f6" opacity="0.9"/>
+            <!-- Runner feet -->
+            <g style="animation: wiggle 0.8s ease-in-out infinite;">
+              <circle cx="40" cy="22" r="6" fill="#fbbf24"/>
+              <line x1="40" y1="28" x2="40" y2="34" stroke="#1e1b4b" stroke-width="2.5"/>
+            </g>
+          </svg>
+        </div>
+        <h3 style="font-weight:800; font-size:14px; color:var(--navy); margin:0 0 6px;">We Hit the Market</h3>
+        <p style="font-size:12px; color:#6b7280; line-height:1.6; margin:0;">Our runners head to the nearest market and procure your exact items.</p>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="step-card appear">
+        <div class="step-num">3</div>
+        <div class="anim-wrap mb-3" style="height:80px;">
+          <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="40" cy="40" r="36" fill="#f0fdf4"/>
+            <!-- Hostel building -->
+            <rect x="20" y="30" width="40" height="34" rx="3" fill="#6ee7b7" opacity="0.7"/>
+            <rect x="16" y="27" width="48" height="5" rx="2" fill="#10b981"/>
+            <!-- Windows -->
+            <rect x="24" y="36" width="8" height="8" rx="2" fill="#fff" opacity="0.9"/>
+            <rect x="36" y="36" width="8" height="8" rx="2" fill="#fff" opacity="0.9"/>
+            <rect x="48" y="36" width="8" height="8" rx="2" fill="#fff" opacity="0.9"/>
+            <!-- Door -->
+            <rect x="34" y="50" width="12" height="14" rx="2" fill="#059669"/>
+            <!-- Delivery bag bouncing -->
+            <g style="animation: bounce 1.5s ease-in-out infinite;">
+              <rect x="32" y="10" width="16" height="14" rx="4" fill="#000080"/>
+              <rect x="36" y="8" width="8" height="4" rx="2" fill="#000080" opacity="0.6"/>
+              <text x="35" y="21" font-size="7" fill="#fff" font-weight="bold">CB</text>
+            </g>
+          </svg>
+        </div>
+        <h3 style="font-weight:800; font-size:14px; color:var(--navy); margin:0 0 6px;">Hostel Delivery</h3>
+        <p style="font-size:12px; color:#6b7280; line-height:1.6; margin:0;">Your order lands at your hostel door within 1–2 hours. No excuses.</p>
+      </div>
+
+      <!-- Step 4 -->
+      <div class="step-card appear">
+        <div class="step-num">4</div>
+        <div class="anim-wrap mb-3" style="height:80px;">
+          <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="40" cy="40" r="36" fill="#fdf4ff"/>
+            <!-- Wallet -->
+            <rect x="16" y="28" width="48" height="30" rx="6" fill="#a78bfa" opacity="0.7"/>
+            <rect x="16" y="28" width="48" height="8" rx="6" fill="#7c3aed" opacity="0.8"/>
+            <!-- Coin slot -->
+            <rect x="44" y="38" width="14" height="14" rx="5" fill="#fff" opacity="0.5" stroke="#7c3aed" stroke-width="1.5"/>
+            <circle cx="51" cy="45" r="4" fill="#fbbf24"/>
+            <!-- Paystack green check -->
+            <g style="animation: pulseGlow 1.8s ease-in-out infinite;">
+              <circle cx="28" cy="56" r="8" fill="#10b981"/>
+              <path d="M24 56 L27 59 L33 53" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            </g>
+          </svg>
+        </div>
+        <h3 style="font-weight:800; font-size:14px; color:var(--navy); margin:0 0 6px;">Pay Securely</h3>
+        <p style="font-size:12px; color:#6b7280; line-height:1.6; margin:0;">Top up your wallet via Paystack or pay on delivery. Zero hassle.</p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════ MISSION & VALUES ═══════════ -->
+  <div style="background:#fff; padding:8px 0;">
+    <div class="section appear">
+      <span class="section-label">What We Stand For</span>
+      <h2 class="section-title">Our Mission & Values</h2>
+
+      <!-- Mission illustration -->
+      <div class="story-card" style="margin-bottom:32px;">
+        <div style="display:flex; flex-wrap:wrap; gap:24px; align-items:center; width:100%;">
+          <div class="anim-wrap" style="flex:0 0 110px; min-width:0;">
+            <svg width="130" height="130" viewBox="0 0 130 130" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="65" cy="65" r="60" fill="#eff6ff"/>
+              <!-- Target/bullseye -->
+              <g style="animation: pulseGlow 2.5s ease-in-out infinite; transform-origin: 65px 65px;">
+                <circle cx="65" cy="65" r="44" fill="none" stroke="#bfdbfe" stroke-width="4"/>
+                <circle cx="65" cy="65" r="30" fill="none" stroke="#60a5fa" stroke-width="4"/>
+                <circle cx="65" cy="65" r="16" fill="#000080" opacity="0.9"/>
+              </g>
+              <!-- Arrow -->
+              <g style="animation: bounce 2s ease-in-out infinite;">
+                <line x1="100" y1="30" x2="72" y2="58" stroke="#ef4444" stroke-width="3" stroke-linecap="round"/>
+                <polygon points="65,65 78,52 82,62" fill="#ef4444"/>
+                <!-- Arrow tail -->
+                <line x1="100" y1="30" x2="108" y2="22" stroke="#ef4444" stroke-width="3" stroke-linecap="round"/>
+                <line x1="100" y1="30" x2="94" y2="28" stroke="#ef4444" stroke-width="2" stroke-linecap="round"/>
+                <line x1="100" y1="30" x2="102" y2="38" stroke="#ef4444" stroke-width="2" stroke-linecap="round"/>
+              </g>
+            </svg>
+          </div>
+          <div style="flex:1; min-width:0;">
+            <p class="js-about-mission-quote" style="font-family:'Outfit',sans-serif; font-weight:800; font-size:18px; color:var(--navy); margin:0 0 10px;">
+              "Make campus life easier — one delivery at a time."
+            </p>
+            <p class="js-about-mission-text" style="font-size:14px; color:#6b7280; line-height:1.75; margin:0;">
+              Our mission is simple: eliminate the friction between LASU students and the essentials they need. We believe no student should lose study time to market runs or go without because the market is far.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="values-grid">
+        <div class="value-card appear">
+          <div class="value-icon" style="background:#eff6ff;">🎯</div>
+          <div>
+            <h4 style="font-weight:800; font-size:14px; color:var(--navy); margin:0 0 5px;">Accuracy First</h4>
+            <p style="font-size:13px; color:#6b7280; line-height:1.6; margin:0;">We procure the exact products you order — genuine, from trusted vendors.</p>
+          </div>
+        </div>
+        <div class="value-card appear">
+          <div class="value-icon" style="background:#f0fdf4;">⚡</div>
+          <div>
+            <h4 style="font-weight:800; font-size:14px; color:var(--navy); margin:0 0 5px;">Speed</h4>
+            <p style="font-size:13px; color:#6b7280; line-height:1.6; margin:0;">Orders processed within 30 minutes. Delivered within 1–2 hours. Every time.</p>
+          </div>
+        </div>
+        <div class="value-card appear">
+          <div class="value-icon" style="background:#fef3c7;">🔒</div>
+          <div>
+            <h4 style="font-weight:800; font-size:14px; color:var(--navy); margin:0 0 5px;">Transparency</h4>
+            <p style="font-size:13px; color:#6b7280; line-height:1.6; margin:0;">No hidden fees. What you see is what you pay. Full stop.</p>
+          </div>
+        </div>
+        <div class="value-card appear">
+          <div class="value-icon" style="background:#fdf4ff;">❤️</div>
+          <div>
+            <h4 style="font-weight:800; font-size:14px; color:var(--navy); margin:0 0 5px;">Student-First</h4>
+            <p style="font-size:13px; color:#6b7280; line-height:1.6; margin:0;">Every decision is made with one question: does this make life better for LASU students?</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ WHAT WE OFFER ═══════════ -->
+  <div class="section appear">
+    <span class="section-label">What We Offer</span>
+    <h2 class="section-title">More Than Just Groceries</h2>
+    <p class="section-body">Campus Bulkmart is a full campus superstore — from your morning noodles to hostel services.</p>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:16px; margin-top:32px;">
+
+      <div style="background:#fff; border:1px solid #e8ecff; border-radius:20px; padding:24px 20px; text-align:center;" class="appear">
+        <div style="font-size:36px; margin-bottom:10px; animation: bounce 2s ease-in-out infinite;">🛒</div>
+        <h4 style="font-weight:800; font-size:14px; color:var(--navy); margin:0 0 5px;">Groceries</h4>
+        <p style="font-size:12px; color:#6b7280; margin:0;">Rice, noodles, drinks, snacks & all your daily essentials</p>
+      </div>
+
+      <div style="background:#fff; border:1px solid #e8ecff; border-radius:20px; padding:24px 20px; text-align:center;" class="appear">
+        <div style="font-size:36px; margin-bottom:10px; animation: bounce 2.3s ease-in-out infinite 0.3s;">📚</div>
+        <h4 style="font-weight:800; font-size:14px; color:var(--navy); margin:0 0 5px;">Stationeries</h4>
+        <p style="font-size:12px; color:#6b7280; margin:0;">Pens, notebooks, printing paper & academic supplies</p>
+      </div>
+
+      <div style="background:#fff; border:1px solid #e8ecff; border-radius:20px; padding:24px 20px; text-align:center;" class="appear">
+        <div style="font-size:36px; margin-bottom:10px; animation: bounce 2.1s ease-in-out infinite 0.6s;">🧴</div>
+        <h4 style="font-weight:800; font-size:14px; color:var(--navy); margin:0 0 5px;">Toiletries</h4>
+        <p style="font-size:12px; color:#6b7280; margin:0;">Soaps, toothpaste, skincare & personal care items</p>
+      </div>
+
+      <div style="background:#fff; border:1px solid #e8ecff; border-radius:20px; padding:24px 20px; text-align:center;" class="appear">
+        <div style="font-size:36px; margin-bottom:10px; animation: bounce 1.9s ease-in-out infinite 0.2s;">💅</div>
+        <h4 style="font-weight:800; font-size:14px; color:var(--navy); margin:0 0 5px;">Hostel Services</h4>
+        <p style="font-size:12px; color:#6b7280; margin:0;">Piercings, braiding & bookable campus services</p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════ ON-DEMAND NOTE ═══════════ -->
+  <div style="max-width:900px; margin:0 auto; padding:0 20px 48px;" class="appear">
+    <div style="background:linear-gradient(135deg,#eff6ff,#e8ecff); border:1px solid #bfdbfe; border-radius:20px; padding:28px 28px; display:flex; gap:16px; align-items:flex-start;">
+      <span style="font-size:28px; flex-shrink:0;">ℹ️</span>
+      <div>
+        <h4 style="font-weight:800; font-size:14px; color:#000080; margin:0 0 6px;">How Our Catalog Works</h4>
+        <p style="font-size:13px; color:#374151; line-height:1.7; margin:0;">
+          Products are <strong>procured from local market vendors on demand</strong> upon order placement. Availability is subject to market stock. If an item is temporarily unavailable, we'll notify you immediately and offer a replacement or full refund. This model keeps our prices fair and our catalog always fresh.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ POLICIES ═══════════ -->
+  <div id="policies" class="section appear">
+    <span class="section-label">Legal</span>
+    <h2 class="section-title">Our Policies</h2>
+    <p class="section-body" style="margin-bottom:32px;">Transparency matters to us. Read how we handle your data and what happens if something goes wrong with an order.</p>
+
+    <!-- Tab switcher -->
+    <div style="display:flex; gap:10px; margin-bottom:24px;">
+      <button id="aboutPolicyTabPrivacy" onclick="switchAboutPolicyTab('privacy')"
+        style="padding:8px 20px; border-radius:20px; font-size:13px; font-weight:700; border:none; cursor:pointer; font-family:inherit; background:#007BFF; color:#fff; transition:all 0.2s;">
+        🔒 Privacy Policy
+      </button>
+      <button id="aboutPolicyTabRefund" onclick="switchAboutPolicyTab('refund')"
+        style="padding:8px 20px; border-radius:20px; font-size:13px; font-weight:700; border:1px solid #e8ecff; cursor:pointer; font-family:inherit; background:#fff; color:#6b7280; transition:all 0.2s;">
+        🔄 Refund &amp; Return
+      </button>
+    </div>
+
+    <!-- Policy content card -->
+    <div id="aboutPolicyCard" style="background:#fff; border:1px solid #e8ecff; border-radius:24px; padding:32px 28px;">
+      <div id="aboutPolicyBody"></div>
+    </div>
+
+    <!-- Effective date note -->
+    <p style="font-size:12px; color:#9ca3af; margin-top:16px; text-align:right;">Effective Date: June 1, 2026</p>
+  </div>
+
+  <script>
+    var _aboutPolicyContent = {
+      privacy: [
+        { h: "1. Information We Collect", b: "We collect personal information you voluntarily provide: your name, phone number, email address, hostel/room details, and order history." },
+        { h: "2. Payment Data & Processing", b: "Online payments are handled securely by Paystack — we never store your card details on our servers. WhatsApp payments are verified manually using the receipt you share with us." },
+        { h: "3. How We Use Your Information", b: "Your data is used only to process and deliver your orders, calculate delivery fees, communicate order updates, and comply with payment processor requirements." },
+        { h: "4. Data Sharing & Third Parties", b: "We do not sell your data. Information is shared only with our delivery team (to fulfill your order) and Paystack (to process online payments)." },
+        { h: "5. Data Security", b: "We use Firebase security rules and strict technical measures to protect your personal information from unauthorized access." },
+        { h: "6. Contact Us", b: '📧 <a href="mailto:atebelucky123@gmail.com" style="color:#000080;font-weight:600;">atebelucky123@gmail.com</a> &nbsp;·&nbsp; 📱 <a href="https://wa.me/2349169618353" style="color:#000080;font-weight:600;">+2349169618353</a>' }
+      ],
+      refund: [
+        { h: "1. Eligibility for Refunds & Replacements", b: "We offer refunds or replacements for: items that arrive damaged or spoiled; incorrect items delivered; or items paid for but missing from your package." },
+        { h: "2. Reporting Window", b: "All claims must be submitted within <strong>24 hours</strong> of delivery. Contact us via WhatsApp or email with your order number and a clear photo of the issue." },
+        { h: "3. Processing of Refunds", b: "<strong>Paystack payments:</strong> reversed to your card within 3–7 business days. <strong>WhatsApp/manual payments:</strong> direct bank transfer within 24–48 hours, or store voucher credit — your choice." },
+        { h: "4. Non-Refundable Situations", b: "Refunds are not available if the delivery address was incorrect or unreachable, or if the claim is made after the 24-hour window." },
+        { h: "5. Contact Channels", b: '📧 <a href="mailto:atebelucky123@gmail.com" style="color:#000080;font-weight:600;">atebelucky123@gmail.com</a> &nbsp;·&nbsp; 📱 <a href="https://wa.me/2349169618353" style="color:#000080;font-weight:600;">+2349169618353</a>' }
+      ]
+    };
+
+    function _renderAboutPolicy(tab) {
+      var sections = _aboutPolicyContent[tab];
+      var html = sections.map(function(s) {
+        return '<div style="margin-bottom:20px;">'
+          + '<h4 style="font-family:\'Outfit\',sans-serif;font-weight:800;font-size:14px;color:var(--navy);margin:0 0 6px;">' + s.h + '</h4>'
+          + '<p style="font-size:14px;color:#6b7280;line-height:1.75;margin:0;">' + s.b + '</p>'
+          + '</div>';
+      }).join('');
+      document.getElementById("aboutPolicyBody").innerHTML = html;
+    }
+
+    function switchAboutPolicyTab(tab) {
+      _renderAboutPolicy(tab);
+      var tp = document.getElementById("aboutPolicyTabPrivacy");
+      var tr = document.getElementById("aboutPolicyTabRefund");
+      if (tab === "privacy") {
+        tp.style.background = "#007BFF"; tp.style.color = "#fff"; tp.style.border = "none";
+        tr.style.background = "#fff";   tr.style.color = "#6b7280"; tr.style.border = "1px solid #e8ecff";
+      } else {
+        tr.style.background = "#007BFF"; tr.style.color = "#fff"; tr.style.border = "none";
+        tp.style.background = "#fff";   tp.style.color = "#6b7280"; tp.style.border = "1px solid #e8ecff";
+      }
+    }
+
+    // Init on load
+    document.addEventListener("DOMContentLoaded", function() {
+      // Check if arriving from the auth modal policy link e.g. about.html#policies?tab=refund
+      var hash = window.location.hash || "";
+      var tabMatch = hash.match(/[?&]tab=([a-z]+)/);
+      var tab = (tabMatch && tabMatch[1] === "refund") ? "refund" : "privacy";
+      switchAboutPolicyTab(tab);
+      // If arriving via the policy link, force the section visible then scroll.
+      // The .appear class starts at opacity:0 and only gets .visible from the
+      // IntersectionObserver — but that fires too late when we navigate here
+      // directly, so we add .visible ourselves before scrolling.
+      if (hash.indexOf("policies") !== -1) {
+        var el = document.getElementById("policies");
+        if (el) {
+          el.classList.add("visible");
+          el.querySelectorAll(".appear").forEach(function(child) {
+            child.classList.add("visible");
+          });
+          setTimeout(function() {
+            el.scrollIntoView({ behavior: "smooth", block: "start" });
+          }, 80);
+        }
+      }
+    });
+  </script>
+
+  <!-- ═══════════ CTA ═══════════ -->
+  <div class="cta-section appear">
+    <!-- Animated illustration -->
+    <div class="anim-wrap mb-5">
+      <svg width="120" height="100" viewBox="0 0 120 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Handshake / partnership -->
+        <g style="animation: floatUp 3s ease-in-out infinite;">
+          <!-- Left hand -->
+          <path d="M10 55 Q20 40 35 45 L55 50 Q60 52 58 58 L40 60 Q28 65 18 58 Z" fill="#fbbf24" opacity="0.9"/>
+          <!-- Right hand -->
+          <path d="M110 55 Q100 40 85 45 L65 50 Q60 52 62 58 L80 60 Q92 65 102 58 Z" fill="#fbbf24" opacity="0.9"/>
+          <!-- Join point -->
+          <ellipse cx="60" cy="54" rx="10" ry="8" fill="#f59e0b"/>
+          <!-- Stars above -->
+          <text x="45" y="28" font-size="14" fill="#fbbf24" style="animation: pulseGlow 1.5s ease-in-out infinite;">★</text>
+          <text x="62" y="20" font-size="18" fill="#60a5fa" style="animation: pulseGlow 2s ease-in-out infinite 0.5s;">✨</text>
+          <text x="78" y="28" font-size="14" fill="#fbbf24" style="animation: pulseGlow 1.8s ease-in-out infinite 1s;">★</text>
+          <!-- CBM label -->
+          <rect x="35" y="70" width="50" height="18" rx="6" fill="#000080"/>
+          <text x="60" y="83" font-size="9" fill="#fff" text-anchor="middle" font-weight="bold" font-family="Outfit,sans-serif">CBM</text>
+        </g>
+      </svg>
+    </div>
+
+    <h2 style="font-family:'Outfit',sans-serif; font-weight:800; font-size:clamp(22px,4vw,34px); color:var(--navy); margin:0 0 10px;">
+      Ready to Order?
+    </h2>
+    <p style="font-size:14px; color:#6b7280; max-width:400px; margin:0 auto 28px; line-height:1.7;">
+      Join hundreds of LASU students already saving time and stress with Campus Bulkmart.
+    </p>
+    <div style="display:flex; flex-wrap:wrap; gap:12px; justify-content:center;">
+      <a href="index.html"
+        class="inline-flex items-center gap-2 font-bold px-6 py-3 rounded-xl text-sm transition hover:opacity-90 text-white"
+        style="background:linear-gradient(135deg,#000080,#0000cc);">
+        🛒 Start Shopping
+      </a>
+      <a href="https://wa.me/2349169618353"
+        class="inline-flex items-center gap-2 font-bold px-6 py-3 rounded-xl text-sm transition border-2 hover:bg-gray-50"
+        style="color:#000080; border-color:#000080;">
+        💬 Chat on WhatsApp
+      </a>
+    </div>
+  </div>
+
+  <!-- ═══════════ FOOTER ═══════════ -->
+  <footer class="about-footer">
+    <div style="max-width:700px; margin:0 auto;">
+      <span class="font-outfit font-black" style="font-size:20px; color:#fff;">Campus Bulkmart</span>
+      <p style="color:#6b7280; font-size:13px; margin:10px 0 20px;">Your campus superstore. LASU's favourite delivery platform.</p>
+      <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:20px; font-size:13px; color:#6b7280; margin-bottom:24px;">
+        <a href="faqs.html"      style="color:#6b7280; text-decoration:none;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#6b7280'">FAQs</a>
+        <a href="reviews.html"   style="color:#6b7280; text-decoration:none;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#6b7280'">Reviews</a>
+        <a href="dashboard.html" style="color:#6b7280; text-decoration:none;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#6b7280'">Dashboard</a>
+        <a href="about.html#policies" style="color:#6b7280; text-decoration:none;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#6b7280'">Policies</a>
+        <a href="https://wa.me/2349169618353" style="color:#6b7280; text-decoration:none;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#6b7280'">WhatsApp</a>
+      </div>
+      <div style="border-top:1px solid #1f2937; padding-top:20px; font-size:12px; color:#4b5563;">
+        © 2025 Campus Bulkmart. All rights reserved.
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scroll reveal script -->
+  <script>
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => {
+            entry.target.classList.add("visible");
+          }, 80);
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+
+    document.querySelectorAll(".appear").forEach(el => observer.observe(el));
+  </script>
+
+  <!-- ============================================================
+       ABOUT PAGE CONTENT — admin-editable (settings/siteContent)
+       Read-only here; only the admin panel writes to this doc.
+       Falls back to the original hardcoded copy above if the doc
+       or these specific fields don't exist yet.
+       ============================================================ -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script>
+    (function () {
+      const SUPABASE_URL = "https://oiwgadfjrkuzjkvhugos.supabase.co";
+      const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9pd2dhZGZqcmt1emprdmh1Z29zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4ODU5MTUsImV4cCI6MjA5OTQ2MTkxNX0.QA0KFZLDbYZxT9wlPVRc2iz_-C7cnrAyFLGWdL9EcBM";
+      const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+      // Escapes HTML then turns **text** into <strong>text</strong> — lets
+      // admin-entered text safely include bold emphasis (e.g. **Campus Bulkmart**)
+      // without allowing arbitrary HTML injection through the admin form.
+      function mdBoldToHtml(str) {
+        const escaped = String(str)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;");
+        return escaped.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+      }
+
+      function applyAboutContent(content) {
+        const c = content || {};
+        const set = (selector, text) => {
+          if (!text) return;
+          document.querySelectorAll(selector).forEach(el => { el.innerHTML = mdBoldToHtml(text); });
+        };
+        set(".js-about-hero-title", c.aboutHeroTitle);
+        set(".js-about-hero-subtitle", c.aboutHeroSubtitle);
+        set(".js-about-origin-p1", c.aboutOriginParagraph1);
+        set(".js-about-origin-p2", c.aboutOriginParagraph2);
+        set(".js-about-origin-p3", c.aboutOriginParagraph3);
+        set(".js-about-mission-quote", c.aboutMissionQuote ? `"${c.aboutMissionQuote}"` : null);
+        set(".js-about-mission-text", c.aboutMissionText);
+      }
+
+      sb.from("settings").select("value").eq("key", "siteContent").maybeSingle()
+        .then(({ data, error }) => {
+          if (error) throw error;
+          applyAboutContent(data ? data.value : null);
+        })
+        .catch(e => console.warn("[About] Could not load site content, using defaults:", e.message));
+    })();
+  </script>
+
+</body>
+</html>

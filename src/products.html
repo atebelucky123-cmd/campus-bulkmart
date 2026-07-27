@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png"><link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <title>All Products — Campus Bulkmart</title>
+  <script>
+    (function () {
+      var ua           = navigator.userAgent;
+      var isMobile     = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
+      var isSmall      = window.innerWidth < 640;
+      var params       = new URLSearchParams(window.location.search);
+      var forceDesktop = params.get("view") === "desktop";
+      var forceMobile  = params.get("view") === "mobile";
+
+      if (forceMobile || ((isMobile || isSmall) && !forceDesktop)) {
+        window.location.replace("products-mobile.html" + window.location.search);
+      } else {
+        window.location.replace("products-desktop.html" + window.location.search);
+      }
+    })();
+  </script>
+</head>
+<body style="background:#000080; margin:0;"></body>
+</html>

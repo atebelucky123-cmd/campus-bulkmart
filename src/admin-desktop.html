@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="icon" type="image/png" href="logo.png">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Admin — Campus Bulkmart</title>
+<!-- Desktop-only admin panel. Mobile version lives in admin-mobile.html — never merge them back into one responsive file. -->
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@700;800;900&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tailwind.output.css" />
+<link rel="stylesheet" href="style.css" />
+<link rel="stylesheet" href="admin.css" />
+</head>
+<body class="bg-gray-50 font-montserrat">
+
+<!-- ============================================================
+     AUTH CHECK SCREEN — shown until admin UID is confirmed
+     ============================================================ -->
+<div id="authCheckScreen" class="min-h-screen flex items-center justify-center bg-gray-50 font-montserrat">
+  <div class="text-center">
+    <div class="animate-spin inline-block w-10 h-10 border-[3px] border-current border-t-transparent rounded-full" style="color:#000080;" role="status"></div>
+    <p class="text-gray-400 text-sm mt-4">Checking admin access…</p>
+  </div>
+</div>
+
+<!-- ============================================================
+     MAIN ADMIN APP — hidden until auth confirms admin UID
+     ============================================================ -->
+<div id="adminApp" class="hidden min-h-screen">
+
+  <!-- ── DESKTOP SIDEBAR (always visible — this file is desktop-only) ── -->
+  <aside class="admin-sidebar">
+    <div class="admin-sidebar-brand">
+      <img src="logo.png" alt="Campus Bulkmart" onerror="this.style.display='none'">
+      <span class="admin-sidebar-brand-text">
+        <span style="color:#000080;">Campus</span> <span class="text-black">Bulkmart</span>
+      </span>
+    </div>
+    <div class="admin-sidebar-eyebrow">Admin Panel</div>
+
+    <nav class="admin-sidebar-nav cbm-sidebar-scrollbar">
+      <button class="tab-btn admin-nav-item active" onclick="switchTab('products', this)">
+        <span class="nav-icon">📦</span><span class="nav-label">Products</span>
+      </button>
+      <button class="tab-btn admin-nav-item" onclick="switchTab('services', this)">
+        <span class="nav-icon">💅</span><span class="nav-label">Services</span>
+      </button>
+      <button class="tab-btn admin-nav-item" onclick="switchTab('orders', this)">
+        <span class="nav-icon">🧾</span><span class="nav-label">Orders</span>
+        <span id="pendingOrdersBadge" class="hidden admin-nav-badge">0</span>
+      </button>
+      <button class="tab-btn admin-nav-item" onclick="switchTab('reviews', this)">
+        <span class="nav-icon">⭐</span><span class="nav-label">Reviews</span>
+      </button>
+      <button class="tab-btn admin-nav-item" onclick="switchTab('users', this)">
+        <span class="nav-icon">👤</span><span class="nav-label">Users</span>
+      </button>
+      <button class="tab-btn admin-nav-item" onclick="switchTab('categories', this)">
+        <span class="nav-icon">🏷️</span><span class="nav-label">Categories</span>
+      </button>
+      <button class="tab-btn admin-nav-item" onclick="switchTab('content', this)">
+        <span class="nav-icon">🖼️</span><span class="nav-label">Content</span>
+      </button>
+
+      <hr class="admin-sidebar-divider">
+      <div class="admin-sidebar-section-label">Quick Actions</div>
+
+      <button onclick="document.getElementById('addProductModal').classList.remove('hidden'); document.getElementById('addProductModal').classList.add('flex'); document.body.classList.add('modal-open');"
+        class="admin-nav-action primary">
+        <span class="nav-icon">➕</span><span class="nav-label">Add Product</span>
+      </button>
+      <button onclick="generateMarketList()" class="admin-nav-action secondary">
+        <span class="nav-icon">🛒</span><span class="nav-label">Market List</span>
+      </button>
+      <button onclick="cleanDuplicates()" id="cleanDuplicatesBtn" class="admin-nav-action ghost">
+        <span class="nav-icon">🧹</span><span class="nav-label">Clean Duplicates</span>
+      </button>
+    </nav>
+
+    <div class="admin-sidebar-footer">
+      <span id="adminNameBadge" class="hidden admin-sidebar-name-badge"></span>
+      <a href="index.html" class="admin-footer-btn admin-footer-btn-outline">Exit Admin Panel</a>
+      <button onclick="adminSignOut()" class="admin-footer-btn admin-footer-btn-danger">
+        ⏻ Sign Out
+      </button>
+    </div>
+  </aside>
+
+  <!-- ── MAIN CONTENT ── -->
+  <main class="admin-main-offset pb-6">
+
+    <!-- Top bar: stats + search -->
+    <div class="bg-white border-b border-gray-100 sticky top-0 z-20 shadow-sm">
+      <div class="px-4 sm:px-6 py-3 flex flex-wrap items-center gap-3">
+        <div class="flex items-center gap-2.5 flex-1 flex-wrap">
+          <div class="admin-stat-card">
+            <p class="text-[10px] uppercase tracking-wide font-semibold" style="color:#000080;">Products</p>
+            <p id="statProducts" class="font-outfit font-black text-lg" style="color:#000080;">0</p>
+          </div>
+          <div class="admin-stat-card">
+            <p class="text-[10px] uppercase tracking-wide font-semibold" style="color:#000080;">Pending Orders</p>
+            <p id="statPendingOrders" class="font-outfit font-black text-lg" style="color:#000080;">0</p>
+          </div>
+          <div class="admin-stat-card">
+            <p class="text-[10px] uppercase tracking-wide font-semibold" style="color:#000080;">Reviews</p>
+            <p id="statReviews" class="font-outfit font-black text-lg" style="color:#000080;">0</p>
+          </div>
+          <div class="admin-stat-card flex items-center gap-2.5">
+            <div>
+              <p class="text-[10px] uppercase tracking-wide font-semibold" style="color:#000080;">Wallet</p>
+              <p id="walletToggleLabel" class="font-outfit font-black text-sm" style="color:#000080;">On</p>
+            </div>
+            <button id="walletToggleBtn" onclick="toggleWalletSetting()" title="Turn wallet checkout on/off"
+              class="relative inline-flex flex-shrink-0 h-6 w-11 items-center rounded-full transition-colors duration-200"
+              style="background:#000080;">
+              <span id="walletToggleKnob" class="inline-block rounded-full bg-white shadow transition-transform duration-200" style="height:1.125rem; width:1.125rem; transform:translateX(1.375rem);"></span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Search trigger (opens full search sheet/overlay) -->
+        <button onclick="openAdminSearchSheet()" class="flex-initial flex items-center gap-2 border border-gray-200 rounded-xl px-3 py-2 text-xs hover:bg-gray-50 hover:border-blue-200 transition max-w-[220px]">
+          <span>🔍</span>
+          <span id="adminSearchTriggerLabel" class="text-gray-400 truncate">Search products e.g. rice, soap…</span>
+          <span id="adminSearchTriggerBadge" class="hidden text-[10px] font-bold px-1.5 py-0.5 rounded-full text-white" style="background:#000080;"></span>
+        </button>
+      </div>
+    </div>
+
+    <div class="px-4 sm:px-6 py-6">
+
+      <!-- ============================================================
+           TAB: PRODUCTS
+           ============================================================ -->
+      <section id="tab-products" class="admin-tab">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <h1 class="font-black text-xl text-gray-900">Products</h1>
+          <div class="flex items-center gap-2 flex-wrap">
+            <div class="relative">
+              <input id="adminProductSearch" type="text" placeholder="Quick search…" oninput="handleAdminProductSearch(this.value)"
+                class="border border-gray-200 rounded-lg px-3 py-2 text-xs w-40 focus:outline-none" />
+              <button id="adminSearchClearBtn" onclick="clearAdminProductSearch()" style="display:none;" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 text-xs">✕</button>
+            </div>
+            <select id="productCatFilter" onchange="renderAdminProducts()" class="border border-gray-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 transition" style="--tw-ring-color:#00008033;">
+              <option value="all">All Categories</option>
+              <option value="groceries">Groceries</option>
+              <option value="stationeries">Stationeries</option>
+              <option value="hostel-services">Hostel Services</option>
+            </select>
+            <button onclick="document.getElementById('addProductModal').classList.remove('hidden'); document.getElementById('addProductModal').classList.add('flex'); document.body.classList.add('modal-open');"
+              class="text-white font-bold px-4 py-2 rounded-lg text-xs shadow-sm hover:shadow-md transition" style="background:#000080;">➕ Add Product</button>
+          </div>
+        </div>
+
+        <!-- search echo -->
+        <div id="adminSearchQueryEcho" style="display:none;" class="mb-3 flex items-center gap-2 text-xs text-gray-500">
+          <span>Showing results for "<span id="adminSearchQueryText"></span>" — <span id="adminSearchResultCount"></span></span>
+        </div>
+
+        <!-- Bulk CSV import -->
+        <details class="admin-card no-lift mb-4">
+          <summary class="px-4 py-3 flex items-center gap-3 cursor-pointer select-none list-none">
+            <div class="modal-icon" style="width:32px;height:32px;border-radius:9px;font-size:14px;">⬆️</div>
+            <span class="text-sm font-bold text-gray-800 flex-1">Bulk CSV Import</span>
+            <span class="text-[10px] text-gray-400 font-semibold">click to expand</span>
+          </summary>
+          <div class="px-4 pb-5 pt-1">
+
+            <div class="flex items-center justify-between flex-wrap gap-2 mb-3">
+              <p class="text-xs text-gray-400">Upload a spreadsheet to add or update many products at once.</p>
+              <div class="flex items-center gap-3 flex-wrap">
+                <button type="button" onclick="exportProductsCsv()" class="csv-template-link">⬇ Export Current Products</button>
+                <button type="button" onclick="downloadProductCsvTemplate()" class="csv-template-link">⬇ Download CSV Template</button>
+              </div>
+            </div>
+
+            <div id="csvDropZone" class="csv-drop-zone"
+              ondragover="event.preventDefault(); this.classList.add('drag-over');"
+              ondragleave="this.classList.remove('drag-over');"
+              ondrop="handleCsvDrop(event)"
+              onclick="document.getElementById('csvFileInput').click()">
+              <div id="csvDropZoneIdle">
+                <div class="text-2xl mb-1">📄</div>
+                <p class="text-xs font-semibold text-gray-600">Drag & drop a .csv file here</p>
+                <p class="text-[11px] text-gray-400 mt-0.5">or click to browse from your device</p>
+              </div>
+              <div id="csvDropZoneFile" class="hidden">
+                <div class="text-2xl mb-1">✅</div>
+                <p class="text-xs font-semibold" style="color:#3B592D;" id="csvFileNameLabel">file.csv</p>
+                <p class="text-[11px] text-gray-400 mt-0.5">Click to choose a different file</p>
+              </div>
+              <input id="csvFileInput" type="file" accept=".csv" class="hidden" onchange="handleCsvFile(this.files[0])" />
+            </div>
+
+            <label class="flex items-center gap-2 text-xs text-gray-500 mt-3">
+              <input id="csvMergeMode" type="checkbox" checked /> Merge with existing products by name (uncheck to fully replace matches)
+            </label>
+            <p id="csvImportError" class="text-red-500 text-xs mt-2 hidden"></p>
+
+            <div id="csvPreviewArea" class="hidden mt-4">
+              <div class="flex items-center justify-between mb-2">
+                <p id="csvPreviewLabel" class="text-xs font-semibold text-gray-600"></p>
+              </div>
+              <div class="overflow-x-auto max-h-64 border border-gray-100 rounded-xl">
+                <table class="w-full text-xs">
+                  <thead class="bg-gray-50 text-gray-500 uppercase text-[10px]"><tr>
+                    <th class="px-3 py-2 text-left">Action</th><th class="px-3 py-2 text-left">Name</th><th class="px-3 py-2 text-left">Category</th>
+                    <th class="px-3 py-2 text-left">Price</th><th class="px-3 py-2 text-left">Cost</th><th class="px-3 py-2 text-left">Top Pick</th><th class="px-3 py-2 text-left">Group</th>
+                  </tr></thead>
+                  <tbody id="csvPreviewBody"></tbody>
+                </table>
+              </div>
+              <div class="flex gap-2 mt-3">
+                <button id="csvImportBtn" onclick="executeCsvImport()" class="text-white font-bold px-5 py-2.5 rounded-xl text-xs shadow-sm hover:shadow-md transition" style="background:#000080;">⚡ Import All</button>
+                <button onclick="clearCsvImport()" class="text-gray-500 font-semibold px-5 py-2.5 rounded-xl text-xs border border-gray-200 hover:bg-gray-50 transition">Cancel</button>
+              </div>
+            </div>
+          </div>
+        </details>
+
+        <!-- Bulk delete bar -->
+        <div id="bulkDeleteBar" class="hidden items-center justify-between bg-red-50 border border-red-100 rounded-xl px-4 py-3 mb-4 text-sm">
+          <span><span id="bulkDeleteCount">0</span> selected</span>
+          <button onclick="confirmBulkDelete()" class="text-white font-bold px-4 py-1.5 rounded-lg text-xs bg-red-500 hover:bg-red-600 transition">Delete Selected</button>
+        </div>
+
+        <!-- Loading -->
+        <div id="productLoadingState" class="text-center py-10">
+          <div class="animate-spin inline-block w-6 h-6 border-[3px] border-current border-t-transparent rounded-full" style="color:#000080;"></div>
+        </div>
+
+        <!-- Desktop table -->
+        <div id="productTableWrapper" class="hidden admin-card no-lift overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="bg-gray-50 text-xs text-gray-500 uppercase">
+              <tr>
+                <th class="px-4 py-3 w-8"><input id="selectAllCheckbox" type="checkbox" onchange="toggleSelectAll(this.checked)" /></th>
+                <th class="px-4 py-3 text-left">Product</th>
+                <th class="px-4 py-3 text-left hidden sm:table-cell">Category</th>
+                <th class="px-4 py-3 text-left">Price</th>
+                <th class="px-4 py-3 text-left hidden md:table-cell">Top Pick</th>
+                <th class="px-4 py-3 text-left hidden md:table-cell">Group Order</th>
+                <th class="px-4 py-3 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="productTableBody"></tbody>
+            <tbody><tr id="productEmptyRow" class="hidden"><td colspan="6" class="text-center text-gray-400 text-sm py-10">🗂️ No products found.</td></tr></tbody>
+          </table>
+        </div>
+
+        <!-- Mobile cards -->
+        <div id="productMobileCards" class="hidden grid grid-cols-1 gap-3"></div>
+        <p id="productMobileEmpty" class="hidden admin-empty-state">🗂️ No products found.</p>
+      </section>
+
+      <!-- ============================================================
+           TAB: SERVICES
+           ============================================================ -->
+      <section id="tab-services" class="admin-tab hidden">
+        <h1 class="font-black text-xl text-gray-900 mb-4">Hostel Services</h1>
+
+        <!-- Add new service -->
+        <div class="admin-card no-lift p-5 mb-6">
+          <p class="font-bold text-sm text-gray-800 mb-3">➕ Add New Service</p>
+          <div class="grid sm:grid-cols-2 gap-3">
+            <input id="svcName" type="text" placeholder="Service Name" class="admin-input" />
+            <div class="cbm-dropzone" id="svcImage_dropzone" data-target="svcImage">
+        <input type="hidden" id="svcImage" value="" />
+        <input type="file" id="svcImage_file" accept="image/*" style="display:none;" />
+        <div class="cbm-dropzone-placeholder" id="svcImage_placeholder">
+          <span class="cbm-icon">📷</span>
+          Drag & drop an image, or click to browse
+        </div>
+        <div class="cbm-dropzone-preview hidden" id="svcImage_preview">
+          <img id="svcImage_previewImg" src="" alt="Preview" />
+          <div class="cbm-dropzone-replace-hint">Click or drag to replace</div>
+          <button type="button" class="cbm-dropzone-remove" onclick="cbmRemoveImage('svcImage', event)">✕</button>
+        </div>
+        <div class="cbm-dropzone-uploading hidden" id="svcImage_uploading">
+          <span class="cbm-spinner"></span> Uploading...
+        </div>
+      </div>
+      <p class="cbm-dropzone-error-text hidden" id="svcImage_error"></p>
+            <textarea id="svcDesc" placeholder="Short description" class="admin-input sm:col-span-2" rows="2"></textarea>
+          </div>
+          <div class="flex items-center gap-5 mt-3 text-xs text-gray-600">
+            <label class="flex items-center gap-2"><input id="svcIsTopPick" type="checkbox" /> Top Pick</label>
+            <label class="flex items-center gap-2"><input id="svcAllowGroupOrder" type="checkbox" checked /> Allow Group Order</label>
+          </div>
+          <p id="addServiceError" class="text-red-500 text-xs mt-2 hidden"></p>
+          <button id="addServiceBtn" onclick="addService()" class="mt-3 text-white font-bold px-5 py-2.5 rounded-xl text-sm shadow-sm hover:shadow-md transition" style="background:#000080;">➕ Add Service</button>
+        </div>
+
+        <div id="servicesEmpty" class="hidden admin-empty-state">💅 No services yet — add your first one above.</div>
+
+        <div class="hidden md:block admin-card no-lift overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="bg-gray-50 text-xs text-gray-500 uppercase">
+              <tr><th class="px-4 py-3 text-left">Service</th><th class="px-4 py-3 text-left">Top Pick</th><th class="px-4 py-3 text-right">Actions</th></tr>
+            </thead>
+            <tbody id="servicesTableBody"></tbody>
+          </table>
+        </div>
+        <div id="servicesMobileCards" class="md:hidden grid grid-cols-1 gap-3"></div>
+      </section>
+
+      <!-- ============================================================
+           TAB: ORDERS
+           ============================================================ -->
+      <section id="tab-orders" class="admin-tab hidden">
+        <div class="flex items-center justify-between gap-3 mb-4">
+          <h1 class="font-black text-xl text-gray-900">Orders</h1>
+          <select id="orderStatusFilter" onchange="renderAdminOrders()" class="border border-gray-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 transition" style="--tw-ring-color:#00008033;">
+            <option value="all">All Statuses</option>
+            <option value="pending">Pending</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="completed">Completed</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+        </div>
+        <div id="orderLoadingState" class="text-center py-10">
+          <div class="animate-spin inline-block w-6 h-6 border-[3px] border-current border-t-transparent rounded-full" style="color:#000080;"></div>
+        </div>
+        <div id="ordersContainer" class="space-y-3"></div>
+        <div id="ordersEmpty" class="hidden admin-empty-state">🧾 No orders found.</div>
+      </section>
+
+      <!-- ============================================================
+           TAB: REVIEWS
+           ============================================================ -->
+      <section id="tab-reviews" class="admin-tab hidden">
+        <div class="flex items-center justify-between gap-3 mb-2 flex-wrap">
+          <h1 class="font-black text-xl text-gray-900">Reviews</h1>
+          <div class="flex items-center gap-2">
+            <label class="flex items-center gap-1.5 text-xs font-semibold text-gray-600 cursor-pointer select-none">
+              <input type="checkbox" id="reviewFeaturedFilter" onchange="renderAdminReviews()" class="w-3.5 h-3.5" />
+              Featured only
+            </label>
+            <select id="reviewStarFilter" onchange="renderAdminReviews()" class="border border-gray-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 transition" style="--tw-ring-color:#00008033;">
+              <option value="all">All Ratings</option>
+              <option value="5">5 stars</option><option value="4">4 stars</option>
+              <option value="3">3 stars</option><option value="2">2 stars</option><option value="1">1 star</option>
+            </select>
+          </div>
+        </div>
+        <p class="text-[11px] text-gray-400 mb-4">Featured reviews (ranked) are shown on product cards in the order below. Use ↑ / ↓ to reorder.</p>
+        <div id="reviewLoadingState" class="text-center py-10">
+          <div class="animate-spin inline-block w-6 h-6 border-[3px] border-current border-t-transparent rounded-full" style="color:#000080;"></div>
+        </div>
+        <div id="reviewsGrid" class="grid sm:grid-cols-2 gap-4"></div>
+        <div id="reviewsEmpty" class="hidden admin-empty-state">⭐ No reviews found.</div>
+      </section>
+
+      <!-- ============================================================
+           TAB: USERS
+           ============================================================ -->
+      <section id="tab-users" class="admin-tab hidden">
+        <h1 class="font-black text-xl text-gray-900 mb-4">Users</h1>
+        <div class="flex gap-2 mb-4 max-w-md">
+          <input id="userEmailSearch" type="email" placeholder="Search by email…" oninput="handleUserSearch(this.value)"
+            class="admin-input flex-1" onkeydown="if(event.key==='Enter') searchUser()" />
+          <button onclick="searchUser()" class="text-white font-bold px-4 py-2 rounded-xl text-sm shadow-sm hover:shadow-md transition" style="background:#000080;">Search</button>
+        </div>
+        <div id="userSearchResult"></div>
+      </section>
+
+      <!-- ============================================================
+           TAB: CATEGORIES
+           ============================================================ -->
+      <section id="tab-categories" class="admin-tab hidden">
+        <h1 class="font-black text-xl text-gray-900 mb-1">Categories</h1>
+        <p class="text-sm text-gray-400 mb-5">Groceries, Stationeries, and Hostel Services are built in. Add more categories here — they'll show up as tabs on the home page and in the product forms.</p>
+
+        <div class="admin-card no-lift p-5 max-w-xl">
+          <div id="categoryManagerList" class="mb-3"></div>
+          <div class="flex items-end gap-2">
+            <div class="flex-1">
+              <label class="block text-[10px] font-semibold text-gray-500 mb-1">Category Name</label>
+              <input id="newCategoryName" type="text" placeholder="e.g. Toiletries" class="admin-input" />
+            </div>
+            <div class="w-24">
+              <label class="block text-[10px] font-semibold text-gray-500 mb-1">Emoji</label>
+              <input id="newCategoryEmoji" type="text" placeholder="🧴" maxlength="4" class="admin-input text-center" />
+            </div>
+            <button onclick="addCategory()" class="text-white font-bold px-5 py-2.5 rounded-xl text-sm shadow-sm hover:shadow-md transition" style="background:#000080;">➕ Add</button>
+          </div>
+          <p id="categoryError" class="text-red-500 text-xs mt-2 hidden"></p>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           TAB: CONTENT (Hero Banner editor)
+           ============================================================ -->
+      <section id="tab-content" class="admin-tab hidden">
+        <h1 class="font-black text-xl text-gray-900 mb-1">Content</h1>
+        <p class="text-sm text-gray-400 mb-5">Edit the hero banner, promo strip, and footer text shown across the site.</p>
+
+        <div class="grid lg:grid-cols-2 gap-5 items-start">
+          <!-- Form -->
+          <div class="admin-card no-lift p-5">
+            <p class="modal-section-label">Headline</p>
+            <div class="grid grid-cols-2 gap-3 mb-4">
+              <div>
+                <label class="block text-[10px] font-semibold text-gray-500 mb-1">Line 1</label>
+                <input id="heroLine1Input" type="text" class="admin-input" oninput="updateHeroPreview()" />
+              </div>
+              <div>
+                <label class="block text-[10px] font-semibold text-gray-500 mb-1">Line 2</label>
+                <input id="heroLine2Input" type="text" class="admin-input" oninput="updateHeroPreview()" />
+              </div>
+            </div>
+
+            <label class="block text-[10px] font-semibold text-gray-500 mb-1">Subtext</label>
+            <textarea id="heroSubtextInput" class="admin-input mb-4" rows="2" oninput="updateHeroPreview()"></textarea>
+
+            <p class="modal-section-label">Stat Boxes</p>
+            <div class="grid grid-cols-2 gap-3 mb-4">
+              <div class="admin-card no-lift p-3">
+                <label class="block text-[10px] font-semibold text-gray-500 mb-1">Stat 1 Value</label>
+                <input id="heroStat1ValueInput" type="text" class="admin-input mb-2" oninput="updateHeroPreview()" />
+                <label class="block text-[10px] font-semibold text-gray-500 mb-1">Stat 1 Label</label>
+                <input id="heroStat1LabelInput" type="text" class="admin-input" oninput="updateHeroPreview()" />
+              </div>
+              <div class="admin-card no-lift p-3">
+                <label class="block text-[10px] font-semibold text-gray-500 mb-1">Stat 2 Value</label>
+                <input id="heroStat2ValueInput" type="text" class="admin-input mb-2" oninput="updateHeroPreview()" />
+                <label class="block text-[10px] font-semibold text-gray-500 mb-1">Stat 2 Label</label>
+                <input id="heroStat2LabelInput" type="text" class="admin-input" oninput="updateHeroPreview()" />
+              </div>
+              <div class="admin-card no-lift p-3">
+                <label class="block text-[10px] font-semibold text-gray-500 mb-1">Stat 3 Value</label>
+                <input id="heroStat3ValueInput" type="text" class="admin-input mb-2" oninput="updateHeroPreview()" />
+                <label class="block text-[10px] font-semibold text-gray-500 mb-1">Stat 3 Label</label>
+                <input id="heroStat3LabelInput" type="text" class="admin-input" oninput="updateHeroPreview()" />
+              </div>
+              <div class="admin-card no-lift p-3">
+                <label class="block text-[10px] font-semibold text-gray-500 mb-1">Stat 4 Value</label>
+                <input id="heroStat4ValueInput" type="text" class="admin-input mb-2" oninput="updateHeroPreview()" />
+                <label class="block text-[10px] font-semibold text-gray-500 mb-1">Stat 4 Label</label>
+                <input id="heroStat4LabelInput" type="text" class="admin-input" oninput="updateHeroPreview()" />
+              </div>
+            </div>
+
+            <div class="flex gap-2">
+              <button id="heroSaveBtn" onclick="saveHeroContent()" class="text-white font-bold px-5 py-2.5 rounded-xl text-sm shadow-sm hover:shadow-md transition" style="background:#000080;">💾 Save Changes</button>
+              <button id="heroResetBtn" onclick="resetHeroContent()" class="text-gray-500 font-semibold px-5 py-2.5 rounded-xl text-sm border border-gray-200 hover:bg-gray-50 transition">Reset to Default</button>
+            </div>
+          </div>
+
+          <!-- Live preview -->
+          <div>
+            <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wide mb-2">Live Preview</p>
+            <div class="rounded-2xl p-6 text-white" style="background: linear-gradient(135deg, #000080 0%, #0000aa 60%, #00006a 100%);">
+              <p class="font-outfit font-black text-3xl leading-tight mb-2">
+                <span id="heroPreviewLine1">Your Campus</span><br><span id="heroPreviewLine2">Superstore</span>
+              </p>
+              <p class="text-blue-100 text-sm mb-4 max-w-md" id="heroPreviewSubtext">Groceries, stationeries, hostel services &amp; more — delivered right to your hostel door.</p>
+              <div class="grid grid-cols-2 gap-3 max-w-xs">
+                <div class="bg-white/10 rounded-2xl p-3 text-center border border-white/20">
+                  <div class="text-xl font-black" id="heroPreviewStat1Value">200+</div>
+                  <div class="text-blue-200 text-xs" id="heroPreviewStat1Label">Products</div>
+                </div>
+                <div class="bg-white/10 rounded-2xl p-3 text-center border border-white/20">
+                  <div class="text-xl font-black" id="heroPreviewStat2Value">Fast</div>
+                  <div class="text-blue-200 text-xs" id="heroPreviewStat2Label">Delivery</div>
+                </div>
+                <div class="bg-white/10 rounded-2xl p-3 text-center border border-white/20">
+                  <div class="text-xl font-black" id="heroPreviewStat3Value">24/7</div>
+                  <div class="text-blue-200 text-xs" id="heroPreviewStat3Label">Support</div>
+                </div>
+                <div class="bg-white/10 rounded-2xl p-3 text-center border border-white/20">
+                  <div class="text-xl font-black" id="heroPreviewStat4Value">₦0</div>
+                  <div class="text-blue-200 text-xs" id="heroPreviewStat4Label">Hidden Fees</div>
+                </div>
+              </div>
+            </div>
+
+            <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wide mb-2 mt-5">Lower Banner Preview</p>
+            <div class="rounded-2xl p-6 text-center" style="background:#3B592D;">
+              <p class="font-outfit font-black text-xl leading-tight mb-2 text-white" id="lowerBannerPreviewTitle">Stock Up Smarter, Save More</p>
+              <p class="text-sm mb-4 max-w-sm mx-auto" style="color:rgba(255,255,255,0.85);" id="lowerBannerPreviewSubtext">Join hundreds of LASU students already ordering in bulk with Campus Bulkmart.</p>
+              <span class="inline-block bg-white font-bold text-sm px-6 py-2.5 rounded-xl" style="color:#3B592D;" id="lowerBannerPreviewBtnText">Shop Now →</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Lower banner form -->
+        <div class="admin-card no-lift p-5 mt-5">
+          <p class="modal-section-label">Lower Banner (promo strip above the footer)</p>
+          <div class="grid md:grid-cols-2 gap-3 mb-3">
+            <div>
+              <label class="block text-[10px] font-semibold text-gray-500 mb-1">Title</label>
+              <input id="lowerBannerTitleInput" type="text" class="admin-input" oninput="updateHeroPreview()" />
+            </div>
+            <div>
+              <label class="block text-[10px] font-semibold text-gray-500 mb-1">Button Text</label>
+              <input id="lowerBannerButtonTextInput" type="text" class="admin-input" oninput="updateHeroPreview()" />
+            </div>
+          </div>
+          <label class="block text-[10px] font-semibold text-gray-500 mb-1">Subtext</label>
+          <textarea id="lowerBannerSubtextInput" class="admin-input mb-3" rows="2" oninput="updateHeroPreview()"></textarea>
+          <label class="block text-[10px] font-semibold text-gray-500 mb-1">Button Link</label>
+          <input id="lowerBannerButtonLinkInput" type="text" class="admin-input" placeholder="#products or a full URL" />
+          <p class="text-[11px] text-gray-400 mt-1.5">Use <code>#products</code> to scroll to the product grid on this same page, or paste a full link (e.g. your WhatsApp link) to send customers elsewhere.</p>
+        </div>
+
+        <!-- Footer form -->
+        <div class="grid lg:grid-cols-2 gap-5 items-start mt-5">
+          <div class="admin-card no-lift p-5">
+            <p class="modal-section-label">Footer</p>
+            <label class="block text-[10px] font-semibold text-gray-500 mb-1">Disclaimer</label>
+            <textarea id="footerDisclaimerInput" class="admin-input mb-4" rows="3" oninput="updateHeroPreview()"></textarea>
+
+            <div class="grid grid-cols-2 gap-3 mb-4">
+              <div>
+                <label class="block text-[10px] font-semibold text-gray-500 mb-1">WhatsApp Number</label>
+                <input id="footerWhatsappInput" type="text" class="admin-input" placeholder="+2349169618353" oninput="updateHeroPreview()" />
+              </div>
+              <div>
+                <label class="block text-[10px] font-semibold text-gray-500 mb-1">Email</label>
+                <input id="footerEmailInput" type="email" class="admin-input" placeholder="you@example.com" oninput="updateHeroPreview()" />
+              </div>
+            </div>
+
+            <label class="block text-[10px] font-semibold text-gray-500 mb-1">Availability Text</label>
+            <input id="footerHoursInput" type="text" class="admin-input mb-4" placeholder="Available daily 8AM – 8PM" oninput="updateHeroPreview()" />
+
+            <p class="modal-section-label">Social Links <span class="text-gray-400 font-normal normal-case">(leave blank to hide)</span></p>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-[10px] font-semibold text-gray-500 mb-1">Instagram URL</label>
+                <input id="footerInstagramInput" type="url" class="admin-input" placeholder="https://instagram.com/..." oninput="updateHeroPreview()" />
+              </div>
+              <div>
+                <label class="block text-[10px] font-semibold text-gray-500 mb-1">TikTok URL</label>
+                <input id="footerTiktokInput" type="url" class="admin-input" placeholder="https://tiktok.com/@..." oninput="updateHeroPreview()" />
+              </div>
+              <div>
+                <label class="block text-[10px] font-semibold text-gray-500 mb-1">X / Twitter URL</label>
+                <input id="footerTwitterInput" type="url" class="admin-input" placeholder="https://x.com/..." oninput="updateHeroPreview()" />
+              </div>
+              <div>
+                <label class="block text-[10px] font-semibold text-gray-500 mb-1">Facebook URL</label>
+                <input id="footerFacebookInput" type="url" class="admin-input" placeholder="https://facebook.com/..." oninput="updateHeroPreview()" />
+              </div>
+            </div>
+
+            <p class="text-[11px] text-gray-400 mt-3">Saved with the same <strong>Save Changes</strong> button above — this all lives in one Content save.</p>
+          </div>
+
+          <!-- Footer live preview -->
+          <div>
+            <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wide mb-2">Footer Preview</p>
+            <div class="rounded-2xl p-5 bg-gray-900 text-white">
+              <h3 class="font-outfit text-lg font-black mb-2" style="color:#fff;">Campus Bulkmart</h3>
+              <p class="text-gray-400 text-xs leading-relaxed" id="footerPreviewDisclaimer"></p>
+              <div id="footerPreviewSocial" style="display:flex; gap:8px; margin-top:12px;"></div>
+              <div class="border-t border-gray-800 mt-4 pt-4 text-xs text-gray-400" style="display:flex; flex-direction:column; gap:6px;">
+                <p>📞 WhatsApp: <span id="footerPreviewWhatsapp"></span></p>
+                <p>✉️ <span id="footerPreviewEmail"></span></p>
+                <p id="footerPreviewHours"></p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- About page form -->
+        <div class="grid lg:grid-cols-2 gap-5 items-start mt-5">
+          <div class="admin-card no-lift p-5">
+            <p class="modal-section-label">About Page — Hero</p>
+            <label class="block text-[10px] font-semibold text-gray-500 mb-1">Title</label>
+            <input id="aboutHeroTitleInput" type="text" class="admin-input mb-4" oninput="updateHeroPreview()" />
+            <label class="block text-[10px] font-semibold text-gray-500 mb-1">Subtitle</label>
+            <textarea id="aboutHeroSubtitleInput" class="admin-input mb-4" rows="2" oninput="updateHeroPreview()"></textarea>
+
+            <p class="modal-section-label">About Page — Origin Story</p>
+            <p class="text-[11px] text-gray-400 mb-2">Wrap text in <code>**double asterisks**</code> to make it bold, e.g. <code>**Campus Bulkmart**</code>.</p>
+            <label class="block text-[10px] font-semibold text-gray-500 mb-1">Paragraph 1</label>
+            <textarea id="aboutOriginP1Input" class="admin-input mb-3" rows="3" oninput="updateHeroPreview()"></textarea>
+            <label class="block text-[10px] font-semibold text-gray-500 mb-1">Paragraph 2</label>
+            <textarea id="aboutOriginP2Input" class="admin-input mb-3" rows="3" oninput="updateHeroPreview()"></textarea>
+            <label class="block text-[10px] font-semibold text-gray-500 mb-1">Paragraph 3</label>
+            <textarea id="aboutOriginP3Input" class="admin-input mb-4" rows="2" oninput="updateHeroPreview()"></textarea>
+
+            <p class="modal-section-label">About Page — Mission</p>
+            <label class="block text-[10px] font-semibold text-gray-500 mb-1">Mission Quote</label>
+            <input id="aboutMissionQuoteInput" type="text" class="admin-input mb-3" oninput="updateHeroPreview()" />
+            <label class="block text-[10px] font-semibold text-gray-500 mb-1">Mission Text</label>
+            <textarea id="aboutMissionTextInput" class="admin-input" rows="3" oninput="updateHeroPreview()"></textarea>
+
+            <p class="text-[11px] text-gray-400 mt-3">Saved with the same <strong>Save Changes</strong> button above.</p>
+          </div>
+
+          <!-- About page live preview -->
+          <div>
+            <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wide mb-2">About Page Preview</p>
+            <div class="rounded-2xl p-6 text-white mb-3" style="background: linear-gradient(135deg, #000080 0%, #0000aa 60%, #00006a 100%);">
+              <p class="font-outfit font-black text-2xl leading-tight mb-2" id="aboutPreviewTitle">Our Story</p>
+              <p class="text-blue-100 text-sm" id="aboutPreviewSubtitle">From a simple idea to LASU's most trusted campus delivery platform — here's how Campus Bulkmart was born.</p>
+            </div>
+            <div class="admin-card no-lift p-4 mb-3">
+              <p class="text-sm text-gray-700 leading-relaxed mb-2" id="aboutPreviewOriginP1"></p>
+              <p class="text-sm text-gray-700 leading-relaxed mb-2" id="aboutPreviewOriginP2"></p>
+              <p class="text-sm text-gray-700 leading-relaxed" id="aboutPreviewOriginP3"></p>
+            </div>
+            <div class="admin-card no-lift p-4">
+              <p class="font-outfit font-black text-base mb-1" style="color:#000080;" id="aboutPreviewMissionQuote"></p>
+              <p class="text-xs text-gray-500 leading-relaxed" id="aboutPreviewMissionText"></p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+</div>
+
+<!-- ============================================================
+     MODAL: ADD PRODUCT
+     ============================================================ -->
+<div id="addProductModal" class="fixed inset-0 z-[70] hidden items-center justify-center p-4">
+  <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="this.parentElement.classList.add('hidden'); this.parentElement.classList.remove('flex'); document.body.classList.remove('modal-open');"></div>
+  <div class="relative modal-panel w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
+    <div class="modal-header">
+      <div class="modal-icon">➕</div>
+      <div class="modal-header-text">
+        <h2 class="font-black text-lg text-gray-900 leading-tight">Add Product</h2>
+        <p class="text-xs text-gray-400">Create a new listing for the storefront</p>
+      </div>
+      <button onclick="document.getElementById('addProductModal').classList.add('hidden'); document.getElementById('addProductModal').classList.remove('flex'); document.body.classList.remove('modal-open');" class="modal-close-btn">✕</button>
+    </div>
+    <div class="space-y-3">
+      <p class="modal-section-label">Basic Info</p>
+      <input id="newName" type="text" placeholder="Product Name" class="admin-input" />
+      <select id="newCategory" class="admin-input" >
+        <option value="groceries">Groceries</option>
+        <option value="stationeries">Stationeries</option>
+        <option value="hostel-services">Hostel Services</option>
+      </select>
+      <input id="newPrice" type="number" placeholder="Price (₦) — shown to customers" class="admin-input" />
+      <textarea id="newDesc" placeholder="Description" class="admin-input" rows="2"></textarea>
+      <div class="cbm-dropzone" id="newImage_dropzone" data-target="newImage">
+        <input type="hidden" id="newImage" value="" />
+        <input type="file" id="newImage_file" accept="image/*" style="display:none;" />
+        <div class="cbm-dropzone-placeholder" id="newImage_placeholder">
+          <span class="cbm-icon">📷</span>
+          Drag & drop an image, or click to browse
+        </div>
+        <div class="cbm-dropzone-preview hidden" id="newImage_preview">
+          <img id="newImage_previewImg" src="" alt="Preview" />
+          <div class="cbm-dropzone-replace-hint">Click or drag to replace</div>
+          <button type="button" class="cbm-dropzone-remove" onclick="cbmRemoveImage('newImage', event)">✕</button>
+        </div>
+        <div class="cbm-dropzone-uploading hidden" id="newImage_uploading">
+          <span class="cbm-spinner"></span> Uploading...
+        </div>
+      </div>
+      <p class="cbm-dropzone-error-text hidden" id="newImage_error"></p>
+
+      <p class="modal-section-label">Market List Info <span class="text-gray-400 font-normal normal-case">(optional — for shopping, not shown to customers)</span></p>
+      <input id="newCostPrice" type="number" placeholder="Cost Price (₦) — what you pay at the market" class="admin-input" />
+      <input id="newMarketName" type="text" placeholder="Market Name — e.g. &quot;Indomie carton (1 roll)&quot;, &quot;Rice (half crate)&quot;" class="admin-input" />
+
+      <p class="modal-section-label">Variants</p>
+      <div id="newVariantsList" class="space-y-2"></div>
+      <button type="button" onclick="addVariantRow('new')" class="text-xs font-semibold" style="color:#000080;">+ Add Variant</button>
+
+      <p class="modal-section-label">Visibility</p>
+      <label class="flex items-center gap-2 text-xs text-gray-600"><input id="newIsTopPick" type="checkbox" /> Top Pick</label>
+      <div id="newGroupOrderRow" class="flex items-center gap-2 text-xs text-gray-600">
+        <input id="newAllowGroupOrder" type="checkbox" checked /> <label>Allow Group Order</label>
+      </div>
+
+      <p id="addProductError" class="text-red-500 text-xs hidden"></p>
+      <div class="flex gap-2 pt-2">
+        <button onclick="addProduct()" class="flex-1 text-white font-bold py-3 rounded-xl text-sm shadow-sm hover:shadow-md transition" style="background:#000080;">➕ Add Product</button>
+        <button onclick="document.getElementById('addProductModal').classList.add('hidden'); document.getElementById('addProductModal').classList.remove('flex'); document.body.classList.remove('modal-open');" class="px-5 rounded-xl text-sm font-semibold text-gray-600 border border-gray-200 hover:bg-gray-50 transition">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     MODAL: EDIT PRODUCT
+     ============================================================ -->
+<div id="editModal" class="fixed inset-0 z-[70] hidden items-center justify-center p-4">
+  <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeEditModal()"></div>
+  <div class="relative modal-panel w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
+    <div class="modal-header">
+      <div class="modal-icon">✏️</div>
+      <div class="modal-header-text">
+        <h2 class="font-black text-lg text-gray-900 leading-tight">Edit Product</h2>
+        <p class="text-xs text-gray-400">Update details for this listing</p>
+      </div>
+      <button onclick="closeEditModal()" class="modal-close-btn">✕</button>
+    </div>
+    <input id="editId" type="hidden" />
+    <div class="space-y-3">
+      <p class="modal-section-label">Basic Info</p>
+      <input id="editName" type="text" placeholder="Product Name" class="admin-input" />
+      <select id="editCategory" class="admin-input" >
+        <option value="groceries">Groceries</option>
+        <option value="stationeries">Stationeries</option>
+        <option value="hostel-services">Hostel Services</option>
+      </select>
+      <input id="editPrice" type="number" placeholder="Price (₦) — shown to customers" class="admin-input" />
+      <textarea id="editDesc" placeholder="Description" class="admin-input" rows="2"></textarea>
+      <div class="cbm-dropzone" id="editImage_dropzone" data-target="editImage">
+        <input type="hidden" id="editImage" value="" />
+        <input type="file" id="editImage_file" accept="image/*" style="display:none;" />
+        <div class="cbm-dropzone-placeholder" id="editImage_placeholder">
+          <span class="cbm-icon">📷</span>
+          Drag & drop an image, or click to browse
+        </div>
+        <div class="cbm-dropzone-preview hidden" id="editImage_preview">
+          <img id="editImage_previewImg" src="" alt="Preview" />
+          <div class="cbm-dropzone-replace-hint">Click or drag to replace</div>
+          <button type="button" class="cbm-dropzone-remove" onclick="cbmRemoveImage('editImage', event)">✕</button>
+        </div>
+        <div class="cbm-dropzone-uploading hidden" id="editImage_uploading">
+          <span class="cbm-spinner"></span> Uploading...
+        </div>
+      </div>
+      <p class="cbm-dropzone-error-text hidden" id="editImage_error"></p>
+
+      <p class="modal-section-label">Market List Info <span class="text-gray-400 font-normal normal-case">(optional — for shopping, not shown to customers)</span></p>
+      <input id="editCostPrice" type="number" placeholder="Cost Price (₦) — what you pay at the market" class="admin-input" />
+      <input id="editMarketName" type="text" placeholder="Market Name — e.g. &quot;Indomie carton (1 roll)&quot;, &quot;Rice (half crate)&quot;" class="admin-input" />
+
+      <p class="modal-section-label">Variants</p>
+      <div id="editVariantsList" class="space-y-2"></div>
+      <button type="button" onclick="addVariantRow('edit')" class="text-xs font-semibold" style="color:#000080;">+ Add Variant</button>
+
+      <p class="modal-section-label">Visibility</p>
+      <label class="flex items-center gap-2 text-xs text-gray-600"><input id="editIsTopPick" type="checkbox" /> Top Pick</label>
+      <div id="editGroupOrderRow" class="flex items-center gap-2 text-xs text-gray-600">
+        <input id="editAllowGroupOrder" type="checkbox" /> <label>Allow Group Order</label>
+      </div>
+
+      <p id="editProductError" class="text-red-500 text-xs hidden"></p>
+      <div class="flex gap-2 pt-2">
+        <button onclick="saveEditProduct()" class="flex-1 text-white font-bold py-3 rounded-xl text-sm shadow-sm hover:shadow-md transition" style="background:#000080;">💾 Save</button>
+        <button onclick="closeEditModal()" class="px-5 rounded-xl text-sm font-semibold text-gray-600 border border-gray-200 hover:bg-gray-50 transition">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     MODAL: EDIT SERVICE
+     ============================================================ -->
+<div id="editServiceModal" class="fixed inset-0 z-[70] hidden items-center justify-center p-4">
+  <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeEditServiceModal()"></div>
+  <div class="relative modal-panel w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
+    <div class="modal-header">
+      <div class="modal-icon olive">💅</div>
+      <div class="modal-header-text">
+        <h2 class="font-black text-lg text-gray-900 leading-tight">Edit Service</h2>
+        <p class="text-xs text-gray-400">Update this hostel service listing</p>
+      </div>
+      <button onclick="closeEditServiceModal()" class="modal-close-btn">✕</button>
+    </div>
+    <input id="editSvcId" type="hidden" />
+    <div class="space-y-3">
+      <input id="editSvcName" type="text" placeholder="Service Name" class="admin-input" />
+      <textarea id="editSvcDesc" placeholder="Description" class="admin-input" rows="2"></textarea>
+      <div class="cbm-dropzone" id="editSvcImage_dropzone" data-target="editSvcImage">
+        <input type="hidden" id="editSvcImage" value="" />
+        <input type="file" id="editSvcImage_file" accept="image/*" style="display:none;" />
+        <div class="cbm-dropzone-placeholder" id="editSvcImage_placeholder">
+          <span class="cbm-icon">📷</span>
+          Drag & drop an image, or click to browse
+        </div>
+        <div class="cbm-dropzone-preview hidden" id="editSvcImage_preview">
+          <img id="editSvcImage_previewImg" src="" alt="Preview" />
+          <div class="cbm-dropzone-replace-hint">Click or drag to replace</div>
+          <button type="button" class="cbm-dropzone-remove" onclick="cbmRemoveImage('editSvcImage', event)">✕</button>
+        </div>
+        <div class="cbm-dropzone-uploading hidden" id="editSvcImage_uploading">
+          <span class="cbm-spinner"></span> Uploading...
+        </div>
+      </div>
+      <p class="cbm-dropzone-error-text hidden" id="editSvcImage_error"></p>
+      <label class="flex items-center gap-2 text-xs text-gray-600"><input id="editSvcIsTopPick" type="checkbox" /> Top Pick</label>
+      <label class="flex items-center gap-2 text-xs text-gray-600"><input id="editSvcAllowGroupOrder" type="checkbox" /> Allow Group Order</label>
+      <p id="editServiceError" class="text-red-500 text-xs hidden"></p>
+      <div class="flex gap-2 pt-2">
+        <button id="saveEditServiceBtn" onclick="saveEditService()" class="flex-1 text-white font-bold py-3 rounded-xl text-sm shadow-sm hover:shadow-md transition" style="background:#000080;">💾 Save</button>
+        <button onclick="closeEditServiceModal()" class="px-5 rounded-xl text-sm font-semibold text-gray-600 border border-gray-200 hover:bg-gray-50 transition">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     MODAL: PRICE LIST BUILDER
+     ============================================================ -->
+<div id="priceListModal" class="fixed inset-0 z-[70] hidden items-center justify-center p-4">
+  <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closePriceListModal()"></div>
+  <div class="relative modal-panel w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
+    <div class="modal-header">
+      <div class="modal-icon olive">💰</div>
+      <div class="modal-header-text">
+        <h2 class="font-black text-lg text-gray-900 leading-tight">Price List — <span id="priceListServiceName"></span></h2>
+        <p id="priceListSummaryText" class="text-xs text-gray-400"></p>
+      </div>
+      <button onclick="closePriceListModal()" class="modal-close-btn">✕</button>
+    </div>
+
+    <div id="priceListGroupsContainer" class="mb-3"></div>
+    <button type="button" onclick="addGroupToBuilder()" class="text-xs font-semibold mb-6" style="color:#000080;">+ Add Group</button>
+
+    <details class="admin-card no-lift">
+      <summary class="px-4 py-3 flex items-center gap-3 cursor-pointer select-none list-none">
+        <div class="modal-icon olive" style="width:32px;height:32px;border-radius:9px;font-size:14px;">⬆️</div>
+        <span class="text-sm font-bold text-gray-800 flex-1">Bulk import via CSV</span>
+      </summary>
+      <div class="px-4 pb-4">
+        <button onclick="downloadPriceListTemplate()" class="csv-template-link mb-3">⬇ Download CSV Template</button>
+        <div id="csvGroupDropZone" class="csv-drop-zone" onclick="document.getElementById('csvGroupFileInput').click()">
+          <div class="text-xl mb-1">📄</div>
+          <p class="text-xs font-semibold text-gray-600">Click to choose a CSV file</p>
+          <input id="csvGroupFileInput" type="file" accept=".csv" onchange="handlePriceListCsvSelect(this)" class="hidden" />
+        </div>
+        <p id="csvGroupError" class="text-red-500 text-xs mt-2 hidden"></p>
+        <div id="csvGroupPreviewArea" class="hidden mt-3">
+          <p id="csvGroupPreviewLabel" class="text-xs font-semibold text-gray-600 mb-2"></p>
+          <div class="overflow-x-auto max-h-56 border border-gray-100 rounded-xl bg-white">
+            <table class="w-full text-xs">
+              <thead class="bg-gray-50 text-gray-500 uppercase text-[10px]"><tr><th class="px-3 py-2 text-left">Group</th><th class="px-3 py-2 text-left">Item</th><th class="px-3 py-2 text-left">Price</th><th class="px-3 py-2 text-left">Desc</th></tr></thead>
+              <tbody id="csvGroupPreviewBody"></tbody>
+            </table>
+          </div>
+          <button onclick="applyPriceListCsv()" class="mt-3 text-white font-bold px-4 py-2 rounded-lg text-xs shadow-sm hover:shadow-md transition" style="background:#000080;">✅ Apply to Builder</button>
+        </div>
+      </div>
+    </details>
+
+    <div class="flex gap-2 mt-6">
+      <button id="savePriceListBtn" onclick="savePriceList()" class="flex-1 text-white font-bold py-3 rounded-xl text-sm shadow-sm hover:shadow-md transition" style="background:#000080;">💾 Save Price List</button>
+      <button onclick="closePriceListModal()" class="px-5 rounded-xl text-sm font-semibold text-gray-600 border border-gray-200 hover:bg-gray-50 transition">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     MODAL: DELETE CONFIRM
+     ============================================================ -->
+<div id="deleteModal" class="fixed inset-0 z-[80] hidden items-center justify-center p-4">
+  <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeDeleteModal()"></div>
+  <div class="relative modal-panel w-full max-w-sm p-6 text-center">
+    <div class="modal-icon danger mx-auto mb-3" style="width:52px;height:52px;border-radius:16px;font-size:22px;">🗑️</div>
+    <h2 class="font-black text-lg text-gray-900 mb-2">Delete?</h2>
+    <p id="deleteModalMsg" class="text-gray-500 text-sm mb-6">This cannot be undone.</p>
+    <div class="flex gap-2">
+      <button id="deleteConfirmBtn" class="flex-1 text-white font-bold py-3 rounded-xl text-sm bg-red-500 hover:bg-red-600 transition shadow-sm hover:shadow-md">Delete</button>
+      <button onclick="closeDeleteModal()" class="flex-1 py-3 rounded-xl text-sm font-semibold text-gray-600 border border-gray-200 hover:bg-gray-50 transition">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     MODAL: CONFIRM ORDER PAYMENT
+     ============================================================ -->
+<div id="confirmOrderModal" class="fixed inset-0 z-[90] hidden items-center justify-center p-4">
+  <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeConfirmOrderModal()"></div>
+  <div class="relative modal-panel w-full max-w-sm p-6">
+    <div class="modal-icon mx-auto mb-3" style="width:52px;height:52px;border-radius:16px;font-size:22px; background:linear-gradient(135deg,#000080 0%,#0056b3 100%);">✅</div>
+    <h2 class="font-black text-lg text-gray-900 mb-1 text-center">Confirm Payment</h2>
+    <p class="text-gray-500 text-sm mb-5 text-center">Order <span id="confirmOrderIdText" class="font-bold text-gray-700">#——</span> · Total <span id="confirmOrderTotalText" class="font-bold text-gray-700">₦0</span></p>
+
+    <label class="block text-[10px] font-semibold text-gray-500 mb-1">Amount Paid</label>
+    <input id="confirmAmountPaidInput" type="number" min="0" step="1" class="admin-input mb-1" />
+    <p class="text-[11px] text-gray-400 mb-5">Defaults to the order total — edit if the customer paid a different amount.</p>
+
+    <div class="flex gap-2">
+      <button onclick="submitConfirmOrder()" class="flex-1 text-white font-bold py-3 rounded-xl text-sm transition shadow-sm hover:shadow-md" style="background:#000080;">Confirm Payment</button>
+      <button onclick="closeConfirmOrderModal()" class="flex-1 py-3 rounded-xl text-sm font-semibold text-gray-600 border border-gray-200 hover:bg-gray-50 transition">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     MODAL: PAYMENT RECEIPT
+     ============================================================ -->
+<div id="receiptModal" class="fixed inset-0 z-[90] hidden items-center justify-center p-4">
+  <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeReceiptModal()"></div>
+  <div class="relative modal-panel w-full max-w-md p-5 max-h-[90vh] overflow-y-auto">
+    <button onclick="closeReceiptModal()" class="modal-close-btn absolute top-4 right-4">✕</button>
+    <h2 class="font-black text-lg text-gray-900 mb-4">Payment Receipt</h2>
+
+    <div class="rounded-xl overflow-hidden border border-gray-100 mb-4">
+      <div id="receiptPreviewContainer" style="width:100%;"></div>
+    </div>
+
+    <div class="flex gap-2">
+      <button id="receiptDownloadBtn" onclick="downloadReceipt()" class="flex-1 text-white font-bold py-3 rounded-xl text-sm transition shadow-sm hover:shadow-md" style="background:#000080;">⬇ Download</button>
+      <button id="receiptShareBtn" onclick="shareReceipt()" class="flex-1 text-white font-bold py-3 rounded-xl text-sm transition shadow-sm hover:shadow-md" style="background:#3B592D;">📤 Send to Customer</button>
+    </div>
+    <p class="text-[11px] text-gray-400 mt-3 text-center">On supported phones, "Send to Customer" opens your share sheet with the image already attached — pick WhatsApp, then the customer's chat.</p>
+  </div>
+</div>
+
+<!-- Hidden, true-size receipt used only for html2canvas capture (kept off-screen so the visible preview can be scaled down without affecting image quality) -->
+<div id="receiptCaptureContainer" style="position:absolute; left:-9999px; top:0; width:600px;"></div>
+
+<!-- ============================================================
+     MODAL: PRODUCT PREVIEW (admin view)
+     ============================================================ -->
+<div id="adminPreviewModal" class="fixed inset-0 z-[70] hidden items-center justify-center p-4">
+  <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeAdminPreviewModal()"></div>
+  <div class="relative modal-panel w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
+    <button onclick="closeAdminPreviewModal()" class="modal-close-btn absolute top-4 right-4">✕</button>
+    <div id="adminPreviewModalContent"></div>
+  </div>
+</div>
+
+<!-- ============================================================
+     MARKET LIST PANEL
+     ============================================================ -->
+<div id="marketListPanel" class="hidden flex fixed inset-0 z-[75] items-center justify-center p-4">
+  <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeMarketList()"></div>
+  <div class="relative bg-white rounded-3xl shadow-2xl w-full max-w-xl p-6 max-h-[90vh] overflow-y-auto">
+    <div class="flex items-center justify-between mb-1">
+      <h2 class="font-bold text-lg text-gray-800">🛒 Market List</h2>
+      <button onclick="closeMarketList()" class="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center transition">✕</button>
+    </div>
+    <p id="marketListSubtitle" class="text-xs text-gray-400 mb-4"></p>
+    <div class="flex gap-2 mb-4">
+      <button id="btnBuyView" onclick="toggleMarketView('buy')" class="flex-1 text-xs font-semibold py-2 rounded-lg border transition" style="border-color:#000080;color:#000080;">Buy View</button>
+      <button id="btnPackView" onclick="toggleMarketView('pack')" class="flex-1 text-xs font-semibold py-2 rounded-lg border border-gray-200 text-gray-500 transition">Pack View</button>
+    </div>
+    <div id="marketBuyView">
+      <button id="marketListPrintBtn" onclick="downloadMarketBuyList()" class="w-full mb-3 text-xs font-semibold py-2 rounded-lg border transition hover:bg-gray-50" style="color:#000080; border-color:#000080;">🖨 Print Buy List</button>
+      <div id="marketBuyList" class="space-y-2"></div>
+    </div>
+    <div id="marketPackView" class="hidden"><div id="marketPackList" class="space-y-3"></div></div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SEARCH OVERLAY / SHEET (mobile-friendly full search)
+     ============================================================ -->
+<div id="adminSearchOverlay" style="display:none;" class="fixed inset-0 z-[85] flex flex-col bg-white">
+  <div class="flex items-center gap-2 px-4 py-3 border-b border-gray-100">
+    <input id="adminSheetInput" type="text" placeholder="Search products…" oninput="handleAdminSheetSearch(this.value)"
+      class="flex-1 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none" />
+    <button id="adminSheetClearBtn" onclick="clearAdminSheetSearch()" style="display:none;" class="text-gray-400 text-sm px-2">Clear</button>
+    <button onclick="closeAdminSearchSheet()" class="text-sm font-semibold px-2" style="color:#000080;">Done</button>
+  </div>
+  <div class="flex-1 overflow-y-auto">
+    <div id="adminSheetDefault" class="text-center text-gray-400 text-sm py-16">Start typing to search all products…</div>
+    <div id="adminSheetEmpty" style="display:none;" class="text-center text-gray-400 text-sm py-16">No products match that search.</div>
+    <div id="adminSheetResults" style="display:none;"></div>
+  </div>
+</div>
+
+<!-- ============================================================
+     TOAST
+     ============================================================ -->
+<div id="adminToast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[90]">
+  <div class="toast-card">
+    <span id="adminToastIcon" class="toast-icon">✅</span>
+    <span id="adminToastMsg" class="text-white text-sm font-medium">Done!</span>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="admin-core.js"></script>
+<script src="admin-categories.js"></script>
+<script src="admin-products-table.js"></script>
+<script src="admin-reviews.js"></script>
+<script src="admin-products-form.js"></script>
+<script src="admin-orders.js"></script>
+<script src="admin-csv-import.js"></script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "scripts": {
+    "build": "tailwindcss -i tailwind.input.css -o src/tailwind.output.css && node copy-assets.js",
+    "watch": "tailwindcss -i tailwind.input.css -o src/tailwind.output.css --watch"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.0"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.110.2",
+    "firebase-admin": "^14.1.0"
+  }
+}

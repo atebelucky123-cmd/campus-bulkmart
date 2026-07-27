@@ -1,0 +1,18 @@
+{
+  "name": "campus-bulkmart-server",
+  "version": "1.0.0",
+  "description": "Campus Bulkmart backend API (waitlist, future payment redesign)",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.4.0",
+    "resend": "^4.0.0"
+  }
+}

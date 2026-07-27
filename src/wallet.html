@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png"><link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wallet – Campus Bulkmart</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@700;800;900&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="tailwind.output.css" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* ── Wallet error banner ── */
+    .wallet-error-banner {
+      background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c;
+      border-radius: 0.75rem; padding: 0.75rem 1rem; font-size: 0.875rem; margin-bottom: 1rem;
+    }
+    /* ── Deposit input row ── */
+    .deposit-input-row { display: flex; gap: 0.625rem; align-items: center; }
+    .deposit-input {
+      flex: 1; padding: 0.625rem 0.875rem; border: 1px solid #d1d5db;
+      border-radius: 0.625rem; font-size: 1rem; color: #111827;
+      background: #fff; outline: none; transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .deposit-input:focus { border-color: #000080; box-shadow: 0 0 0 3px rgba(0,0,128,0.12); }
+    .deposit-btn {
+      padding: 0.625rem 1.125rem; background: #000080; color: #fff;
+      font-size: 0.9rem; font-weight: 700; border: none; border-radius: 0.625rem;
+      cursor: pointer; white-space: nowrap; transition: opacity 0.15s;
+    }
+    .deposit-btn:hover:not(:disabled) { opacity: 0.88; }
+    .deposit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .input-error { margin-top: 0.375rem; font-size: 0.8125rem; color: #dc2626; }
+    /* ── Checkout block ── */
+    .checkout-box {
+      background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 0.75rem;
+      padding: 1.25rem 1.375rem; margin-top: 1rem;
+      animation: walletSlideDown 0.25s ease;
+    }
+    @keyframes walletSlideDown {
+      from { opacity: 0; transform: translateY(-8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .checkout-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.875rem; }
+    .checkout-badge {
+      font-size: 0.65rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase;
+      color: #000080; background: #e0e7ff; padding: 0.25rem 0.625rem; border-radius: 999px;
+    }
+    .checkout-dismiss {
+      background: none; border: none; font-size: 1rem; color: #9ca3af;
+      cursor: pointer; padding: 0.2rem 0.4rem; border-radius: 0.25rem; line-height: 1;
+    }
+    .checkout-dismiss:hover { color: #374151; background: #f3f4f6; }
+    .checkout-amount-label { font-size: 0.75rem; color: #6b7280; margin: 0 0 0.125rem; }
+    .checkout-amount { font-size: 1.75rem; font-weight: 900; color: #111827; margin: 0 0 1rem; }
+    .checkout-account-box {
+      background: #fff; border: 1px solid #e5e7eb; border-radius: 0.5rem;
+      padding: 0.75rem 1rem; margin-bottom: 0.875rem;
+    }
+    .checkout-detail-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0.45rem 0; border-bottom: 1px solid #f3f4f6;
+    }
+    .checkout-detail-row:last-child { border-bottom: none; }
+    .detail-label { font-size: 0.8rem; color: #6b7280; font-weight: 500; }
+    .detail-value { font-size: 0.9375rem; font-weight: 700; color: #111827; display: flex; align-items: center; gap: 0.5rem; }
+    .account-number { font-family: 'Courier New', monospace; letter-spacing: 0.06em; }
+    .copy-btn {
+      font-size: 0.65rem; font-weight: 700; color: #000080; background: #e0e7ff;
+      border: none; border-radius: 0.25rem; padding: 0.2rem 0.5rem; cursor: pointer;
+    }
+    .copy-btn:hover { background: #c7d2fe; }
+    .checkout-timer-row {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #fff7ed; border: 1px solid #fed7aa; border-radius: 0.5rem;
+      padding: 0.5rem 0.875rem; margin-bottom: 0.875rem;
+    }
+    .timer-label { font-size: 0.8rem; color: #92400e; font-weight: 500; }
+    .timer-value {
+      font-size: 1.1rem; font-weight: 900; color: #b45309;
+      font-family: 'Courier New', monospace; letter-spacing: 0.05em;
+    }
+    .checkout-assurance {
+      font-size: 0.8rem; color: #065f46; background: #ecfdf5;
+      border: 1px solid #a7f3d0; border-radius: 0.5rem;
+      padding: 0.6rem 0.875rem; margin: 0; line-height: 1.5;
+    }
+    /* ── Payment history ── */
+    .tx-row {
+      display: flex; align-items: center; gap: 0.875rem;
+      padding: 0.875rem 0; border-bottom: 1px solid #f3f4f6;
+    }
+    .tx-row:last-child { border-bottom: none; }
+    .tx-icon {
+      width: 2.5rem; height: 2.5rem; border-radius: 0.75rem;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+    .tx-icon.credit { background: #d1fae5; }
+    .tx-icon.debit  { background: #fee2e2; }
+    .tx-amount.credit { color: #059669; font-weight: 700; }
+    .tx-amount.debit  { color: #dc2626; font-weight: 700; }
+
+    /* ── Loading overlay ── */
+    #walletLoadingOverlay {
+      position: fixed; inset: 0; z-index: 9999;
+      background: rgba(0,0,0,0.55);
+      backdrop-filter: blur(6px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 20px;
+    }
+    #walletLoadingOverlay.active { display: flex; animation: overlayFadeIn 0.25s ease; }
+    @keyframes overlayFadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .loader-ring {
+      width: 56px; height: 56px; border-radius: 50%;
+      border: 4px solid rgba(255,255,255,0.15);
+      border-top-color: #fff;
+      animation: spin 0.75s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loader-dots { display: flex; gap: 8px; }
+    .loader-dots span {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: rgba(255,255,255,0.9);
+      animation: bounce 1.2s ease-in-out infinite;
+    }
+    .loader-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .loader-dots span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes bounce {
+      0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+      40% { transform: scale(1); opacity: 1; }
+    }
+    .loader-text {
+      color: #fff; font-size: 0.9rem; font-weight: 600;
+      letter-spacing: 0.03em; opacity: 0.9;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 font-inter">
+
+  <!-- NAV -->
+  <nav class="bg-white border-b border-gray-100 z-40 shadow-sm" style="position:sticky; top:0;">
+    <div class="max-w-2xl mx-auto px-4 flex items-center gap-4" style="height:52px;">
+      <a href="index.html" class="flex items-center gap-2 flex-shrink-0">
+        <img src="logo.png" alt="Campus Bulkmart" class="h-8 w-auto object-contain" onerror="this.style.display='none'">
+        <span class="font-outfit text-base font-black leading-none" style="color:#000080;">Campus Bulkmart</span>
+      </a>
+      <div class="ml-auto flex items-center gap-3">
+        <a href="javascript:history.back()" class="inline-flex items-center justify-center text-xs font-semibold px-4 py-1.5 rounded-lg border transition hover:bg-gray-50" style="color:#000080; border-color:#000080;">back</a>
+        <button id="navSignOutBtn" onclick="auth.signOut().then(() => window.location.href='index.html')"
+          class="hidden text-sm text-red-500 hover:text-red-700 font-medium transition px-3 py-1.5 rounded-lg hover:bg-red-50">Sign Out</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="max-w-2xl mx-auto px-4 py-8 page-content">
+
+    <!-- Auth gate -->
+    <div id="guestView" class="hidden text-center py-20">
+      <div class="text-5xl mb-4">🔒</div>
+      <h2 class="font-bold text-xl text-gray-800 mb-2">Sign In Required</h2>
+      <p class="text-gray-500 text-sm mb-6">Please sign in to view your wallet</p>
+      <button onclick="openAuthModal()" class="text-white font-bold px-6 py-3 rounded-xl transition text-sm" style="background:#000080;">Sign In</button>
+    </div>
+
+    <div id="walletContent" class="hidden">
+
+      <!-- Page title -->
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-11 h-11 rounded-2xl flex items-center justify-center text-xl" style="background:#e0e7ff;">💰</div>
+        <div>
+          <h1 class="font-black text-2xl text-gray-900">My Wallet</h1>
+          <p class="text-gray-400 text-xs">Balance, deposits &amp; payment history</p>
+        </div>
+      </div>
+
+      <!-- Error banner (auto-hides) -->
+      <div id="walletErrorBanner" class="wallet-error-banner hidden" role="alert"></div>
+
+      <!-- Balance card -->
+      <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm mb-4 flex items-center justify-between">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-1">Wallet Balance</p>
+          <p class="text-3xl font-black" id="walletBalanceDisplay" style="color:#000080;">₦—</p>
+        </div>
+        <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl" style="background:#e0e7ff;">💰</div>
+      </div>
+
+      <!-- Wallet disabled notice (shown instead of deposit form when admin turns wallet off) -->
+      <div id="walletDisabledNotice" class="hidden bg-amber-50 border border-amber-200 rounded-2xl p-5 mb-6 text-center">
+        <p class="text-amber-800 text-sm font-semibold mb-1">💳 Wallet top-ups are paused for now</p>
+        <p class="text-amber-700 text-xs">Please checkout via WhatsApp instead — we'll turn this back on soon.</p>
+      </div>
+
+      <!-- Deposit form -->
+      <div id="depositFormCard" class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm mb-6">
+        <label class="block text-sm font-semibold text-gray-700 mb-3" for="depositAmountInput">
+          Top up your wallet (min. ₦100)
+        </label>
+        <div class="deposit-input-row">
+          <input
+            type="number"
+            id="depositAmountInput"
+            class="deposit-input"
+            placeholder="e.g. 5000"
+            min="100"
+            step="50"
+          />
+          <button
+            id="depositBtn"
+            class="deposit-btn"
+            onclick="initiateDeposit(document.getElementById('depositAmountInput').value)"
+          >
+            Deposit
+          </button>
+        </div>
+        <p id="depositInputError" class="input-error hidden" role="alert"></p>
+
+        <!-- Checkout block injected here by wallet.js -->
+        <div id="depositCheckoutContainer"></div>
+      </div>
+
+      <!-- Payment History -->
+      <h2 class="font-bold text-lg text-gray-800 mb-4">Payment History</h2>
+      <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+        <div id="txList">
+          <p class="text-gray-400 text-sm text-center py-4">Loading transactions…</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDkbAls30xJVY4k7W8GV1nk397Qyu1ymLM",
+      authDomain: "campusbulkmart.firebaseapp.com",
+      projectId: "campusbulkmart",
+      storageBucket: "campusbulkmart.firebasestorage.app",
+      messagingSenderId: "397276211409",
+      appId: "1:397276211409:web:c8881eae2f5c61b1d33df0",
+      measurementId: "G-KJKTC6GCXB"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    const SUPABASE_URL = "https://oiwgadfjrkuzjkvhugos.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9pd2dhZGZqcmt1emprdmh1Z29zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4ODU5MTUsImV4cCI6MjA5OTQ2MTkxNX0.QA0KFZLDbYZxT9wlPVRc2iz_-C7cnrAyFLGWdL9EcBM";
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      accessToken: async () => {
+        try {
+          const user = firebase.auth().currentUser;
+          return user ? await user.getIdToken() : null;
+        } catch (e) { return null; }
+      }
+    });
+
+    // ── Wallet on/off setting (toggled from Admin Panel) ────────
+    sb.from("settings").select("value").eq("key", "appConfig").maybeSingle().then(({ data, error }) => {
+      if (error) throw error;
+      const walletEnabled = data ? (data.value?.walletEnabled !== false) : true;
+      if (!walletEnabled) {
+        document.getElementById("depositFormCard")?.classList.add("hidden");
+        document.getElementById("walletDisabledNotice")?.classList.remove("hidden");
+      }
+    }).catch(err => console.warn("[Settings] Could not load wallet setting:", err.message));
+
+    auth.onAuthStateChanged(async user => {
+      if (!user) {
+        document.getElementById("guestView").classList.remove("hidden");
+        document.getElementById("navSignOutBtn").classList.add("hidden");
+        return;
+      }
+      document.getElementById("navSignOutBtn").classList.remove("hidden");
+      document.getElementById("walletContent").classList.remove("hidden");
+
+      // Init profile if new user, then display balance (one-time fetch —
+      // see dashboard.html for the note on why this isn't a live subscription)
+      let balance = 0;
+      try {
+        const { data: userRow, error: userErr } = await sb.from("users").select("wallet_balance").eq("uid", user.uid).maybeSingle();
+        if (userErr) throw userErr;
+
+        if (!userRow) {
+          await sb.from("users").insert({ uid: user.uid, email: user.email });
+        } else {
+          balance = userRow.wallet_balance ?? 0;
+        }
+      } catch (e) {
+        console.error("[Wallet] Could not load balance:", e.message);
+      }
+
+      const el = document.getElementById("walletBalanceDisplay");
+      if (el) el.textContent = `₦${Number(balance).toLocaleString("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      const chip = document.getElementById("homepage-vault-chip-balance");
+      if (chip) chip.textContent = `₦${Number(balance).toLocaleString("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+      // Payment history — reads from the "transactions" table (see
+      // supabase/add-transactions-table.sql). Written by the backend
+      // when it processes a deposit/payment; empty until then.
+      const txList = document.getElementById("txList");
+      try {
+        const { data: txRows, error: txErr } = await sb
+          .from("transactions")
+          .select("*")
+          .eq("user_id", user.uid)
+          .order("created_at", { ascending: false })
+          .limit(30);
+        if (txErr) throw txErr;
+
+        if (!txRows || txRows.length === 0) {
+          txList.innerHTML = `
+            <div class="text-center py-8">
+              <div class="text-3xl mb-2">📭</div>
+              <p class="text-gray-500 text-sm font-medium">No transactions yet</p>
+              <p class="text-gray-400 text-xs mt-1">Your deposit and payment history will appear here</p>
+            </div>`;
+          return;
+        }
+
+        txList.innerHTML = txRows.map(d => {
+          const isCredit = d.type === "credit";
+          const date = d.created_at
+            ? new Date(d.created_at).toLocaleDateString("en-NG", { day:"numeric", month:"short", year:"numeric" })
+            : "—";
+          const amount = Number(d.amount || 0).toLocaleString("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+          return `
+            <div class="tx-row">
+              <div class="tx-icon ${isCredit ? 'credit' : 'debit'}">${isCredit ? '⬆️' : '⬇️'}</div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-semibold text-gray-800 truncate">${d.description || (isCredit ? 'Deposit' : 'Payment')}</p>
+                <p class="text-xs text-gray-400">${date}</p>
+              </div>
+              <span class="tx-amount ${isCredit ? 'credit' : 'debit'} text-sm">
+                ${isCredit ? '+' : '-'}₦${amount}
+              </span>
+            </div>`;
+        }).join("");
+      } catch (err) {
+        // Table exists but empty, or a genuine error — either way, empty state is the right fallback
+        console.info("[Wallet] No transactions found or table unreachable — showing empty state.", err.message);
+        txList.innerHTML = `
+          <div class="text-center py-8">
+            <div class="text-3xl mb-2">📭</div>
+            <p class="text-gray-500 text-sm font-medium">No transactions yet</p>
+            <p class="text-gray-400 text-xs mt-1">Your deposit and payment history will appear here</p>
+          </div>`;
+      }
+    });
+
+    // wallet.js needs these element IDs present — they are above.
+    // It also exposes: initiateDeposit(), renderDepositCheckout(), clearActiveCheckout()
+    // Helper expected by wallet.js error banner
+    function showWalletError(msg) {
+      const el = document.getElementById("walletErrorBanner");
+      if (!el) return;
+      el.textContent = msg;
+      el.classList.remove("hidden");
+      setTimeout(() => el.classList.add("hidden"), 6000);
+    }
+  </script>
+  <script src="auth-modal.js"></script>
+  <script src="wallet.js"></script>
+
+  <!-- Loading Overlay -->
+  <div id="walletLoadingOverlay">
+    <div class="loader-ring"></div>
+    <div class="loader-dots"><span></span><span></span><span></span></div>
+    <p class="loader-text">Connecting to Paystack…</p>
+  </div>
+  <script>
+    function showLoadingOverlay() {
+      document.getElementById("walletLoadingOverlay").classList.add("active");
+    }
+    function hideLoadingOverlay() {
+      document.getElementById("walletLoadingOverlay").classList.remove("active");
+    }
+  </script>
+
+  <!-- AUTH MODAL -->
+  <div id="authModal" class="fixed inset-0 z-[70] hidden items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeAuthModal()"></div>
+    <div class="relative bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6">
+      <button onclick="closeAuthModal()" class="absolute top-4 right-4 w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center transition">
+        <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+      <div class="text-center mb-6">
+        <div class="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-3" style="background:#000080;">
+          <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+        </div>
+        <h2 class="font-bold text-xl text-gray-800" id="authTitle">Welcome Back</h2>
+        <p class="text-gray-400 text-sm mt-1" id="authSubtitle">Sign in to your account</p>
+      </div>
+      <button id="googleSignInBtn" onclick="handleGoogleSignIn()" class="w-full flex items-center justify-center gap-3 border border-gray-200 rounded-xl py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition mb-3">
+        <svg class="w-5 h-5" viewBox="0 0 24 24">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+        </svg>
+        Continue with Google
+      </button>
+      <div class="flex items-center gap-3 mb-3">
+        <div class="flex-1 h-px bg-gray-200"></div>
+        <span class="text-gray-400 text-xs">or</span>
+        <div class="flex-1 h-px bg-gray-200"></div>
+      </div>
+      <div id="signUpFields" class="hidden space-y-3 mb-3">
+        <input id="authUsername" type="text" placeholder="Username" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none transition" onfocus="this.style.boxShadow='0 0 0 2px #000080'" onblur="this.style.boxShadow=''" />
+        <input id="authDisplayName" type="text" placeholder="Full Name" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none transition" onfocus="this.style.boxShadow='0 0 0 2px #000080'" onblur="this.style.boxShadow=''" />
+      </div>
+      <div class="space-y-3">
+        <input id="authEmail" type="email" placeholder="Email Address" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none transition" onfocus="this.style.boxShadow='0 0 0 2px #000080'" onblur="this.style.boxShadow=''" />
+        <div class="relative">
+          <input id="authPassword" type="password" placeholder="Password" class="w-full border border-gray-200 rounded-xl px-4 py-3 pr-11 text-sm focus:outline-none transition" onfocus="this.style.boxShadow='0 0 0 2px #000080'" onblur="this.style.boxShadow=''" />
+          <button type="button" class="auth-pw-toggle hidden absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition" tabindex="-1" aria-label="Show password">
+            <svg class="icon-eye w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg class="icon-eye-off w-4 h-4 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.94 17.94A10.94 10.94 0 0112 20c-7 0-11-8-11-8a21.8 21.8 0 015.06-6.94M9.9 4.24A10.94 10.94 0 0112 4c7 0 11 8 11 8a21.77 21.77 0 01-3.22 4.44M14.12 14.12a3 3 0 11-4.24-4.24"/><path stroke-linecap="round" stroke-linejoin="round" d="M1 1l22 22"/></svg>
+          </button>
+        </div>
+        <div id="confirmPasswordWrapper" class="hidden">
+          <div class="relative">
+            <input id="authConfirmPassword" type="password" placeholder="Confirm Password" class="w-full border border-gray-200 rounded-xl px-4 py-3 pr-11 text-sm focus:outline-none transition" onfocus="this.style.boxShadow='0 0 0 2px #000080'" onblur="this.style.boxShadow=''" />
+            <button type="button" class="auth-pw-toggle hidden absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition" tabindex="-1" aria-label="Show password">
+              <svg class="icon-eye w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg class="icon-eye-off w-4 h-4 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.94 17.94A10.94 10.94 0 0112 20c-7 0-11-8-11-8a21.8 21.8 0 015.06-6.94M9.9 4.24A10.94 10.94 0 0112 4c7 0 11 8 11 8a21.77 21.77 0 01-3.22 4.44M14.12 14.12a3 3 0 11-4.24-4.24"/><path stroke-linecap="round" stroke-linejoin="round" d="M1 1l22 22"/></svg>
+            </button>
+          </div>
+        </div>
+        <p id="authError" class="text-red-500 text-xs hidden"></p>
+        <!-- Policy consent -->
+        <div id="policyConsentRow" class="flex items-start gap-2.5 py-1">
+          <input type="checkbox" id="policyCheckbox" onchange="updateAuthBtnState()"
+            class="mt-0.5 flex-shrink-0 rounded" style="width:16px;height:16px;accent-color:#000080;cursor:pointer;" />
+          <label for="policyCheckbox" class="text-xs text-gray-500 cursor-pointer select-none" style="line-height:1.6;">
+            I have read and agree to the <button type="button" onclick="openPolicyModal('privacy')" class="font-semibold underline underline-offset-2 bg-transparent border-none p-0 cursor-pointer text-xs" style="color:#000080;display:inline;">Privacy Policy</button> and <button type="button" onclick="openPolicyModal('refund')" class="font-semibold underline underline-offset-2 bg-transparent border-none p-0 cursor-pointer text-xs" style="color:#000080;display:inline;">Refund &amp; Return Policy</button>
+          </label>
+        </div>
+        <button onclick="handleAuth()" class="w-full text-white font-bold py-3 rounded-xl transition text-sm" id="authSubmitBtn" style="background:#000080;">Sign In</button>
+      </div>
+      <div class="text-center mt-4">
+        <p class="text-gray-500 text-sm">
+          <span id="authToggleText">Don't have an account?</span>
+          <button onclick="toggleAuthMode()" class="font-semibold ml-1 hover:underline" id="authToggleBtn" style="color:#000080;">Sign Up</button>
+        </p>
+      </div>
+    </div>
+  </div>
+  <!-- ═══════════════════════════════════════════════════
+       POLICY MODAL (Privacy + Refund & Return)
+       ═══════════════════════════════════════════════════ -->
+  <div id="policyModal" class="fixed inset-0 z-[80] hidden items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closePolicyModal()"></div>
+    <div class="relative bg-white rounded-3xl shadow-2xl w-full max-w-lg flex flex-col" style="max-height:85vh;">
+      <div class="flex-shrink-0 flex items-center justify-between px-6 pt-5 pb-4 border-b border-gray-100">
+        <div class="flex items-center gap-2">
+          <button id="policyTabPrivacy" onclick="switchPolicyTab('privacy')"
+            class="px-4 py-1.5 rounded-full text-xs font-bold transition"
+            style="background:#000080; color:#fff;">Privacy Policy</button>
+          <button id="policyTabRefund" onclick="switchPolicyTab('refund')"
+            class="px-4 py-1.5 rounded-full text-xs font-bold transition border border-gray-200 text-gray-500 bg-white">Refund &amp; Return</button>
+        </div>
+        <button onclick="closePolicyModal()" class="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center transition flex-shrink-0">
+          <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div id="policyBody" class="flex-1 overflow-y-auto px-6 py-5 text-sm text-gray-600 leading-relaxed space-y-4"></div>
+      <div class="flex-shrink-0 px-6 py-4 border-t border-gray-100">
+        <button onclick="acceptPolicyFromModal()"
+          class="w-full text-white font-bold py-3 rounded-xl text-sm transition hover:opacity-90"
+          style="background:#000080;">I Agree &amp; Close</button>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

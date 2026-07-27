@@ -1,0 +1,402 @@
+/* ============================================================
+   mobile.css — Campus Bulkmart Mobile Annexe styles
+   Only loaded by mobile.html — never modify style.css
+   ============================================================ */
+
+/* ── Base ── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  max-width: 100vw;
+}
+
+body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+/* ── Sticky Mobile Header ── */
+.m-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: #fff;
+  border-bottom: 1px solid #f0f0f0;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  height: 56px;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  gap: 8px;
+  /* Allow dropdown to escape the sticky header's stacking context */
+  overflow: visible;
+}
+
+.m-header-brand {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+  text-decoration: none;
+}
+
+.m-header-brand img {
+  height: 26px;
+  width: auto;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.m-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.m-icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid #e5e7eb;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #6b7280;
+  transition: background 0.15s, color 0.15s;
+  flex-shrink: 0;
+  padding: 0;
+}
+.m-icon-btn:active {
+  background: #f3f4f6;
+}
+
+/* ── Bottom Navigation Dock ── */
+.m-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: #fff;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  align-items: stretch;
+  height: 64px;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.m-nav-tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  color: #9ca3af;
+  font-size: 10px;
+  font-weight: 600;
+  font-family: inherit;
+  transition: color 0.15s;
+  -webkit-tap-highlight-color: transparent;
+  padding: 8px 0 6px;
+  text-decoration: none;
+}
+
+.m-nav-tab svg {
+  width: 22px;
+  height: 22px;
+  stroke: currentColor;
+  flex-shrink: 0;
+}
+
+.m-nav-tab.active,
+.m-nav-tab:active {
+  color: #000080;
+}
+
+.m-nav-tab .m-cart-badge {
+  position: absolute;
+  top: 6px;
+  right: calc(50% - 18px);
+  background: #ef4444;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  border-radius: 20px;
+  min-width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 3px;
+}
+
+.m-nav-cart-wrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ── Hero (compact mobile version) ── */
+.m-hero {
+  background: linear-gradient(135deg, #000080 0%, #0000aa 60%, #00006a 100%);
+  color: #fff;
+  padding: 16px 14px;
+}
+
+.m-hero h1 {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 900;
+  color: #fff;
+  font-size: 22px;
+  line-height: 1.15;
+  margin: 0 0 6px;
+}
+
+.m-hero p {
+  color: #bfdbfe;
+  font-size: 12px;
+  margin: 0 0 12px;
+}
+
+.m-hero-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.m-hero-stat {
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 10px;
+  padding: 8px 4px;
+  text-align: center;
+}
+
+.m-hero-stat .val {
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.m-hero-stat .lbl {
+  font-size: 9px;
+  color: #bfdbfe;
+  margin-top: 1px;
+}
+
+/* ── Category Tabs ── */
+.m-category-row {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 10px 12px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  background: #fff;
+  border-bottom: 1px solid #f3f4f6;
+}
+.m-category-row::-webkit-scrollbar { display: none; }
+
+/* ── Order Mode Toggle ── */
+.m-mode-row {
+  display: flex;
+  gap: 8px;
+  padding: 10px 12px 6px;
+}
+
+/* ── Top Picks Carousel ── */
+.m-top-picks-section {
+  padding: 12px 0 4px;
+  background: #fff;
+  margin-bottom: 8px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.m-section-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: #111827;
+  padding: 0 12px 8px;
+}
+
+.m-top-picks-track {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 0 12px 10px;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+}
+.m-top-picks-track::-webkit-scrollbar { display: none; }
+
+.m-top-pick-card {
+  flex-shrink: 0;
+  width: 140px;
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+  scroll-snap-align: start;
+  cursor: pointer;
+  transition: box-shadow 0.15s;
+}
+.m-top-pick-card:active {
+  box-shadow: 0 4px 16px rgba(0,0,128,0.12);
+}
+
+.m-top-pick-img {
+  width: 100%;
+  height: 96px;
+  object-fit: cover;
+  display: block;
+  background: #ffffff;
+}
+
+.m-top-pick-body {
+  padding: 8px;
+}
+
+.m-top-pick-name {
+  font-size: 11px;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.m-top-pick-price {
+  font-size: 12px;
+  font-weight: 900;
+  color: #000080;
+  margin-top: 4px;
+}
+
+/* ── Product Grid (2-column) ── */
+.m-product-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  padding: 10px 10px 16px;
+}
+
+/* Ensure product cards in mobile grid are thumb-friendly */
+.m-product-grid .product-card {
+  border-radius: 14px;
+}
+
+.m-product-grid .product-img-wrap {
+  aspect-ratio: 4 / 3;
+}
+
+/* ── Cart Bottom Sheet ── */
+.m-cart-sheet {
+  position: fixed;
+  bottom: 64px; /* sits above bottom nav */
+  left: 0;
+  right: 0;
+  z-index: 49;
+  background: #fff;
+  border-radius: 20px 20px 0 0;
+  box-shadow: 0 -8px 40px rgba(0,0,0,0.18);
+  display: flex;
+  flex-direction: column;
+  max-height: 88vh;
+  transform: translateY(100%);
+  transition: transform 0.32s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.m-cart-sheet.open {
+  transform: translateY(0);
+}
+
+.m-cart-drag-handle {
+  width: 36px;
+  height: 4px;
+  background: #e5e7eb;
+  border-radius: 2px;
+  margin: 10px auto 0;
+  flex-shrink: 0;
+}
+
+/* ── Search overlays (reuse desktop ones, no overrides needed) ── */
+
+/* ── Scroll to top — above bottom nav on mobile ── */
+#topBtn {
+  bottom: 80px;
+}
+
+/* ── Toast — above bottom nav on mobile ── */
+#toast {
+  bottom: 76px;
+}
+
+/* ── Tap target safety ── */
+button, a, [onclick] {
+  min-height: 44px;
+}
+/* Inline text buttons must never be forced to 44px height */
+button[style*="display:inline"],
+button[style*="display: inline"] {
+  min-height: 0 !important;
+  line-height: inherit !important;
+  vertical-align: baseline !important;
+}
+
+.category-btn {
+  min-height: 36px; /* category pills can be smaller — they're touch-scrollable */
+}
+
+/* ── Vault chip in header ── */
+#homepage-vault-chip {
+  font-size: 11px;
+  height: 32px;
+  padding: 0 8px;
+  max-width: 90px;
+}
+
+/* ── qty buttons stay touch-friendly ── */
+.qty-btn {
+  width: 34px !important;
+  height: 34px !important;
+  min-width: 34px !important;
+}
+
+/* ── Animations ── */
+@keyframes slideUpIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.m-fade-in {
+  animation: slideUpIn 0.25s ease forwards;
+}
+
+/* ── Lower Banner — compact mobile sizing ── */
+.lower-banner-inner {
+  padding: 32px 16px;
+}
+.lower-banner-title {
+  font-size: 20px;
+}
+.lower-banner-subtext {
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+.lower-banner-btn {
+  font-size: 13px;
+  padding: 9px 22px;
+}

@@ -1,0 +1,73 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ========================================================
+    // 0. HELPER
+    // ========================================================
+    function isAdmin() {
+      return request.auth != null && request.auth.uid == 'aq0QC7De1GNIOYVH7qtCDwBEH1I2';
+    }
+
+    // ========================================================
+    // 1. PRODUCTS, CAROUSEL, & DISCOUNTS (EXISTING LOGIC)
+    // ========================================================
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /categories/{categoryId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /carousel/{itemId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /discounts/{discountId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    // ========================================================
+    // 2. STORE SETTINGS (e.g. Wallet on/off toggle)
+    // ========================================================
+    match /settings/{settingId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    // ========================================================
+    // 3. REVIEWS & ORDERS
+    // ========================================================
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    match /orders/{orderId} {
+      allow read: if request.auth != null && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if request.auth != null;
+      allow update, delete: if isAdmin();
+    }
+    // ========================================================
+    // 4. SECURE CAMPUS WALLETS & PROFILES (NEW FIREWALL)
+    // ========================================================
+    match /users/{userId} {
+      // ✅ FIX: admin can now read the users collection (list + get),
+      // in addition to a user reading their own document.
+      allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      allow create: if request.auth != null && request.auth.uid == userId;
+      allow update: if request.auth != null && request.auth.uid == userId
+                    && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['walletBalance']);
+      allow write: if isAdmin();
+    }
+    // ========================================================
+    // 5. INBOUND DEPOSITS LEDGER (ANTI-EXPLOIT TRAIL)
+    // ========================================================
+    match /deposits/{transactionId} {
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow write: if isAdmin();
+    }
+  }
+}

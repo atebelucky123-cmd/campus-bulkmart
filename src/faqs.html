@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png"><link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FAQs – Campus Bulkmart</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@700;800;900&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="tailwind.output.css" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body { font-family: 'Montserrat', sans-serif; }
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease, padding 0.3s ease;
+    }
+    .faq-answer.open {
+      max-height: 300px;
+    }
+    .faq-arrow {
+      transition: transform 0.3s ease;
+    }
+    .faq-arrow.rotated {
+      transform: rotate(180deg);
+    }
+  </style>
+</head>
+<body class="bg-gray-50 font-inter">
+
+  <nav class="bg-white border-b border-gray-100 z-40 shadow-sm" style="position:sticky; top:0;">
+    <div class="max-w-4xl mx-auto px-4 flex items-center gap-4" style="height:52px;">
+      <a href="index.html" class="flex items-center gap-2 flex-shrink-0">
+        <img src="logo.png" alt="Campus Bulkmart" class="h-8 w-auto object-contain" onerror="this.style.display='none'">
+        <span class="font-outfit text-base font-black leading-none" style="color:#000080;">
+          Campus Bulkmart
+        </span>
+      </a>
+      <div class="ml-auto flex items-center gap-3">
+        <a href="javascript:history.back()" class="inline-flex items-center justify-center text-xs font-semibold px-4 py-1.5 rounded-lg border transition hover:bg-gray-50" style="color:#000080; border-color:#000080;">back</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- PAGE CONTENT -->
+  <main class="max-w-3xl mx-auto px-4 py-10">
+
+    <!-- Header -->
+    <div class="text-center mb-10">
+      <div class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl" style="background:#eff6ff;">❓</div>
+      <h1 class="font-black text-2xl sm:text-3xl mb-2">Frequently Asked Questions</h1>
+      <p class="text-gray-500 text-sm">Everything you need to know about Campus Bulkmart</p>
+    </div>
+
+    <!-- FAQ List -->
+    <div class="space-y-3" id="faqList"></div>
+
+    <!-- WhatsApp CTA -->
+    <div class="mt-10 rounded-2xl p-6 sm:p-8 text-center text-white" style="background: linear-gradient(135deg, #000080 0%, #0000aa 60%, #00006a 100%);">
+      <p class="font-black text-lg mb-1">Still have questions?</p>
+      <p class="text-blue-200 text-sm mb-5">Reach out to us on WhatsApp — we respond within minutes</p>
+      <a href="https://wa.me/2349169618353"
+        class="inline-flex items-center gap-2 bg-white font-bold px-6 py-3 rounded-xl text-sm hover:bg-blue-50 transition"
+        style="color:#000080;">
+        💬 Chat on WhatsApp
+      </a>
+    </div>
+  </main>
+
+  <!-- FOOTER — matches index.html -->
+  <footer class="text-white mt-10" style="background:#3B592D;">
+    <div class="max-w-7xl mx-auto px-4 py-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+      <div>
+        <h3 class="font-outfit text-xl font-black mb-3" style="color:#fff;">
+          Campus Bulkmart
+        </h3>
+        <p class="text-white text-sm">Your one-stop campus superstore. Delivering essentials to every hostel at LASU.</p>
+      </div>
+      <div>
+        <h4 class="font-semibold text-gray-300 mb-3">Quick Links</h4>
+        <div class="flex flex-col gap-2 text-sm text-white">
+          <a href="faqs.html"      class="hover:text-white transition">FAQs</a>
+          <a href="reviews.html"   class="hover:text-white transition">Reviews</a>
+          <a href="dashboard.html" class="hover:text-white transition">Dashboard</a>
+        </div>
+      </div>
+      <div>
+        <h4 class="font-semibold text-gray-300 mb-3">Contact Us</h4>
+        <p class="text-white text-sm">📞 WhatsApp: <a href="https://wa.me/2349169618353" class="hover:text-white transition">+2349169618353</a></p>
+        <p class="text-white text-sm mt-1">✉️ <a href="mailto:atebelucky123@gmail.com" class="hover:text-white transition">atebelucky123@gmail.com</a></p>
+        <p class="text-white text-sm mt-1">Available daily 8AM – 8PM</p>
+      </div>
+    </div>
+    <div class="border-t border-gray-800 px-4 py-4 text-center text-white/60 text-xs">
+      © 2025 Campus Bulkmart. All rights reserved.
+    </div>
+  </footer>
+
+  <script>
+    const faqs = [
+      {
+        q: "How does delivery work?",
+        a: "Once you place an order via WhatsApp, our team processes it within 30 minutes. Delivery to your hostel room typically takes 1–2 hours depending on demand and your location within campus."
+      },
+      {
+        q: "What are your delivery hours?",
+        a: "We operate daily from 8:00 AM to 8:00 PM. Orders placed outside these hours will be fulfilled first thing the next morning."
+      },
+      {
+        q: "Do you deliver to all LASU hostels?",
+        a: "Yes! We deliver to all on-campus hostels and student accommodation facilities within LASU."
+      },
+      {
+        q: "Is there a minimum order amount?",
+        a: "Yes, the minimum order amount is ₦3,000. This helps us cover logistics and keep delivery running smoothly for everyone."
+      },
+      {
+        q: "How do I pay for my order?",
+        a: "We currently accept payment on delivery. After placing your order via WhatsApp, our agent will collect payment when they deliver to your room. Bank transfer options are coming soon."
+      },
+      {
+        q: "Can I cancel or modify my order?",
+        a: "Yes, you can cancel or modify your order by contacting us on WhatsApp within 15 minutes of placing it. After that, cancellations may not be possible as preparation would have already begun."
+      },
+      {
+        q: "What if an item I ordered is out of stock?",
+        a: "We'll notify you immediately via WhatsApp if any item is unavailable and offer a suitable replacement or a full refund for that item."
+      },
+      {
+        q: "How do I track my order?",
+        a: "After placing your order, you'll receive a WhatsApp confirmation with updates. You can also check your Order History page on your dashboard for status updates."
+      },
+      {
+        q: "Are the products genuine?",
+        a: "Absolutely. All products are sourced directly from verified distributors and trusted wholesalers. Quality is our top priority."
+      },
+      {
+        q: "Do you offer bulk discounts?",
+        a: "Yes! For large orders, we offer special bulk pricing. Contact us on WhatsApp to discuss bulk orders for your hostel block or organization."
+      },
+    ];
+
+    document.getElementById("faqList").innerHTML = faqs.map((f, i) => `
+      <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <button onclick="toggle(${i})" class="w-full flex items-center justify-between px-5 py-4 text-left gap-4">
+          <span class="font-semibold text-gray-800 text-sm">${f.q}</span>
+          <svg id="arrow_${i}" class="faq-arrow w-5 h-5 flex-shrink-0" style="color:#000080;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </button>
+        <div id="ans_${i}" class="faq-answer">
+          <p class="text-sm leading-relaxed px-5 pb-5" style="color:#3B592D;">${f.a}</p>
+        </div>
+      </div>
+    `).join("");
+
+    function toggle(i) {
+      const ans   = document.getElementById(`ans_${i}`);
+      const arrow = document.getElementById(`arrow_${i}`);
+      const isOpen = ans.classList.contains("open");
+
+      // Close all others first
+      document.querySelectorAll(".faq-answer").forEach(el => el.classList.remove("open"));
+      document.querySelectorAll(".faq-arrow").forEach(el => el.classList.remove("rotated"));
+
+      // Open clicked one if it was closed
+      if (!isOpen) {
+        ans.classList.add("open");
+        arrow.classList.add("rotated");
+      }
+    }
+  </script>
+</body>
+</html>

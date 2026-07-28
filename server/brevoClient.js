@@ -1,17 +1,20 @@
 // ============================================================
-// lib/resendClient.js — sends the waitlist confirmation email
+// lib/brevoClient.js — sends the waitlist confirmation email via Brevo
+//
+// Uses Brevo's transactional email API directly (no SDK dependency needed —
+// Node's built-in fetch is enough). Docs: https://developers.brevo.com/reference/sendtransacemail
 // ============================================================
 
-const { Resend } = require("resend");
+const BREVO_API_KEY = process.env.BREVO_API_KEY;
+const FROM_EMAIL = process.env.BREVO_FROM_EMAIL || "";
+const FROM_NAME = process.env.BREVO_FROM_NAME || "Campus Bulkmart";
 
-const RESEND_API_KEY = process.env.RESEND_API_KEY;
-const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || "Campus Bulkmart <onboarding@resend.dev>";
-
-if (!RESEND_API_KEY) {
-  console.warn("[Resend] Missing RESEND_API_KEY env var — confirmation emails will fail to send.");
+if (!BREVO_API_KEY) {
+  console.warn("[Brevo] Missing BREVO_API_KEY env var — confirmation emails will fail to send.");
 }
-
-const resend = new Resend(RESEND_API_KEY);
+if (!FROM_EMAIL) {
+  console.warn("[Brevo] Missing BREVO_FROM_EMAIL env var — confirmation emails will fail to send.");
+}
 
 /**
  * Sends the "you're #X on the waitlist" confirmation email.
@@ -27,21 +30,30 @@ async function sendWaitlistEmail(toEmail, position, alreadyOnList) {
   const html = buildWaitlistEmailHtml(position, alreadyOnList);
 
   try {
-    const { data, error } = await resend.emails.send({
-      from: FROM_EMAIL,
-      to: toEmail,
-      subject,
-      html,
+    const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "api-key": BREVO_API_KEY,
+      },
+      body: JSON.stringify({
+        sender: { name: FROM_NAME, email: FROM_EMAIL },
+        to: [{ email: toEmail }],
+        subject,
+        htmlContent: html,
+      }),
     });
 
-    if (error) {
-      console.error("[Resend] send failed:", error);
-      return { success: false, error };
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error("[Brevo] send failed:", data);
+      return { success: false, error: data };
     }
 
-    return { success: true, id: data?.id };
+    return { success: true, id: data?.messageId };
   } catch (err) {
-    console.error("[Resend] send threw:", err);
+    console.error("[Brevo] send threw:", err);
     return { success: false, error: err };
   }
 }
@@ -72,7 +84,8 @@ function buildWaitlistEmailHtml(position, alreadyOnList) {
     </div>
     <p style="text-align: center; font-size: 12px; color: #9ca3af; margin-top: 24px; line-height: 1.6;">
       LASU Students Only &middot; Student-Run &amp; Trusted<br>
-      You're getting this because you joined the Campus Bulkmart waitlist.
+      You're getting this because you joined the Campus Bulkmart waitlist.<br>
+      Add this address to your contacts so future updates land straight in your inbox.
     </p>
   </div>
   `;

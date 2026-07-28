@@ -27,16 +27,20 @@ touch your Tailwind build pipeline at all.
    - **service_role key** (NOT the `anon` key — the service_role one, further
      down the page, usually behind a "reveal" click). Keep this secret.
 
-## 3. Set up Resend
+## 3. Set up Brevo
 
-1. Go to [resend.com](https://resend.com) → sign up → free tier
-2. **API Keys** → **Create API Key** → copy it (shown once)
-3. For now, leave `RESEND_FROM_EMAIL` as `onboarding@resend.dev` — this works
-   immediately with zero setup, but only actually delivers to your own
-   Resend account email (a restriction on their shared test domain, not
-   something we can configure around). Real students' emails won't receive
-   anything until a real domain is verified with Resend. When you're ready
-   to buy one, come back and we'll add the domain + change this one setting.
+> **Note:** this replaces Resend. If you already set up Resend earlier, you
+> can ignore/delete those env vars — Brevo lets us send to *real* students
+> immediately without owning a domain, which Resend's test mode couldn't do.
+
+1. Go to [brevo.com](https://www.brevo.com) → sign up (free, no card needed)
+2. Create a **new dedicated Gmail** just for sending, e.g.
+   `campusbulkmart.noreply@gmail.com` — don't use a personal inbox
+3. In Brevo: **Senders, Domains & Dedicated IPs → Senders → Add a sender**
+   → enter that Gmail address and a sender name (`Campus Bulkmart`)
+4. Brevo emails a 6-digit code to that Gmail — copy it, paste it back into
+   Brevo to verify
+5. **SMTP & API → API Keys → Generate a new API key** → copy it immediately
 
 ## 4. Deploy to Render
 
@@ -50,8 +54,9 @@ touch your Tailwind build pipeline at all.
    |---|---|
    | `SUPABASE_URL` | `https://oiwgadfjrkuzjkvhugos.supabase.co` |
    | `SUPABASE_SERVICE_ROLE_KEY` | *(from step 2)* |
-   | `RESEND_API_KEY` | *(from step 3)* |
-   | `RESEND_FROM_EMAIL` | `Campus Bulkmart <onboarding@resend.dev>` |
+   | `BREVO_API_KEY` | *(from step 3)* |
+   | `BREVO_FROM_EMAIL` | `campusbulkmart.noreply@gmail.com` |
+   | `BREVO_FROM_NAME` | `Campus Bulkmart` |
    | `ALLOWED_ORIGINS` | `https://campusbulkmart.web.app,http://localhost:3000,http://127.0.0.1:5500` |
 
 6. Deploy. Render gives you a URL like `https://campus-bulkmart-api.onrender.com`
@@ -63,7 +68,7 @@ Once deployed, test with curl (replace the URL with your actual Render URL):
 ```bash
 curl -X POST https://your-service.onrender.com/api/waitlist \
   -H "Content-Type: application/json" \
-  -d '{"email":"your-own-email@example.com","source":"test"}'
+  -d '{"email":"a-real-email-you-can-check@example.com","source":"test"}'
 ```
 
 Expected response:
@@ -71,23 +76,28 @@ Expected response:
 {"success":true,"position":1,"alreadyOnList":false}
 ```
 
-And you should receive an email at that address (since Resend's test domain
-only delivers to your own account email — use the same email your Resend
-account is registered under to actually see it land).
+Check that inbox (and its spam folder, just in case — see note below) for
+the confirmation email.
 
 Run it again with the same email — you should get `"alreadyOnList":true`
 with the same position number, not a duplicate row.
 
-## 6. What's next (Phase 3)
+## 6. Frontend — already wired up
 
-Once this is confirmed working, the frontend forms (`coming-soon-desktop.html`
-and `coming-soon-mobile.html`) get updated to:
-- POST to this real endpoint instead of just showing a fake toast
-- Include a hidden `website` field (the honeypot) — named to match what this
-  backend checks for
-- Show the real position number in the success message
+Both `coming-soon-desktop.html` and `coming-soon-mobile.html` already POST
+to this endpoint, include the honeypot field, and show the real position
+number in the success toast. Nothing left to do here unless the Render URL
+changes.
 
-Send me the live Render URL once it's deployed and I'll wire that part up.
+## A note on deliverability
+
+Since we're sending from a personal-style Gmail address rather than an
+authenticated domain, some emails may land in spam instead of the inbox —
+this is a Gmail/Yahoo/Microsoft policy thing, not a bug in the code. The
+on-page toast message already accounts for this ("check your inbox and spam
+folder"). When there's budget for a real domain later, switching to full
+domain authentication with Brevo (or moving back to Resend) will fix this
+properly — no code changes needed beyond swapping env vars.
 
 ## Notes on the honeypot
 

@@ -13,7 +13,7 @@
 
 const express = require("express");
 const { supabase } = require("./supabaseClient");
-const { sendWaitlistEmail } = require("./resendClient");
+const { sendWaitlistEmail } = require("./brevoClient");
 
 const router = express.Router();
 

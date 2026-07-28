@@ -52,8 +52,8 @@ function buildWaitlistEmailHtml(position, alreadyOnList) {
     : `You're #${position} on the waitlist!`;
 
   const body = alreadyOnList
-    ? "Looks like you'd already signed up — no worries, you're still locked in. We'll email you the moment we launch."
-    : "Thanks for signing up early. We'll email you the moment Campus Bulkmart opens for LASU students — groceries, stationeries, and hostel services, delivered straight to your door.";
+    ? "Looks like you'd already signed up — no worries, you're still locked in and eligible for launch discounts. Stay tuned, we'll email you the exact launch date soon."
+    : "You've been added to the Campus Bulkmart waitlist and you're eligible for discount offers at launch. Stay tuned for more updates — we'll email you as soon as we have a launch date, and again the moment we open.";
 
   return `
   <div style="font-family: Arial, Helvetica, sans-serif; max-width: 480px; margin: 0 auto; padding: 32px 24px; background: #FAF9F6;">
@@ -65,7 +65,10 @@ function buildWaitlistEmailHtml(position, alreadyOnList) {
         #${position}
       </div>
       <h1 style="font-size: 20px; color: #1A1A1A; margin: 0 0 12px;">${headline}</h1>
-      <p style="font-size: 14px; color: #6b7280; line-height: 1.6; margin: 0;">${body}</p>
+      <p style="font-size: 14px; color: #6b7280; line-height: 1.6; margin: 0 0 18px;">${body}</p>
+      <span style="display: inline-block; background: rgba(59,89,45,0.1); color: #3B592D; font-weight: 700; font-size: 12px; padding: 8px 16px; border-radius: 999px;">
+        🎁 Eligible for launch discounts
+      </span>
     </div>
     <p style="text-align: center; font-size: 12px; color: #9ca3af; margin-top: 24px; line-height: 1.6;">
       LASU Students Only &middot; Student-Run &amp; Trusted<br>

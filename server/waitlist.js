@@ -12,8 +12,8 @@
 // ============================================================
 
 const express = require("express");
-const { supabase } = require("../lib/supabaseClient");
-const { sendWaitlistEmail } = require("../lib/resendClient");
+const { supabase } = require("./supabaseClient");
+const { sendWaitlistEmail } = require("./resendClient");
 
 const router = express.Router();
 

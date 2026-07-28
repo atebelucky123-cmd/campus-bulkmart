@@ -8,7 +8,7 @@ const express = require("express");
 const cors = require("cors");
 const rateLimit = require("express-rate-limit");
 
-const waitlistRoutes = require("./routes/waitlist");
+const waitlistRoutes = require("./waitlist");
 
 const app = express();
 const PORT = process.env.PORT || 3000;

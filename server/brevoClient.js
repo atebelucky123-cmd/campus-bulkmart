@@ -9,11 +9,55 @@ const BREVO_API_KEY = process.env.BREVO_API_KEY;
 const FROM_EMAIL = process.env.BREVO_FROM_EMAIL || "";
 const FROM_NAME = process.env.BREVO_FROM_NAME || "Campus Bulkmart";
 
+// The "waitlist" list in Brevo (Contacts → Lists → waitlist).
+// List ID stays stable even if the list gets renamed later — it's tied
+// to the list's internal id, not its display name.
+const WAITLIST_LIST_ID = 2;
+
 if (!BREVO_API_KEY) {
   console.warn("[Brevo] Missing BREVO_API_KEY env var — confirmation emails will fail to send.");
 }
 if (!FROM_EMAIL) {
   console.warn("[Brevo] Missing BREVO_FROM_EMAIL env var — confirmation emails will fail to send.");
+}
+
+/**
+ * Adds (or updates) a contact in the Brevo "waitlist" list.
+ * Uses updateEnabled: true so a repeat signup just gets re-added to the
+ * list instead of erroring on "contact already exists" — same
+ * already-on-list case waitlist.js already handles for the DB row.
+ * @param {string} email
+ * @param {string} source - where they signed up (hero_form, waitlist_modal, etc.)
+ */
+async function syncContactToBrevo(email, source) {
+  try {
+    const response = await fetch("https://api.brevo.com/v3/contacts", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "api-key": BREVO_API_KEY,
+      },
+      body: JSON.stringify({
+        email,
+        listIds: [WAITLIST_LIST_ID],
+        updateEnabled: true,
+        attributes: { SOURCE: source || "unknown" },
+      }),
+    });
+
+    // Brevo returns 204 No Content on a successful update-existing-contact
+    // call, and 201 Created on a brand new contact — both are success.
+    if (response.status !== 201 && response.status !== 204) {
+      const data = await response.json().catch(() => ({}));
+      console.error("[Brevo] contact sync failed:", response.status, data);
+      return { success: false, error: data };
+    }
+
+    return { success: true };
+  } catch (err) {
+    console.error("[Brevo] contact sync threw:", err);
+    return { success: false, error: err };
+  }
 }
 
 /**
@@ -91,4 +135,4 @@ function buildWaitlistEmailHtml(position, alreadyOnList) {
   `;
 }
 
-module.exports = { sendWaitlistEmail };
+module.exports = { sendWaitlistEmail, syncContactToBrevo };

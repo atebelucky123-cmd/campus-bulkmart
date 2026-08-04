@@ -7,14 +7,15 @@
 //  3. Look up existing signup — if found, return their existing position
 //  4. Otherwise insert a new row, Supabase's auto-incrementing id IS the
 //     waitlist position
-//  5. Send the confirmation email via Resend
+//  5. Send the confirmation email AND sync the contact into Brevo's
+//     "waitlist" list, in parallel (both best-effort)
 //  6. Respond with the position so the frontend can show it
 // ============================================================
 
 const express = require("express");
 const rateLimit = require("express-rate-limit");
 const { supabase } = require("./supabaseClient");
-const { sendWaitlistEmail } = require("./brevoClient");
+const { sendWaitlistEmail, syncContactToBrevo } = require("./brevoClient");
 const { verifyAdmin } = require("./verifyAdmin");
 
 const router = express.Router();
@@ -89,10 +90,20 @@ router.post("/waitlist", waitlistPostLimiter, async (req, res) => {
       alreadyOnList = false;
     }
 
-    // ── Send confirmation email (best-effort — don't fail the request if this fails) ──
-    const emailResult = await sendWaitlistEmail(normalizedEmail, position, alreadyOnList);
+    // ── Sync to Brevo (best-effort — don't fail the request if either fails) ──
+    // Runs both the confirmation email and the contact-list sync in parallel
+    // since they're independent of each other. Covers repeat signups too
+    // (alreadyOnList case) — harmless if they're already on the list,
+    // and catches anyone who signed up before this sync existed.
+    const [emailResult, syncResult] = await Promise.all([
+      sendWaitlistEmail(normalizedEmail, position, alreadyOnList),
+      syncContactToBrevo(normalizedEmail, source),
+    ]);
     if (!emailResult.success) {
       console.warn("[Waitlist] Signup saved but confirmation email failed to send.");
+    }
+    if (!syncResult.success) {
+      console.warn("[Waitlist] Signup saved but Brevo contact sync failed.");
     }
 
     return res.status(200).json({ success: true, position, alreadyOnList });

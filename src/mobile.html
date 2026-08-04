@@ -368,8 +368,8 @@
 
     <!-- Brand -->
     <a href="mobile.html" style="display:flex; align-items:center; gap:7px; flex:1; min-width:0; text-decoration:none;">
-      <img src="logo.png" alt="Campus Bulkmart" onerror="this.style.display='none'" style="height:28px; width:auto; object-fit:contain; flex-shrink:0;">
-      <span class="font-outfit font-black" style="font-size:13px; letter-spacing:-0.3px; white-space:nowrap; color:#000080;">Campus Bulkmart</span>
+      <img src="2.png" alt="Campus Bulkmart" onerror="this.style.display='none'" style="height:28px; width:auto; object-fit:contain; flex-shrink:0;">
+      <span class="font-outfit font-black" style="font-size:17px; letter-spacing:-0.3px; white-space:nowrap; color:#000080;">Campus Bulkmart</span>
     </a>
 
     <!-- Right side actions -->
@@ -427,14 +427,14 @@
        ═══════════════════════════════════════════════════ -->
   <section class="m-hero">
     <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px;">
-      <span style="display:inline-block; background:rgba(255,255,255,0.2); color:#fff; font-size:10px; font-weight:700; padding:3px 10px; border-radius:20px;">🎓 LASU Students Only</span>
+      <span style="display:inline-block; background:rgba(255,255,255,0.2); color:#fff; font-size:10px; font-weight:700; padding:3px 10px; border-radius:20px;">🎓 LASUCOM Students Only</span>
       <span style="display:inline-block; background:#3B592D; color:#fff; font-size:10px; font-weight:700; padding:3px 10px; border-radius:20px;">🌱 Student-Run &amp; Trusted</span>
     </div>
     <h1><span class="js-hero-headline-line1">Your Campus</span><br><span class="js-hero-headline-line2">Superstore</span></h1>
     <p class="js-hero-subtext">Groceries, stationeries, services &amp; more — right to your hostel door.</p>
     <div style="display:inline-flex; flex-direction:column; align-items:flex-start; gap:2px; margin-bottom:0;">
       <button onclick="window.location.href='products.html'"
-        class="font-bold rounded-xl transition text-sm" style="background:#fff; color:#000080; padding:9px 20px; border:none; cursor:pointer; font-family:inherit;">
+        class="font-bold rounded-lg transition" style="background:#fff; color:#000080; padding:6px 14px; font-size:12px; border:none; cursor:pointer; font-family:inherit; min-height:0 !important; height:auto; line-height:1.3;">
         Shop Now →
       </button>
       <button onclick="openAboutPopup()" style="color:rgba(255,255,255,0.72); font-size:11px; font-weight:500; text-decoration:underline; text-underline-offset:2px; background:none; border:none; cursor:pointer; padding:2px 0 0; margin:0; min-height:0; height:auto; font-family:inherit;">About Us</button>
@@ -463,7 +463,9 @@
     <!-- ── PRODUCT GRID ── -->
     <div id="productGrid" class="m-product-grid"></div>
     <div id="emptyState" class="hidden text-center py-16">
-      <div style="font-size:44px; margin-bottom:12px;">🔍</div>
+      <div style="margin-bottom:12px; display:flex; justify-content:center;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="44" height="44"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      </div>
       <p class="text-gray-500 font-medium text-sm">No products found</p>
       <p class="text-gray-400 text-xs mt-1">Try a different category</p>
     </div>
@@ -476,7 +478,7 @@
   <section class="lower-banner">
     <div class="lower-banner-inner">
       <h2 class="lower-banner-title js-lower-banner-title">Stock Up Smarter, Save More</h2>
-      <p class="lower-banner-subtext js-lower-banner-subtext">Join hundreds of LASU students already ordering in bulk with Campus Bulkmart.</p>
+      <p class="lower-banner-subtext js-lower-banner-subtext">Join hundreds of LASUCOM students already ordering in bulk with Campus Bulkmart.</p>
       <a id="lowerBannerBtn" href="products.html" class="lower-banner-btn"><span class="js-lower-banner-btn-text">Shop Now →</span></a>
     </div>
   </section>
@@ -490,16 +492,24 @@
         <h3 class="font-outfit text-lg font-black" style="margin-bottom:8px; color:#fff;">
           Campus Bulkmart
         </h3>
-        <a href="reviews.html" style="display:inline-block; color:#93c5fd; font-size:12px; font-weight:600; text-decoration:underline; text-underline-offset:3px; margin-bottom:14px;">User Reviews</a>
-        <p class="text-white text-xs leading-relaxed js-footer-disclaimer">Disclaimer: Campus Bulkmart is an independent, student-run delivery platform. We are not officially affiliated with, endorsed by, or partnered with Lagos State University (LASU) or its management. All services, logistics, and fulfillments are managed entirely by Campus Bulkmart.</p>
+        <p class="text-white text-xs leading-relaxed js-footer-disclaimer">Disclaimer: Campus Bulkmart is an independent, student-run delivery platform. We are not officially affiliated with, endorsed by, or partnered with LASU (Lagos State University) or LASUCOM (Lagos State University College of Medicine), or their respective managements. All services, logistics, and fulfillments are managed entirely by Campus Bulkmart.</p>
         <div class="js-footer-social" style="display:flex; gap:8px; margin-top:14px;"></div>
       </div>
-      <div style="border-top:1px solid #1f2937; padding-top:24px;">
+      <div style="border-top:1px solid #1f2937; padding-top:24px; margin-bottom:24px;">
         <p style="font-size:11px; font-weight:600; color:#9ca3af; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:12px;">Contact Us</p>
         <div class="text-xs text-white" style="display:flex; flex-direction:column; gap:10px;">
-          <p>📞 <a href="https://wa.me/2349169618353" class="hover:text-white transition js-footer-whatsapp-link">+2349169618353</a></p>
-          <p>✉️ <a href="mailto:atebelucky123@gmail.com" class="hover:text-white transition js-footer-email-link">atebelucky123@gmail.com</a></p>
-          <p>⏰ <span class="js-footer-hours">Available daily 8AM – 8PM</span></p>
+          <p><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:-2px; margin-right:4px;"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg><a href="https://wa.me/2349169618353" class="hover:text-white transition js-footer-whatsapp-link">+2349169618353</a></p>
+          <p><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:-2px; margin-right:4px;"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 6-10 7L2 6"/></svg><a href="mailto:atebelucky123@gmail.com" class="hover:text-white transition js-footer-email-link">atebelucky123@gmail.com</a></p>
+          <p><span class="js-footer-hours">Available daily 8AM – 8PM</span></p>
+        </div>
+      </div>
+      <div style="border-top:1px solid #1f2937; padding-top:24px;">
+        <p style="font-size:11px; font-weight:600; color:#9ca3af; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:12px;">Quick Links</p>
+        <div class="text-xs text-white" style="display:flex; flex-direction:column; gap:10px;">
+          <a href="faqs.html" class="hover:text-blue-300 transition">FAQs</a>
+          <a href="reviews.html" class="hover:text-blue-300 transition">Reviews</a>
+          <a href="about.html" class="hover:text-blue-300 transition">About Us</a>
+          <a href="about.html#policies?tab=privacy" class="hover:text-blue-300 transition">Privacy Policy</a>
         </div>
       </div>
     </div>
@@ -532,7 +542,7 @@
     <!-- Order Mode Selector -->
     <div class="order-mode-bar">
       <div style="font-size:11px; font-weight:700; color:#6b7280; flex-shrink:0; align-self:center; white-space:nowrap;">Select Order:</div>
-      <button id="modeIndividual" class="order-mode-btn active-mode" onclick="setOrderMode('individual')">👤 Individual</button>
+      <button id="modeIndividual" class="order-mode-btn active-mode" onclick="setOrderMode('individual')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:-2px; margin-right:3px;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Individual</button>
       <button id="modeGroup"      class="order-mode-btn"             onclick="setOrderMode('group')">🤝 Group</button>
     </div>
 
@@ -545,7 +555,7 @@
     <!-- Cart Items -->
     <div id="cartItems" style="flex:1; overflow-y:auto; padding:12px 16px; -webkit-overflow-scrolling:touch;">
       <div id="emptyCart" style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; text-align:center; padding:40px 20px;">
-        <div style="font-size:40px; margin-bottom:12px;">🛒</div>
+        <div style="margin-bottom:12px; display:flex; justify-content:center;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></div>
         <p style="color:#6b7280; font-weight:600; font-size:14px; margin:0 0 4px;">Your cart is empty</p>
         <p style="color:#9ca3af; font-size:12px; margin:0;">Add some items to get started</p>
       </div>
@@ -639,7 +649,7 @@
       </button>
       <div class="text-center mb-5">
         <div class="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-3" style="background:#000080;">
-          <span style="font-size:22px;">💳</span>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
         </div>
         <h2 class="font-bold text-xl text-gray-800">How do you want to pay?</h2>
         <p class="text-gray-400 text-sm mt-1">Choose a payment method to complete your order</p>
@@ -647,7 +657,7 @@
       <button id="payVaultBtn" onclick="checkoutVault()"
         class="w-full flex items-center gap-4 border-2 rounded-2xl p-4 mb-3 text-left transition hover:border-blue-800 hover:bg-blue-50"
         style="border-color:#000080; background:transparent; cursor:pointer; font-family:inherit;">
-        <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-xl" style="background:#e0e7ff;">💰</div>
+        <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background:#e0e7ff;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000080" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg></div>
         <div class="flex-1 min-w-0">
           <p class="font-bold text-gray-800 text-sm">Pay with Hostel Vault</p>
           <p class="text-gray-400 text-xs mt-0.5">Instant — no WhatsApp needed</p>
@@ -658,7 +668,7 @@
       <button onclick="checkoutWhatsApp()"
         class="w-full flex items-center gap-4 border-2 border-gray-200 rounded-2xl p-4 text-left transition hover:border-green-500 hover:bg-green-50"
         style="background:transparent; cursor:pointer; font-family:inherit;">
-        <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-xl bg-green-100">📱</div>
+        <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 bg-green-100"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></div>
         <div class="flex-1 min-w-0">
           <p class="font-bold text-gray-800 text-sm">Pay via WhatsApp</p>
           <p class="text-gray-400 text-xs mt-0.5">Manual payment confirmation</p>
@@ -815,7 +825,7 @@
         <!-- Idle / default state (shown when no query typed yet) -->
         <div id="searchDefaultMobile">
           <div id="searchIdleState">
-            <div class="idle-icon">🔍</div>
+            <div class="idle-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#000080" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></div>
             <p class="idle-title">Find anything</p>
             <p class="idle-sub">Search groceries, stationery,<br>services and more</p>
           </div>
@@ -835,7 +845,7 @@
 
         <!-- Empty state -->
         <div id="searchEmptyMobile" class="hidden" style="padding:48px 20px; text-align:center;">
-          <div style="font-size:40px; margin-bottom:12px;">😕</div>
+          <div style="margin-bottom:12px; display:flex; justify-content:center;"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 15s1.5-2 4-2 4 2 4 2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div>
           <p style="color:#6b7280; font-size:15px; font-weight:700; margin:0 0 6px;">Nothing found</p>
           <p style="color:#9ca3af; font-size:12px; margin:0;" id="searchEmptyQueryMobile"></p>
         </div>

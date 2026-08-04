@@ -12,14 +12,29 @@
 // ============================================================
 
 const express = require("express");
+const rateLimit = require("express-rate-limit");
 const { supabase } = require("./supabaseClient");
 const { sendWaitlistEmail } = require("./brevoClient");
+const { verifyAdmin } = require("./verifyAdmin");
 
 const router = express.Router();
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-router.post("/waitlist", async (req, res) => {
+// Basic protection against someone hammering the public signup endpoint
+// directly (the honeypot handles bots that go through the actual form).
+// Scoped to POST only now — the admin GET route below has its own
+// protection via verifyAdmin and shouldn't be limited to 8 requests/10min,
+// since an admin refreshing the waitlist tab would hit that instantly.
+const waitlistPostLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000, // 10 minutes
+  max: 8,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, error: "Too many attempts. Please try again later." },
+});
+
+router.post("/waitlist", waitlistPostLimiter, async (req, res) => {
   try {
     const { email, source, website } = req.body || {};
 
@@ -85,6 +100,33 @@ router.post("/waitlist", async (req, res) => {
   } catch (err) {
     console.error("[Waitlist] unexpected error:", err);
     return res.status(500).json({ success: false, error: "Something went wrong. Please try again." });
+  }
+});
+
+// ============================================================
+// GET /api/waitlist — admin-only, returns every signup.
+// Protected by verifyAdmin: requires a valid Firebase ID token for
+// the one admin account (Authorization: Bearer <token>). The
+// frontend admin panel is what supplies this — see admin-waitlist.js.
+// Ordered newest-first so the admin sees recent signups at the top;
+// "position" (the id) is still the actual waitlist order.
+// ============================================================
+router.get("/waitlist", verifyAdmin, async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from("waitlist")
+      .select("id, email, source, created_at")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("[Waitlist] admin list fetch failed:", error);
+      return res.status(500).json({ success: false, error: "Could not load waitlist." });
+    }
+
+    return res.status(200).json({ success: true, count: data.length, entries: data });
+  } catch (err) {
+    console.error("[Waitlist] admin list unexpected error:", err);
+    return res.status(500).json({ success: false, error: "Something went wrong." });
   }
 });
 

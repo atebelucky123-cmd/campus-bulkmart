@@ -3,6 +3,17 @@
 // Products table rendering, search/filter, product preview modal, mobile search fullscreen.
 // ============================================================
 
+// ============================================================
+// CLOUDINARY DELIVERY OPTIMIZATION (Phase 3)
+// See products.js for the full explanation — same helper, duplicated
+// here since the admin panel and storefront don't share JS scope.
+// ============================================================
+function cbmImg(url, w, h) {
+  if (!url || !url.includes("res.cloudinary.com") || !url.includes("/upload/")) return url || "";
+  const size = h ? `w_${w},h_${h},c_fill` : `w_${w},c_limit`;
+  return url.replace("/upload/", `/upload/f_auto,q_auto,${size}/`);
+}
+
 // RENDER PRODUCTS TABLE
 // ============================================================
 function renderAdminProducts() {
@@ -65,7 +76,7 @@ function renderAdminProducts() {
       </td>
       <td class="px-4 py-3">
         <div class="flex items-center gap-3">
-          <img src="${p.image || ''}" alt="${p.name}"
+          <img src="${cbmImg(p.image, 80, 80)}" alt="${p.name}"
             class="w-10 h-10 rounded-lg object-cover flex-shrink-0 bg-gray-100"
             onerror="this.src='https://placehold.co/80x80/e5e7eb/9ca3af?text=?'">
           <div class="min-w-0">
@@ -132,7 +143,7 @@ function renderAdminProducts() {
       mobileEmpty?.classList.add("hidden");
       mobileCards.innerHTML = filtered.map(p => `
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-3 flex items-center gap-3">
-          <img src="${p.image || ''}" alt="${p.name}"
+          <img src="${cbmImg(p.image, 100, 100)}" alt="${p.name}"
             class="w-14 h-14 rounded-xl object-cover flex-shrink-0 bg-gray-100"
             onerror="this.src='https://placehold.co/80x80/e5e7eb/9ca3af?text=?'">
           <div class="flex-1 min-w-0">
@@ -236,7 +247,7 @@ function openAdminPreviewModal(id) {
 
   content.innerHTML = `
     <div class="aspect-video bg-gray-100 overflow-hidden rounded-t-3xl">
-      <img src="${p.image || ''}" alt="${escapeHtml(p.name)}" class="w-full h-full object-cover"
+      <img src="${cbmImg(p.image, 600)}" alt="${escapeHtml(p.name)}" class="w-full h-full object-cover"
         onerror="this.src='https://placehold.co/600x400/e5e7eb/9ca3af?text=Product'">
     </div>
     <div class="p-5 sm:p-6">
@@ -419,7 +430,7 @@ function renderAdminSheetResults(query) {
     })(p.id));
 
     var img = document.createElement("img");
-    img.src = p.image || "";
+    img.src = cbmImg(p.image, 100, 100);
     img.alt = p.name;
     img.style.cssText = "width:48px;height:48px;border-radius:12px;object-fit:cover;flex-shrink:0;background:#f3f4f6;";
     img.onerror = function(){ this.src = "https://placehold.co/80x80/e5e7eb/9ca3af?text=?"; };

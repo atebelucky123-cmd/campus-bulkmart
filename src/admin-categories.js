@@ -49,7 +49,7 @@ function renderCategoryManager() {
     <div class="flex items-center justify-between gap-2 py-2 border-b border-gray-50 last:border-0">
       <span class="text-sm">${cat.emoji || "🏷️"} <span class="font-semibold text-gray-800">${escapeHtml(cat.name)}</span>
         <span class="text-gray-400 text-xs">(${escapeHtml(cat.slug)})</span></span>
-      <button onclick="deleteCategory('${cat.id}')" class="text-red-500 hover:text-red-700 text-xs font-semibold">🗑️ Delete</button>
+      <button onclick="deleteCategory('${cat.id}')" class="text-red-500 hover:text-red-700 text-xs font-semibold inline-flex items-center gap-1"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Delete</button>
     </div>
   `).join("");
 }
@@ -93,7 +93,7 @@ async function addCategory() {
     if (error) throw error;
     nameInput.value = "";
     emojiInput.value = "";
-    showAdminToast("✅", `"${name}" category added`);
+    showAdminToast("success", `"${name}" category added`);
     loadCategories();
   } catch (e) {
     if (errEl) { errEl.textContent = "Failed to add category: " + e.message; errEl.classList.remove("hidden"); }
@@ -113,10 +113,10 @@ async function deleteCategory(id) {
   try {
     const { error } = await sb.from("categories").delete().eq("id", id);
     if (error) throw error;
-    showAdminToast("✅", `"${cat.name}" category deleted`);
+    showAdminToast("success", `"${cat.name}" category deleted`);
     loadCategories();
   } catch (e) {
-    showAdminToast("❌", "Failed to delete category: " + e.message);
+    showAdminToast("error", "Failed to delete category: " + e.message);
   }
 }
 
@@ -219,7 +219,7 @@ async function executeBulkDelete(idsToDelete) {
   updateBulkDeleteBar();
   updateStats();
   renderAdminProducts();
-  showAdminToast("🗑️", `${deleted} product${deleted > 1 ? 's' : ''} deleted`);
+  showAdminToast("trash", `${deleted} product${deleted > 1 ? 's' : ''} deleted`);
 }
 
 // ============================================================

@@ -7,14 +7,35 @@
   <title>Admin — Campus Bulkmart</title>
   <script>
     (function () {
-      var ua           = navigator.userAgent;
-      var isMobile     = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
-      var isSmall      = window.innerWidth < 640;
+      // ── Device-class detection ──
+      // Classifies by the device's LONGER screen dimension (stable across
+      // rotation) rather than user-agent sniffing or raw current width.
+      // This fixes tablets always landing on the phone layout regardless
+      // of orientation (the old UA regex matched "iPad"/"Android" outright).
+      //   < TABLET_MIN            -> phone: always mobile layout
+      //   TABLET_MIN..TABLET_MAX  -> tablet: landscape->desktop, portrait->mobile
+      //   > TABLET_MAX            -> desktop-class screen: always desktop layout
+      var TABLET_MIN = 900;
+      var TABLET_MAX = 1400;
+
+      var w            = window.innerWidth;
+      var h            = window.innerHeight;
+      var longSide     = Math.max(w, h);
+      var isLandscape  = w > h;
       var params       = new URLSearchParams(window.location.search);
       var forceDesktop = params.get("view") === "desktop";
       var forceMobile  = params.get("view") === "mobile";
 
-      if (forceMobile || ((isMobile || isSmall) && !forceDesktop)) {
+      var useMobile;
+      if (longSide < TABLET_MIN) {
+        useMobile = true;
+      } else if (longSide <= TABLET_MAX) {
+        useMobile = !isLandscape;
+      } else {
+        useMobile = false;
+      }
+
+      if (forceMobile || (useMobile && !forceDesktop)) {
         window.location.replace("admin-mobile.html" + window.location.search);
       } else {
         window.location.replace("admin-desktop.html" + window.location.search);

@@ -55,11 +55,11 @@ function findMatchingProduct(row) {
 // ============================================================
 function downloadProductCsvTemplate() {
   const csv = [
-    "name,category,price,desc,image,isTopPick,allowGroupOrder,variants,costprice,marketname",
-    "Premium Rice Bag (Mini Lot),groceries,4500,High-grade parboiled rice in a convenient mini-lot,https://example.com/rice.jpg,true,true,,4000,Rice (half crate)",
-    "Exams Success Stationery Bundle,stationeries,1000,Complete exam-prep set with pens and rulers,https://example.com/stationery.jpg,false,true,,700,Stationery bundle pack",
-    "Nail Tech Custom Setup,hostel-services,3500,Professional on-campus nail extension and polishing,https://example.com/nails.jpg,false,false,,,",
-    "Sample Product With Variants,groceries,,A product sold in multiple sizes,https://example.com/sample.jpg,false,true,\"500g:3000/1kg:5500\",,",
+    "name,category,price,desc,isTopPick,allowGroupOrder,variants,costprice,marketname",
+    "Premium Rice Bag (Mini Lot),groceries,4500,High-grade parboiled rice in a convenient mini-lot,true,true,,4000,Rice (half crate)",
+    "Exams Success Stationery Bundle,stationeries,1000,Complete exam-prep set with pens and rulers,false,true,,700,Stationery bundle pack",
+    "Nail Tech Custom Setup,hostel-services,3500,Professional on-campus nail extension and polishing,false,false,,,",
+    "Sample Product With Variants,groceries,,A product sold in multiple sizes,false,true,\"500g:3000/1kg:5500\",,",
   ].join("\n");
   const blob = new Blob([csv], { type: "text/csv" });
   const url  = URL.createObjectURL(blob);
@@ -76,7 +76,7 @@ function downloadProductCsvTemplate() {
 // ============================================================
 function exportProductsCsv() {
   if (allProducts.length === 0) {
-    showAdminToast("❌", "No products to export yet");
+    showAdminToast("error", "No products to export yet");
     return;
   }
 
@@ -88,7 +88,7 @@ function exportProductsCsv() {
   // "id" is included here (export of existing products) but deliberately NOT in
   // downloadProductCsvTemplate() — new products don't have an id yet. On re-import,
   // a matching id is the strongest possible signal that a row is the same product.
-  const rows = [["id", "name", "category", "price", "desc", "image", "isTopPick", "allowGroupOrder", "variants", "costprice", "marketname"]];
+  const rows = [["id", "name", "category", "price", "desc", "isTopPick", "allowGroupOrder", "variants", "costprice", "marketname"]];
 
   allProducts.forEach(p => {
     const variantsStr = Array.isArray(p.variants) && p.variants.length > 0
@@ -100,7 +100,6 @@ function exportProductsCsv() {
       p.category || "",
       p.price ?? "",
       p.desc || "",
-      p.image || "",
       p.isTopPick ? "true" : "false",
       p.allowGroupOrder === false ? "false" : "true",
       variantsStr,
@@ -115,7 +114,7 @@ function exportProductsCsv() {
   const a    = document.createElement("a");
   a.href = url; a.download = `campus_bulkmart_products_${new Date().toISOString().slice(0,10)}.csv`;
   a.click(); URL.revokeObjectURL(url);
-  showAdminToast("✅", `Exported ${allProducts.length} products`);
+  showAdminToast("success", `Exported ${allProducts.length} products`);
 }
 
 function handleCsvDrop(event) {
@@ -128,7 +127,7 @@ function handleCsvDrop(event) {
 
 function handleCsvFile(file) {
   if (!file || !file.name.endsWith(".csv")) {
-    showAdminToast("❌", "Please upload a .csv file");
+    showAdminToast("error", "Please upload a .csv file");
     return;
   }
 
@@ -144,7 +143,7 @@ function parseCsv(text) {
   return (async () => {
   const lines = text.split(/\r?\n/).filter(l => l.trim());
   if (lines.length < 2) {
-    showAdminToast("❌", "CSV file appears empty");
+    showAdminToast("error", "CSV file appears empty");
     return;
   }
 
@@ -152,7 +151,7 @@ function parseCsv(text) {
   const required = ["name", "category", "price", "desc"];
   const missing = required.filter(r => !headers.includes(r));
   if (missing.length > 0) {
-    showAdminToast("❌", `Missing columns: ${missing.join(", ")}`);
+    showAdminToast("error", `Missing columns: ${missing.join(", ")}`);
     return;
   }
 
@@ -172,7 +171,6 @@ function parseCsv(text) {
   // isTopPick and allowGroupOrder columns are optional — only read if present
   const hasTopPick     = idx("istoppick") >= 0;
   const hasGroupOrder  = idx("allowgrouporder") >= 0;
-  const hasImage       = idx("image") >= 0;
   const hasVariants    = idx("variants") >= 0;
   const hasCostPrice   = idx("costprice") >= 0;
   const hasMarketName  = idx("marketname") >= 0;
@@ -181,7 +179,12 @@ function parseCsv(text) {
   // Stored globally so executeCsvImport() knows exactly which columns were actually
   // present in this upload — needed so it only ever touches fields the admin
   // explicitly included, never fields a column-less row would otherwise default.
-  csvColumnFlags = { hasTopPick, hasGroupOrder, hasImage, hasVariants, hasCostPrice, hasMarketName, hasId };
+  // NOTE: image is deliberately excluded — CSV can no longer set or touch a
+  // product's image at all. Images are managed exclusively through the
+  // Cloudinary drag-and-drop uploader on each product's Add/Edit form now,
+  // never via a pasted URL. This closes off the legal/reliability risk of
+  // hotlinking third-party images through bulk import.
+  csvColumnFlags = { hasTopPick, hasGroupOrder, hasVariants, hasCostPrice, hasMarketName, hasId };
 
   csvParsedRows = [];
   const errors = [];
@@ -206,7 +209,6 @@ function parseCsv(text) {
     const category = (clean[idx("category")] || "").toLowerCase().trim();
     const priceRaw = clean[idx("price")] || "";
     const desc     = clean[idx("desc")] || "";
-    const image    = hasImage ? (clean[idx("image")] || "") : "";
     const variantsRaw = hasVariants ? (clean[idx("variants")] || "") : "";
     const costPriceRaw = hasCostPrice  ? (clean[idx("costprice")]  || "") : "";
     const marketName    = hasMarketName ? (clean[idx("marketname")] || "") : "";
@@ -268,7 +270,6 @@ function parseCsv(text) {
       category: normCat,
       price,
       desc,
-      image: image || "https://placehold.co/400x400/e5e7eb/9ca3af?text=Product",
       isTopPick:       isTopPickRaw.toLowerCase()  === "true",
       // Group order defaults to allowed — only explicit "false" in the column turns it off
       allowGroupOrder: allowGroupRaw.trim() === "" ? true : allowGroupRaw.toLowerCase() !== "false",
@@ -348,9 +349,10 @@ function buildProductDiff(row, product) {
   if (row.price !== product.price)                          diff.price = row.price;
   if (row.desc !== (product.desc || ""))                    diff.desc = row.desc;
 
-  // Optional columns — only ever considered if that column existed in the CSV
-  if (csvColumnFlags.hasImage && row.image && row.image !== (product.image || ""))
-    diff.image = row.image;
+  // Optional columns — only ever considered if that column existed in the CSV.
+  // NOTE: image is deliberately never diffed here — CSV updates can never
+  // change a product's existing image, on purpose. See the note in
+  // parseCsv() above for why.
 
   if (csvColumnFlags.hasVariants) {
     const rowVariantsStr = JSON.stringify(row.variants || []);
@@ -418,9 +420,10 @@ async function executeCsvImport() {
         category: row.category,
         price: row.price,
         desc: row.desc,
-        image: (row.image && row.image.trim() && !row.image.includes("placehold.co"))
-          ? row.image
-          : PLACEHOLDER_IMAGE,
+        // CSV can never set a real image — every product created via bulk
+        // import starts with the placeholder and gets a real photo uploaded
+        // afterward through the product's Edit form (Cloudinary uploader).
+        image: PLACEHOLDER_IMAGE,
         variants: row.variants || [],
         costPrice: row.costPrice ?? null,
         marketName: row.marketName || "",
@@ -438,12 +441,12 @@ async function executeCsvImport() {
     if (created)   parts.push(`${created} new`);
     if (updated)   parts.push(`${updated} updated`);
     if (unchanged) parts.push(`${unchanged} unchanged`);
-    showAdminToast("✅", `Import done — ${parts.join(", ")}`);
+    showAdminToast("success", `Import done — ${parts.join(", ")}`);
     clearCsvImport();
     loadAllProducts();
 
   } catch (e) {
-    showAdminToast("❌", "Import failed: " + e.message);
+    showAdminToast("error", "Import failed: " + e.message);
   } finally {
     btn.disabled = false;
     btn.textContent = "⚡ Import All";
@@ -490,7 +493,7 @@ async function cleanDuplicates() {
     });
 
     if (toDelete.length === 0) {
-      showAdminToast("✅", "No duplicates found — Supabase is clean!");
+      showAdminToast("success", "No duplicates found — Supabase is clean!");
       btn.disabled = false;
       btn.textContent = "🧹 Clean Duplicates";
       return;
@@ -505,10 +508,10 @@ async function cleanDuplicates() {
       if (delErr) throw delErr;
     }
 
-    showAdminToast("✅", toDelete.length + " duplicate products removed!");
+    showAdminToast("success", toDelete.length + " duplicate products removed!");
     loadAllProducts();
   } catch (e) {
-    showAdminToast("❌", "Cleanup failed: " + e.message);
+    showAdminToast("error", "Cleanup failed: " + e.message);
   } finally {
     btn.disabled = false;
     btn.textContent = "🧹 Clean Duplicates";

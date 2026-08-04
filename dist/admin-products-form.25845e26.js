@@ -3,6 +3,212 @@
 // Add product, price list manager, edit product modal, delete product, hide/show toggle, clone product.
 // ============================================================
 
+// ============================================================
+// CLOUDINARY DELIVERY OPTIMIZATION (Phase 3)
+// See products.js for the full explanation — same helper, duplicated
+// here since the admin panel and storefront don't share JS scope.
+// ============================================================
+function cbmImg(url, w, h) {
+  if (!url || !url.includes("res.cloudinary.com") || !url.includes("/upload/")) return url || "";
+  const size = h ? `w_${w},h_${h},c_fill` : `w_${w},c_limit`;
+  return url.replace("/upload/", `/upload/f_auto,q_auto,${size}/`);
+}
+
+// ============================================================
+// CLOUDINARY IMAGE UPLOADER
+// Replaces the old "paste an image URL" inputs. Each dropzone
+// wraps a hidden <input id="{baseId}"> that still holds the final
+// image URL — every existing `.value.trim()` read elsewhere in
+// this file (add/edit product, add/edit service) works unchanged.
+//
+// Uses an UNSIGNED Cloudinary upload preset, so this uploads
+// directly from the browser with no backend involved.
+// ============================================================
+const CLOUDINARY_CLOUD_NAME = "dhfhkm4dv";
+const CLOUDINARY_UPLOAD_PRESET = "campusbulkmart";
+const CLOUDINARY_MAX_FILE_MB = 8;
+
+const _cbmUploaders = {}; // baseId -> { initialized: bool }
+
+function cbmToggleUploader(baseId) {
+  const wrapper = document.getElementById(`${baseId}_wrapper`);
+  const chevron = document.getElementById(`${baseId}_chevron`);
+  if (!wrapper) return;
+  wrapper.classList.toggle("hidden");
+  chevron?.classList.toggle("expanded");
+}
+
+function _cbmUpdateTrigger(baseId, imageUrl) {
+  const thumb = document.getElementById(`${baseId}_thumb`);
+  const triggerIcon = document.getElementById(`${baseId}_triggerIcon`);
+  const triggerText = document.getElementById(`${baseId}_triggerText`);
+  if (imageUrl) {
+    if (thumb) { thumb.src = cbmImg(imageUrl, 80, 80); thumb.classList.remove("hidden"); }
+    triggerIcon?.classList.add("hidden");
+    if (triggerText) triggerText.textContent = "Change Image";
+  } else {
+    thumb?.classList.add("hidden");
+    triggerIcon?.classList.remove("hidden");
+    if (triggerText) triggerText.textContent = "Add Image";
+  }
+}
+
+function initImageUploader(baseId) {
+  if (_cbmUploaders[baseId]?.initialized) return; // don't double-wire listeners
+  const dropzone = document.getElementById(`${baseId}_dropzone`);
+  const fileInput = document.getElementById(`${baseId}_file`);
+  if (!dropzone || !fileInput) return;
+
+  const openPicker = () => fileInput.click();
+  dropzone.addEventListener("click", openPicker);
+
+  fileInput.addEventListener("change", () => {
+    if (fileInput.files && fileInput.files[0]) {
+      _cbmHandleFile(baseId, fileInput.files[0]);
+    }
+  });
+
+  ["dragenter", "dragover"].forEach(evt => {
+    dropzone.addEventListener(evt, e => {
+      e.preventDefault();
+      e.stopPropagation();
+      dropzone.classList.add("drag-over");
+    });
+  });
+  ["dragleave", "drop"].forEach(evt => {
+    dropzone.addEventListener(evt, e => {
+      e.preventDefault();
+      e.stopPropagation();
+      dropzone.classList.remove("drag-over");
+    });
+  });
+  dropzone.addEventListener("drop", e => {
+    const file = e.dataTransfer?.files?.[0];
+    if (file) _cbmHandleFile(baseId, file);
+  });
+
+  _cbmUploaders[baseId] = { initialized: true };
+}
+
+// Call when opening/resetting a form. existingUrl prefills the preview
+// (Edit forms); leave blank for a fresh Add form.
+function resetImageUploader(baseId, existingUrl = "", collapse = true) {
+  const hiddenInput = document.getElementById(baseId);
+  const dropzone = document.getElementById(`${baseId}_dropzone`);
+  const placeholder = document.getElementById(`${baseId}_placeholder`);
+  const preview = document.getElementById(`${baseId}_preview`);
+  const previewImg = document.getElementById(`${baseId}_previewImg`);
+  const uploading = document.getElementById(`${baseId}_uploading`);
+  const errorEl = document.getElementById(`${baseId}_error`);
+  const wrapper = document.getElementById(`${baseId}_wrapper`);
+  const chevron = document.getElementById(`${baseId}_chevron`);
+  if (!hiddenInput || !dropzone) return;
+
+  hiddenInput.value = existingUrl || "";
+  uploading?.classList.add("hidden");
+  errorEl?.classList.add("hidden");
+  dropzone.classList.remove("has-error");
+
+  if (existingUrl) {
+    placeholder?.classList.add("hidden");
+    preview?.classList.remove("hidden");
+    if (previewImg) previewImg.src = cbmImg(existingUrl, 400);
+  } else {
+    preview?.classList.add("hidden");
+    placeholder?.classList.remove("hidden");
+  }
+
+  _cbmUpdateTrigger(baseId, existingUrl);
+
+  // Collapsed by default when a form opens/resets — the whole point of
+  // the redesign is the card stays compact until the admin actually
+  // wants to look at or change the image. Skipped when collapse=false
+  // (e.g. removing an image mid-interaction shouldn't snap shut on them).
+  if (collapse) {
+    wrapper?.classList.add("hidden");
+    chevron?.classList.remove("expanded");
+  }
+}
+
+function cbmRemoveImage(baseId, event) {
+  event?.stopPropagation(); // don't trigger the dropzone's own click-to-browse
+  resetImageUploader(baseId, "", /* collapse */ false);
+}
+
+function _cbmShowError(baseId, message) {
+  const dropzone = document.getElementById(`${baseId}_dropzone`);
+  const errorEl = document.getElementById(`${baseId}_error`);
+  dropzone?.classList.add("has-error");
+  if (errorEl) { errorEl.textContent = message; errorEl.classList.remove("hidden"); }
+}
+
+async function _cbmHandleFile(baseId, file) {
+  const dropzone = document.getElementById(`${baseId}_dropzone`);
+  const placeholder = document.getElementById(`${baseId}_placeholder`);
+  const preview = document.getElementById(`${baseId}_preview`);
+  const previewImg = document.getElementById(`${baseId}_previewImg`);
+  const uploading = document.getElementById(`${baseId}_uploading`);
+  const errorEl = document.getElementById(`${baseId}_error`);
+  const hiddenInput = document.getElementById(baseId);
+
+  errorEl?.classList.add("hidden");
+  dropzone?.classList.remove("has-error");
+
+  if (!file.type.startsWith("image/")) {
+    _cbmShowError(baseId, "Please choose an image file.");
+    return;
+  }
+  if (file.size > CLOUDINARY_MAX_FILE_MB * 1024 * 1024) {
+    _cbmShowError(baseId, `Image is too large — max ${CLOUDINARY_MAX_FILE_MB}MB.`);
+    return;
+  }
+
+  // Instant local preview, before the upload even starts
+  const localUrl = URL.createObjectURL(file);
+  placeholder?.classList.add("hidden");
+  preview?.classList.remove("hidden");
+  if (previewImg) previewImg.src = localUrl;
+  uploading?.classList.remove("hidden");
+
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+      method: "POST",
+      body: formData
+    });
+    const data = await res.json();
+    if (!res.ok || !data.secure_url) {
+      throw new Error(data.error?.message || "Upload failed");
+    }
+
+    // Swap the local blob preview for the real, permanent Cloudinary URL.
+    // NOTE: only the preview display gets the cbmImg() sizing treatment —
+    // the value actually saved to Supabase (hiddenInput) stays the raw
+    // URL, so every other place this image is displayed (storefront card,
+    // admin table row, product modal) can apply its own appropriate size.
+    if (previewImg) previewImg.src = cbmImg(data.secure_url, 400);
+    if (hiddenInput) hiddenInput.value = data.secure_url;
+    _cbmUpdateTrigger(baseId, data.secure_url);
+  } catch (err) {
+    console.error("[Cloudinary] Upload failed:", err);
+    _cbmShowError(baseId, "Upload failed — check your connection and try again.");
+    // Revert to empty state so a bad upload can't be silently saved
+    resetImageUploader(baseId, "");
+  } finally {
+    uploading?.classList.add("hidden");
+  }
+}
+
+// Wire up all 4 dropzones once the page is ready. They're always present
+// in the DOM (Add Product / Add Service forms are inline, not modals that
+// get created fresh each time), so a single init pass covers everything.
+document.addEventListener("DOMContentLoaded", () => {
+  ["newImage", "editImage", "svcImage", "editSvcImage"].forEach(initImageUploader);
+});
+
 // ADD PRODUCT
 // ============================================================
 
@@ -103,12 +309,13 @@ async function addService() {
     allProducts.push({ id: newId, ...newProduct });
 
     // Reset form
-    ["svcName","svcDesc","svcImage"].forEach(id => { const el = document.getElementById(id); if (el) el.value = ""; });
+    ["svcName","svcDesc"].forEach(id => { const el = document.getElementById(id); if (el) el.value = ""; });
+    resetImageUploader("svcImage", "");
     document.getElementById("svcIsTopPick").checked = false;
     document.getElementById("svcAllowGroupOrder").checked = false;
 
     updateStats();
-    showAdminToast("✅", "Service added! Now add its price list from the Services tab.");
+    showAdminToast("success", "Service added! Now add its price list from the Services tab.");
     switchTab("services", document.querySelector(".tab-btn[onclick=\"switchTab('services', this)\"]"));
 
   } catch (e) {
@@ -233,7 +440,7 @@ function openEditServiceModal(serviceId) {
   document.getElementById("editSvcId").value            = svc.id;
   document.getElementById("editSvcName").value          = svc.name || "";
   document.getElementById("editSvcDesc").value          = svc.desc || "";
-  document.getElementById("editSvcImage").value         = svc.image || "";
+  resetImageUploader("editSvcImage", svc.image || "");
   document.getElementById("editSvcIsTopPick").checked   = !!svc.isTopPick;
   document.getElementById("editSvcAllowGroupOrder").checked = !!svc.allowGroupOrder;
   document.getElementById("editServiceError").classList.add("hidden");
@@ -278,7 +485,7 @@ async function saveEditService() {
     if (idx !== -1) allProducts[idx] = { ...allProducts[idx], ...updateData };
     closeEditServiceModal();
     renderAdminServices();
-    showAdminToast("✅", "Service updated!");
+    showAdminToast("success", "Service updated!");
   } catch (e) {
     errEl.textContent = "Failed to save: " + e.message;
     errEl.classList.remove("hidden");
@@ -434,9 +641,9 @@ async function savePriceList() {
     if (idx !== -1) allProducts[idx] = { ...allProducts[idx], ...updateData };
     closePriceListModal();
     renderAdminServices();
-    showAdminToast("✅", "Price list saved!");
+    showAdminToast("success", "Price list saved!");
   } catch (e) {
-    showAdminToast("❌", "Failed to save: " + e.message);
+    showAdminToast("error", "Failed to save: " + e.message);
   } finally {
     if (btn) { btn.disabled = false; btn.textContent = "💾 Save Price List"; }
   }
@@ -606,7 +813,7 @@ function applyPriceListCsv() {
   }
 
   updatePriceListSummary();
-  showAdminToast("✅", "CSV applied to builder — review and save when ready.");
+  showAdminToast("success", "CSV applied to builder — review and save when ready.");
 }
 
 async function addProduct() {
@@ -680,7 +887,8 @@ async function addProduct() {
     allProducts.push(newProduct);
 
     // Reset form
-    ["newName","newDesc","newImage","newCostPrice","newMarketName"].forEach(id => { const el = document.getElementById(id); if(el) el.value = ""; });
+    ["newName","newDesc","newCostPrice","newMarketName"].forEach(id => { const el = document.getElementById(id); if(el) el.value = ""; });
+    resetImageUploader("newImage", "");
     document.getElementById("newCategory").value = "";
     document.getElementById("newPrice").value = "";
     document.getElementById("newIsTopPick").checked = false;
@@ -688,7 +896,7 @@ async function addProduct() {
     clearVariantRows("new");
 
     updateStats();
-    showAdminToast("✅", "Product added to store!");
+    showAdminToast("success", "Product added to store!");
 
     // Switch to products tab
     switchTab("products", document.querySelector(".tab-btn"));
@@ -714,7 +922,7 @@ function openEditModal(productId) {
   document.getElementById("editCategory").value = p.category || "groceries";
   document.getElementById("editPrice").value    = p.price || "";
   document.getElementById("editDesc").value     = p.desc || "";
-  document.getElementById("editImage").value    = p.image || "";
+  resetImageUploader("editImage", p.image || "");
   document.getElementById("editCostPrice").value  = (p.costPrice ?? "") === null ? "" : (p.costPrice ?? "");
   document.getElementById("editMarketName").value = p.marketName || "";
   document.getElementById("editIsTopPick").checked = !!p.isTopPick;
@@ -791,7 +999,7 @@ async function saveEditProduct() {
 
     closeEditModal();
     renderAdminProducts();
-    showAdminToast("✅", "Product updated!");
+    showAdminToast("success", "Product updated!");
   } catch (e) {
     errEl.textContent = "Failed to save: " + e.message;
     errEl.classList.remove("hidden");
@@ -816,9 +1024,9 @@ async function toggleProductVisibility(productId, currentlyHidden) {
     const p = allProducts.find(x => x.id === productId);
     if (p) p.isHidden = !currentlyHidden;
     renderAdminProducts();
-    showAdminToast(currentlyHidden ? "👁" : "🙈", currentlyHidden ? "Product is now visible" : "Product hidden from customers");
+    showAdminToast(currentlyHidden ? "eye" : "eye-off", currentlyHidden ? "Product is now visible" : "Product hidden from customers");
   } catch (e) {
-    showAdminToast("❌", "Failed to update visibility: " + e.message);
+    showAdminToast("error", "Failed to update visibility: " + e.message);
   }
 }
 
@@ -842,13 +1050,13 @@ async function executeDeleteProduct(productId) {
     allProducts = allProducts.filter(p => p.id !== productId);
     updateStats();
     renderAdminProducts();
-    showAdminToast("🗑️", "Product deleted");
+    showAdminToast("trash", "Product deleted");
   } catch (e) {
     // If it's a local product not in Supabase, just remove from local state
     allProducts = allProducts.filter(p => p.id !== productId);
     updateStats();
     renderAdminProducts();
-    showAdminToast("🗑️", "Product removed");
+    showAdminToast("trash", "Product removed");
   }
 }
 
@@ -868,7 +1076,6 @@ function cloneProduct(productId) {
     const catEl  = document.getElementById("newCategory");
     const priceEl = document.getElementById("newPrice");
     const descEl  = document.getElementById("newDesc");
-    const imageEl = document.getElementById("newImage");
     const topPickEl = document.getElementById("newIsTopPick");
     const groupEl = document.getElementById("newAllowGroupOrder");
 
@@ -876,11 +1083,11 @@ function cloneProduct(productId) {
     if (catEl)    catEl.value    = p.category || "";
     if (priceEl)  priceEl.value  = p.price || "";
     if (descEl)   descEl.value   = p.desc || "";
-    if (imageEl)  imageEl.value  = p.image || "";
+    resetImageUploader("newImage", p.image || "");
     if (topPickEl) topPickEl.checked = !!p.isTopPick;
     if (groupEl)  groupEl.checked = p.allowGroupOrder !== false;
 
-    showAdminToast("⧉", "Product cloned — edit details and save");
+    showAdminToast("clone", "Product cloned — edit details and save");
   }, 120);
 }
 
@@ -895,7 +1102,7 @@ function generateMarketList() {
   const openOrders = allOrders.filter(o => o.status === "pending" || o.status === "confirmed");
 
   if (openOrders.length === 0) {
-    showAdminToast("ℹ️", "No open orders to aggregate");
+    showAdminToast("info", "No open orders to aggregate");
     return;
   }
 
@@ -961,7 +1168,7 @@ function generateMarketList() {
   subtitle.textContent = `${openOrders.length} open order${openOrders.length !== 1 ? 's' : ''} · ${marketListData.aggregated.length} unique item${marketListData.aggregated.length !== 1 ? 's' : ''}`;
 
   panel.scrollIntoView({ behavior: "smooth", block: "start" });
-  showAdminToast("🛒", `Market list generated — ${marketListData.aggregated.length} items`);
+  showAdminToast("cart", `Market list generated — ${marketListData.aggregated.length} items`);
 }
 
 function renderMarketBuyList() {
@@ -1053,7 +1260,7 @@ async function downloadMarketBuyList() {
   const items = marketListData.aggregated;
 
   if (!items || items.length === 0) {
-    showAdminToast("ℹ️", "Nothing to print yet — generate the list first");
+    showAdminToast("info", "Nothing to print yet — generate the list first");
     return;
   }
 
@@ -1090,9 +1297,9 @@ async function downloadMarketBuyList() {
       if (page < totalPages - 1) await new Promise(r => setTimeout(r, 400));
     }
 
-    showAdminToast("✅", totalPages > 1 ? `Downloaded ${totalPages} pages` : "Market list downloaded");
+    showAdminToast("success", totalPages > 1 ? `Downloaded ${totalPages} pages` : "Market list downloaded");
   } catch (e) {
-    showAdminToast("❌", "Could not generate market list: " + e.message);
+    showAdminToast("error", "Could not generate market list: " + e.message);
   } finally {
     if (btn) { btn.disabled = false; btn.textContent = originalText; }
   }

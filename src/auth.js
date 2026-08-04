@@ -214,7 +214,7 @@ async function handleAuth() {
       await cred.user.updateProfile({ displayName: name });
       await sb.from("users").insert({ uid: cred.user.uid, username, display_name: name, email });
       // ✅ onAuthStateChanged handles modal close + UI update
-      showToast("✅", "Account created! Welcome!");
+      showToast("success", "Account created! Welcome!");
     } else {
       await auth.signInWithEmailAndPassword(email, password);
       // ✅ onAuthStateChanged handles modal close + UI update
@@ -227,7 +227,7 @@ async function handleAuth() {
   }
 }
 async function signOut() {
-  await auth.signOut(); toggleUserDropdown(true); showToast("👋", "Signed out successfully");
+  await auth.signOut(); toggleUserDropdown(true); showToast("signout", "Signed out successfully");
 }
 function toggleUserDropdown(forceClose = false) {
   const dropdown = document.getElementById("userDropdown");

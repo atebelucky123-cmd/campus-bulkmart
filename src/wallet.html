@@ -159,7 +159,7 @@
 
     <!-- Auth gate -->
     <div id="guestView" class="hidden text-center py-20">
-      <div class="text-5xl mb-4">🔒</div>
+      <div class="mb-4 flex justify-center"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
       <h2 class="font-bold text-xl text-gray-800 mb-2">Sign In Required</h2>
       <p class="text-gray-500 text-sm mb-6">Please sign in to view your wallet</p>
       <button onclick="openAuthModal()" class="text-white font-bold px-6 py-3 rounded-xl transition text-sm" style="background:#000080;">Sign In</button>
@@ -169,7 +169,7 @@
 
       <!-- Page title -->
       <div class="flex items-center gap-3 mb-6">
-        <div class="w-11 h-11 rounded-2xl flex items-center justify-center text-xl" style="background:#e0e7ff;">💰</div>
+        <div class="w-11 h-11 rounded-2xl flex items-center justify-center" style="background:#e0e7ff;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg></div>
         <div>
           <h1 class="font-black text-2xl text-gray-900">My Wallet</h1>
           <p class="text-gray-400 text-xs">Balance, deposits &amp; payment history</p>
@@ -185,12 +185,12 @@
           <p class="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-1">Wallet Balance</p>
           <p class="text-3xl font-black" id="walletBalanceDisplay" style="color:#000080;">₦—</p>
         </div>
-        <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl" style="background:#e0e7ff;">💰</div>
+        <div class="w-12 h-12 rounded-2xl flex items-center justify-center" style="background:#e0e7ff;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg></div>
       </div>
 
       <!-- Wallet disabled notice (shown instead of deposit form when admin turns wallet off) -->
       <div id="walletDisabledNotice" class="hidden bg-amber-50 border border-amber-200 rounded-2xl p-5 mb-6 text-center">
-        <p class="text-amber-800 text-sm font-semibold mb-1">💳 Wallet top-ups are paused for now</p>
+        <p class="text-amber-800 text-sm font-semibold mb-1"><svg class="inline-block align-[-3px] mr-1" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#92400e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Wallet top-ups are paused for now</p>
         <p class="text-amber-700 text-xs">Please checkout via WhatsApp instead — we'll turn this back on soon.</p>
       </div>
 
@@ -316,7 +316,7 @@
         if (!txRows || txRows.length === 0) {
           txList.innerHTML = `
             <div class="text-center py-8">
-              <div class="text-3xl mb-2">📭</div>
+              <div class="mb-2 flex justify-center"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg></div>
               <p class="text-gray-500 text-sm font-medium">No transactions yet</p>
               <p class="text-gray-400 text-xs mt-1">Your deposit and payment history will appear here</p>
             </div>`;
@@ -331,7 +331,9 @@
           const amount = Number(d.amount || 0).toLocaleString("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
           return `
             <div class="tx-row">
-              <div class="tx-icon ${isCredit ? 'credit' : 'debit'}">${isCredit ? '⬆️' : '⬇️'}</div>
+              <div class="tx-icon ${isCredit ? 'credit' : 'debit'}">${isCredit
+                ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>'
+                : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>'}</div>
               <div class="flex-1 min-w-0">
                 <p class="text-sm font-semibold text-gray-800 truncate">${d.description || (isCredit ? 'Deposit' : 'Payment')}</p>
                 <p class="text-xs text-gray-400">${date}</p>
@@ -346,7 +348,7 @@
         console.info("[Wallet] No transactions found or table unreachable — showing empty state.", err.message);
         txList.innerHTML = `
           <div class="text-center py-8">
-            <div class="text-3xl mb-2">📭</div>
+            <div class="mb-2 flex justify-center"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg></div>
             <p class="text-gray-500 text-sm font-medium">No transactions yet</p>
             <p class="text-gray-400 text-xs mt-1">Your deposit and payment history will appear here</p>
           </div>`;

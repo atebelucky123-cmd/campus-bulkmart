@@ -3,6 +3,23 @@
 // Product/category loading + caching, top-picks carousel, product rendering, product modal, reviews, search.
 // ============================================================
 
+// ============================================================
+// CLOUDINARY DELIVERY OPTIMIZATION (Phase 3)
+// Appends transformation parameters to a Cloudinary URL so every
+// image is auto-compressed (q_auto), served in the best format for
+// the visitor's browser (f_auto — WebP/AVIF where supported), and
+// sized appropriately for where it's actually displayed, instead of
+// shipping whatever raw size was uploaded.
+//
+// Safe to call on ANY url: non-Cloudinary URLs (e.g. the
+// placehold.co fallback) pass through unchanged.
+// ============================================================
+function cbmImg(url, w, h) {
+  if (!url || !url.includes("res.cloudinary.com") || !url.includes("/upload/")) return url || "";
+  const size = h ? `w_${w},h_${h},c_fill` : `w_${w},c_limit`;
+  return url.replace("/upload/", `/upload/f_auto,q_auto,${size}/`);
+}
+
 // TOP PICKS CAROUSEL
 // ============================================================
 function renderTopPicksCarousel() {
@@ -19,7 +36,7 @@ function renderTopPicksCarousel() {
   section.innerHTML = topPicks.map(p => `
     <div class="flex-shrink-0 w-40 sm:w-48 cursor-pointer group" onclick="openProductModal('${p.id}')">
       <div class="relative overflow-hidden rounded-2xl bg-gray-100 shadow-sm" style="height:140px;">
-        <img src="${p.image || ''}" alt="${p.name}"
+        <img src="${cbmImg(p.image, 200, 200)}" alt="${p.name}"
           class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           onerror="this.src='https://placehold.co/200x140/e5e7eb/9ca3af?text=?'" loading="lazy">
         <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
@@ -144,7 +161,7 @@ function addVariantToCart(productId) {
   // Block the add outright if we're in Group Order mode and this product
   // has group ordering disabled — a toast-only warning let it into the cart anyway.
   if (orderMode === "group" && p.allowGroupOrder === false) {
-    showToast("⚠️", `${p.name} isn't available for Group Orders`);
+    showToast("warning", `${p.name} isn't available for Group Orders`);
     return;
   }
 
@@ -167,7 +184,7 @@ function addVariantToCart(productId) {
   }
   updateCartUI();
   saveCartToStorage();
-  showToast("🛒", `${p.name} (${variant.name}) × ${addQty} added!`);
+  showToast("cart", `${p.name} (${variant.name}) × ${addQty} added!`);
 }
 
 function renderProducts() {
@@ -195,23 +212,30 @@ function renderProducts() {
       })();
       const priceLabel = sp ? `from ₦${Number(sp).toLocaleString()}` : (p.price && p.price > 0 ? `from ₦${Number(p.price).toLocaleString()}` : "Price on request");
       return `
-      <div class="product-card bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm cursor-pointer" onclick="openServiceModal('${p.id}')">
+      <div class="product-card overflow-hidden cursor-pointer" onclick="openServiceModal('${p.id}')">
         <div class="product-img-wrap">
-          <img src="${p.image || ''}" alt="${p.name}" class="product-img" loading="lazy"
+          <img src="${cbmImg(p.image, 400, 400)}" alt="${p.name}" class="product-img" loading="lazy"
             onerror="this.src='https://placehold.co/400x400/e5e7eb/9ca3af?text=Service'">
-          <span class="absolute top-2 left-2 text-white text-[10px] font-bold px-2 py-0.5 rounded-full" style="background:#000080;">🛎 SERVICE</span>
-          ${p.isTopPick ? '<span class="absolute bottom-2 left-2 text-white text-[10px] font-bold px-2 py-0.5 rounded-full" style="background:#000080;">⚡ Top Pick</span>' : ''}
+          <span class="absolute top-2 left-2 cbm-chip" style="background:rgba(0,0,128,0.85);"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-1px;margin-right:3px;"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Service</span>
+          ${p.isTopPick ? '<span class="absolute top-2 right-2 cbm-chip" style="background:rgba(59,89,45,0.9);">⚡ Top Pick</span>' : ''}
+          <button onclick="event.stopPropagation(); openServiceModal('${p.id}')" class="cbm-fab" aria-label="View price list">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+          </button>
         </div>
         <div class="card-body p-3 sm:p-4">
           <div class="card-text">
-            <p class="text-[10px] sm:text-xs font-semibold uppercase tracking-wide mb-1" style="color:#000080;">Hostel Service</p>
-            <h3 class="font-bold text-gray-800 text-xs sm:text-sm leading-tight line-clamp-2 mb-1">${p.name}</h3>
-            <p class="text-gray-400 text-[10px] sm:text-xs line-clamp-2 mb-2">${p.desc || ''}</p>
+            <div class="cbm-eyebrow mb-1">
+              <span class="cbm-eyebrow-dot olive"></span>
+              <p class="text-[10px] sm:text-xs font-semibold uppercase tracking-wide" style="color:#3B592D;">Hostel Service</p>
+            </div>
+            <h3 class="cbm-name font-bold text-gray-800 text-xs sm:text-sm leading-tight line-clamp-2 mb-1">${p.name}</h3>
+            <p class="cbm-desc text-gray-400 text-[10px] sm:text-xs line-clamp-2">${p.desc || ''}</p>
           </div>
+          <div class="cbm-tear"></div>
           <div>
             <span class="font-black text-gray-900 text-xs sm:text-sm">${priceLabel}</span>
-            <button onclick="event.stopPropagation(); openServiceModal('${p.id}')"
-              class="w-full text-white text-xs font-bold py-1.5 rounded-lg transition mt-2" style="background:#007BFF;">
+            <button onclick="event.stopPropagation(); openServiceModal('${p.id}')" class="cbm-cta mt-2">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="13" height="13"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h7"/></svg>
               View Price List
             </button>
           </div>
@@ -236,46 +260,60 @@ function renderProducts() {
 
     // CTA area: variant products get "View Product" button; normal get qty+add
     const ctaHTML = hasVariants ? `
-      <button onclick="event.stopPropagation(); openProductModal('${p.id}')"
-        class="w-full text-white text-xs font-bold py-2 rounded-lg transition flex items-center justify-center gap-1.5" style="background:#007BFF;">
+      <button onclick="event.stopPropagation(); openProductModal('${p.id}')" class="cbm-cta">
         <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
         View Product
       </button>` : `
-      <div class="qty-row" onclick="event.stopPropagation()">
-        <button onclick="changeProductQty('${p.id}', -1, event)" class="qty-btn">−</button>
+      <div class="cbm-stepper" onclick="event.stopPropagation()">
+        <button onclick="changeProductQty('${p.id}', -1, event)" class="cbm-stepper-btn">−</button>
         <input id="qty-display-${p.id}" type="text" inputmode="numeric" pattern="[0-9]*"
           value="${qty}" onclick="event.stopPropagation()"
           onchange="setProductQtyFromInput('${p.id}', this.value, event)"
           oninput="setProductQtyFromInput('${p.id}', this.value, event)"
-          class="qty-input" />
-        <button onclick="changeProductQty('${p.id}', 1, event)" class="qty-btn">+</button>
+          class="cbm-stepper-input" />
+        <button onclick="changeProductQty('${p.id}', 1, event)" class="cbm-stepper-btn">+</button>
       </div>
-      <button onclick="event.stopPropagation(); addToCartWithQty('${p.id}')"
-        class="w-full text-white text-xs font-bold py-1.5 rounded-lg transition" style="background:#007BFF;">
+      <button onclick="event.stopPropagation(); addToCartWithQty('${p.id}')" class="cbm-cta">
         + Add to Cart
       </button>`;
 
+    // The floating tag-button on the photo — a one-tap shortcut. Simple
+    // products get instant quick-add; anything needing a choice first
+    // (variants) opens the picker instead.
+    const fabHTML = hasVariants ? `
+      <button onclick="event.stopPropagation(); openProductModal('${p.id}')" class="cbm-fab" aria-label="View product">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+      </button>` : `
+      <button onclick="event.stopPropagation(); addToCartWithQty('${p.id}')" class="cbm-fab" aria-label="Quick add to cart">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14"/></svg>
+      </button>`;
+
     return `
-    <div class="product-card bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm cursor-pointer" onclick="openProductModal('${p.id}')">
+    <div class="product-card overflow-hidden cursor-pointer" onclick="openProductModal('${p.id}')">
       <div class="product-img-wrap">
-        <img src="${p.image || ''}" alt="${p.name}" class="product-img" loading="lazy"
+        <img src="${cbmImg(p.image, 400, 400)}" alt="${p.name}" class="product-img" loading="lazy"
           onerror="this.src='https://placehold.co/400x400/e5e7eb/9ca3af?text=Product'">
-        ${p.isTopPick ? '<span class="absolute top-2 left-2 text-white text-[10px] font-bold px-2 py-0.5 rounded-full" style="background:#000080;">⚡ Top Pick</span>' : ''}
-        ${!hasVariants && p.stock && p.stock <= 5 ? `<span class="absolute top-2 right-2 bg-red-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full">Only ${p.stock} left</span>` : ''}
+        ${p.isTopPick ? '<span class="absolute top-2 left-2 cbm-chip" style="background:rgba(59,89,45,0.9);">⚡ Top Pick</span>' : ''}
+        ${!hasVariants && p.stock && p.stock <= 5 ? `<span class="absolute top-2 right-2 cbm-chip" style="background:rgba(239,68,68,0.92);">Only ${p.stock} left</span>` : ''}
+        ${fabHTML}
       </div>
       <div class="card-body p-3 sm:p-4">
         <div class="card-text">
-          <p class="text-[10px] sm:text-xs font-semibold uppercase tracking-wide mb-1" style="color:#000080;">${(p.category || '').replace(/-/g, ' ')}</p>
-          <h3 class="font-bold text-gray-800 text-xs sm:text-sm leading-tight line-clamp-2 mb-1">${p.name}</h3>
-          <p class="text-gray-400 text-[10px] sm:text-xs line-clamp-2 mb-2">${p.desc || ''}</p>
+          <div class="cbm-eyebrow mb-1">
+            <span class="cbm-eyebrow-dot"></span>
+            <p class="text-[10px] sm:text-xs font-semibold uppercase tracking-wide" style="color:#000080;">${(p.category || '').replace(/-/g, ' ')}</p>
+          </div>
+          <h3 class="cbm-name font-bold text-gray-800 text-xs sm:text-sm leading-tight line-clamp-2 mb-1">${p.name}</h3>
+          <p class="cbm-desc text-gray-400 text-[10px] sm:text-xs line-clamp-2">${p.desc || ''}</p>
         </div>
+        <div class="cbm-tear"></div>
         <div>
-          <div class="flex items-center justify-between mb-2">
+          <div class="flex items-center justify-between mb-2 gap-2">
             <span class="font-black text-gray-900 text-xs sm:text-sm" id="card-price-${p.id}" data-unit-price="${displayPrice}">
               ${hasVariants ? `From ₦${Number(displayPrice).toLocaleString()}` : `₦${Number(displayPrice * qty).toLocaleString()}`}
             </span>
+            ${groupOrderAllowed ? '<span class="cbm-group-chip">🤝 Group</span>' : ''}
           </div>
-          ${groupOrderAllowed ? '<p class="text-[9px] sm:text-[10px] font-bold mb-1.5" style="color:#3B592D;">🤝 Group Order Available</p>' : ''}
           ${ctaHTML}
         </div>
       </div>
@@ -292,13 +330,14 @@ function setCategory(cat) {
   const grid = document.getElementById("productGrid");
   if (grid) {
     grid.innerHTML = Array(8).fill(0).map(() => `
-      <div class="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm animate-pulse">
+      <div class="product-card overflow-hidden animate-pulse">
         <div class="bg-gray-200 h-44"></div>
         <div class="p-3 space-y-2">
-          <div class="bg-gray-200 h-3 rounded w-1/3"></div>
+          <div class="bg-gray-200 h-3 rounded-full w-1/3"></div>
           <div class="bg-gray-200 h-4 rounded w-full"></div>
           <div class="bg-gray-200 h-3 rounded w-2/3"></div>
-          <div class="bg-gray-200 h-8 rounded-lg w-full mt-2"></div>
+          <div style="border-top:1.5px dashed #e2e4ea; margin:6px 0;"></div>
+          <div class="bg-gray-200 h-8 rounded-full w-full mt-2"></div>
         </div>
       </div>
     `).join("");
@@ -320,7 +359,7 @@ function openProductModal(id) {
 
   content.innerHTML = `
     <div class="bg-white overflow-hidden rounded-t-3xl" style="height:120px;">
-      <img src="${p.image || ''}" alt="${p.name}" class="w-full h-full object-contain"
+      <img src="${cbmImg(p.image, 600)}" alt="${p.name}" class="w-full h-full object-contain"
         onerror="this.src='https://placehold.co/600x400/e5e7eb/9ca3af?text=Product'">
     </div>
     <div class="p-4">
@@ -366,7 +405,7 @@ function openProductModal(id) {
           </span>
         </div>
         <button onclick="addVariantToCart('${p.id}'); closeProductModal();"
-          class="w-full text-white font-bold py-3 rounded-xl transition text-sm mb-4" style="background:#007BFF;">
+          class="w-full text-white font-bold py-3 rounded-xl transition text-sm mb-4" style="background:#000080;">
           Add to Cart
         </button>
       ` : `
@@ -391,7 +430,7 @@ function openProductModal(id) {
           </div>
         </div>
         <button onclick="addToCartWithQty('${p.id}'); closeProductModal();"
-          class="w-full text-white font-bold py-3 rounded-xl transition text-sm mb-4" style="background:#007BFF;">
+          class="w-full text-white font-bold py-3 rounded-xl transition text-sm mb-4" style="background:#000080;">
           Add to Cart
         </button>
       `}
@@ -493,7 +532,7 @@ function openServiceModal(productId) {
   if (!modal) return;
 
   // Header
-  document.getElementById("svcModalImg").src = p.image || "";
+  document.getElementById("svcModalImg").src = cbmImg(p.image, 600);
   document.getElementById("svcModalImg").onerror = function(){ this.src="https://placehold.co/600x300/e5e7eb/9ca3af?text=Service"; };
   document.getElementById("svcModalName").textContent = p.name;
   document.getElementById("svcModalDesc").textContent = p.desc || "";
@@ -613,7 +652,7 @@ function renderModalReviewForm(productId) {
         <textarea id="reviewText_${productId}" placeholder="Share your experience..."
           class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none resize-none" rows="3"
           onfocus="this.style.boxShadow='0 0 0 2px #000080'" onblur="this.style.boxShadow=''"></textarea>
-        <button onclick="submitReview('${productId}')" class="mt-2 w-full text-white text-sm font-bold py-2 rounded-xl transition" style="background:#007BFF;">Submit Review</button>
+        <button onclick="submitReview('${productId}')" class="mt-2 w-full text-white text-sm font-bold py-2 rounded-xl transition" style="background:#000080;">Submit Review</button>
       </div>`;
   } else {
     area.innerHTML = `<p class="text-sm text-gray-400 text-center"><button onclick="closeProductModal(); openAuthModal()" class="font-semibold" style="color:#000080;">Sign in</button> to leave a review</p>`;
@@ -635,7 +674,7 @@ async function submitReview(productId) {
   const stars = selectedStars[productId] || 0;
   const textEl = document.getElementById(`reviewText_${productId}`);
   const text = textEl?.value.trim();
-  if (!stars || !text) { showToast("⚠️", "Please add a rating and review text"); return; }
+  if (!stars || !text) { showToast("warning", "Please add a rating and review text"); return; }
   try {
     const { error } = await sb.from("reviews").insert({
       product_id: productId,
@@ -646,7 +685,7 @@ async function submitReview(productId) {
       // created_at: Postgres column default (now()) handles this — no need to set it
     });
     if (error) throw error;
-    showToast("✅", "Review submitted!");
+    showToast("success", "Review submitted!");
 
     // Clear the form so the same review can't be re-submitted by repeatedly
     // pressing Submit — reset both the textarea and the star picker.
@@ -658,7 +697,7 @@ async function submitReview(productId) {
     });
 
     loadProductReviews(productId);
-  } catch (e) { showToast("❌", "Failed to submit review"); }
+  } catch (e) { showToast("error", "Failed to submit review"); }
 }
 
 // Cache of the full (unsliced) review list per product, so "Show more"
@@ -937,7 +976,7 @@ function buildResultsHTML(results, query) {
       <div class="search-result-item flex items-center gap-3 px-4 py-3 hover:bg-blue-50 cursor-pointer transition group"
            onclick="selectSearchResult('${p.id}')">
         <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl overflow-hidden flex-shrink-0 bg-gray-100">
-          <img src="${p.image || ''}" alt="${p.name}"
+          <img src="${cbmImg(p.image, 100, 100)}" alt="${p.name}"
             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
             onerror="this.src='https://placehold.co/56x56/e5e7eb/9ca3af?text=?'">
         </div>

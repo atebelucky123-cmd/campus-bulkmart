@@ -616,6 +616,10 @@ video {
   visibility: visible;
 }
 
+.collapse {
+  visibility: collapse;
+}
+
 .fixed {
   position: fixed;
 }
@@ -2209,6 +2213,10 @@ video {
   color: rgb(255 255 255 / 0.5);
 }
 
+.text-white\/60 {
+  color: rgb(255 255 255 / 0.6);
+}
+
 .text-white\/75 {
   color: rgb(255 255 255 / 0.75);
 }
@@ -2602,8 +2610,8 @@ video {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .sm\:gap-16 {
-    gap: 4rem;
+  .sm\:gap-12 {
+    gap: 3rem;
   }
 
   .sm\:gap-3 {
@@ -2612,6 +2620,10 @@ video {
 
   .sm\:gap-4 {
     gap: 1rem;
+  }
+
+  .sm\:gap-5 {
+    gap: 1.25rem;
   }
 
   .sm\:gap-6 {

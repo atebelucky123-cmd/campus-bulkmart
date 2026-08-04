@@ -25,7 +25,7 @@ body.modal-open { overflow: hidden; }
 #adminToast.show { opacity: 1; transform: translateY(0) translateX(-50%); }
 .price-group-card { border: 1.5px solid #e5e7eb; border-radius: 14px; padding: 14px; margin-bottom: 12px; }
 .price-item-row + .price-item-row { margin-top: 6px; }
-#csvDropZone.drag-over { border-color: #007BFF; background: #eff6ff; }
+#csvDropZone.drag-over { border-color: #000080; background: #eff6ff; }
 
 /* ── Stat cards in top bar ── */
 .admin-stat-card {
@@ -53,10 +53,10 @@ body.modal-open { overflow: hidden; }
   box-shadow: 0 10px 28px rgba(0,0,128,0.08);
 }
 .admin-card.no-lift:hover { transform: none; box-shadow: 0 1px 3px rgba(0,0,128,0.04); }
-.admin-badge-toppick { color: #007BFF; background: #eff6ff; }
+.admin-badge-toppick { color: #000080; background: #eff6ff; }
 .admin-btn-view   { color: #4b5563; background: #f3f4f6; }
 .admin-btn-view:hover   { background: #e5e7eb; }
-.admin-btn-edit   { color: #007BFF; background: #eff6ff; }
+.admin-btn-edit   { color: #000080; background: #eff6ff; }
 .admin-btn-edit:hover   { background: #dbeafe; }
 .admin-btn-clone  { color: #3B592D; background: #eef3ec; }
 .admin-btn-clone:hover  { background: #dfe8db; }
@@ -112,7 +112,7 @@ body.modal-open { overflow: hidden; }
 .modal-close-btn:hover { background: #e5e7eb; color: #111827; }
 .modal-section-label {
   font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em;
-  color: #007BFF; margin: 18px 0 8px;
+  color: #000080; margin: 18px 0 8px;
 }
 .modal-section-label:first-of-type { margin-top: 0; }
 
@@ -147,8 +147,8 @@ body.modal-open { overflow: hidden; }
   transition: border-color .15s, background .15s;
   background: #fafafa;
 }
-.csv-drop-zone:hover { border-color: #007BFF; background: #eff6ff; }
-.csv-drop-zone.drag-over { border-color: #007BFF; background: #eff6ff; }
+.csv-drop-zone:hover { border-color: #000080; background: #eff6ff; }
+.csv-drop-zone.drag-over { border-color: #000080; background: #eff6ff; }
 .csv-drop-zone.has-file { border-style: solid; border-color: #3B592D; background: #eef3ec; }
 .csv-template-link {
   display: inline-flex; align-items: center; gap: 6px;
@@ -174,7 +174,7 @@ body.modal-open { overflow: hidden; }
   background: #3B592D;
 }
 #adminToast.toast-error .toast-icon { background: #dc2626; }
-#adminToast.toast-info .toast-icon  { background: #007BFF; }
+#adminToast.toast-info .toast-icon  { background: #000080; }
 
 /* ── Step 4: mobile bottom nav active state ── */
 .mobile-tab { position: relative; }
@@ -230,7 +230,7 @@ body.modal-open { overflow: hidden; }
 }
 /* Buttons everywhere get a visible keyboard focus ring too */
 button:focus-visible, a:focus-visible {
-  outline: 2px solid #007BFF;
+  outline: 2px solid #000080;
   outline-offset: 2px;
 }
 
@@ -272,7 +272,7 @@ button:focus-visible, a:focus-visible {
   font-weight: 800;
   letter-spacing: .08em;
   text-transform: uppercase;
-  color: #007BFF;
+  color: #000080;
   flex-shrink: 0;
 }
 
@@ -364,7 +364,7 @@ button:focus-visible, a:focus-visible {
   transition: background .15s ease, box-shadow .15s ease, transform .15s ease;
 }
 .admin-nav-action:hover { transform: translateX(2px); }
-.admin-nav-action.primary { background: #007BFF; color: #fff; box-shadow: 0 8px 18px rgba(0,123,255,.28); }
+.admin-nav-action.primary { background: #000080; color: #fff; box-shadow: 0 8px 18px rgba(0,123,255,.28); }
 .admin-nav-action.primary:hover { box-shadow: 0 10px 22px rgba(0,123,255,.36); }
 .admin-nav-action.secondary { background: #fff; color: #3B592D; border: 1.5px solid #e5e7eb; }
 .admin-nav-action.secondary:hover { background: #eef3ec; border-color: #3B592D; }
@@ -405,11 +405,11 @@ button:focus-visible, a:focus-visible {
 }
 .admin-footer-btn + .admin-footer-btn { margin-top: 8px; }
 .admin-footer-btn-outline {
-  color: #007BFF;
+  color: #000080;
   border: 1.5px solid #bfdcff;
   background: #f5f9ff;
 }
-.admin-footer-btn-outline:hover { background: #eff6ff; border-color: #007BFF; transform: translateY(-1px); }
+.admin-footer-btn-outline:hover { background: #eff6ff; border-color: #000080; transform: translateY(-1px); }
 .admin-footer-btn-danger {
   color: #ef4444;
   background: #fef2f2;
@@ -508,3 +508,186 @@ button:focus-visible, a:focus-visible {
    Phase 4+ additions (action-row alignment) will be appended
    below in later phases.
    ============================================================ */
+
+/* ============================================================
+   CLOUDINARY DRAG-AND-DROP IMAGE UPLOADER
+   Replaces the old "paste an image URL" text inputs across
+   Add Product / Edit Product / Add Service / Edit Service.
+   ============================================================ */
+.cbm-dropzone {
+  position: relative;
+  border: 2px dashed #d1d5db;
+  border-radius: 14px;
+  background: #fafbff;
+  min-height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  overflow: hidden;
+}
+.cbm-dropzone:hover {
+  border-color: #000080;
+  background: #f4f6ff;
+}
+.cbm-dropzone.drag-over {
+  border-color: #000080;
+  background: #eef0ff;
+}
+.cbm-dropzone.has-error {
+  border-color: #ef4444;
+  background: #fef2f2;
+}
+
+.cbm-dropzone-placeholder {
+  text-align: center;
+  padding: 20px;
+  color: #6b7280;
+  font-size: 13px;
+  font-weight: 600;
+  pointer-events: none;
+}
+.cbm-dropzone-placeholder .cbm-icon {
+  font-size: 28px;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.cbm-dropzone-preview {
+  position: relative;
+  width: 100%;
+  height: 140px;
+}
+.cbm-dropzone-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.cbm-dropzone-remove {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  border: none;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+.cbm-dropzone-remove:hover {
+  background: rgba(220, 38, 38, 0.9);
+}
+.cbm-dropzone-replace-hint {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+  padding: 5px 0;
+}
+
+.cbm-dropzone-uploading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: #000080;
+  font-size: 13px;
+  font-weight: 700;
+}
+.cbm-spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid #dbe0ff;
+  border-top-color: #000080;
+  border-radius: 50%;
+  animation: cbm-spin 0.7s linear infinite;
+}
+@keyframes cbm-spin {
+  to { transform: rotate(360deg); }
+}
+
+.cbm-dropzone-error-text {
+  color: #ef4444;
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 6px;
+}
+
+/* Bug fix: Tailwind's .hidden and this file's own display:flex/relative
+   rules have equal CSS specificity, so whichever stylesheet loads LAST
+   wins ties — which is admin.css, meaning .hidden alone could never
+   actually hide these elements. Compound selectors below always win
+   regardless of load order. */
+.cbm-dropzone-uploading.hidden,
+.cbm-dropzone-preview.hidden {
+  display: none;
+}
+
+/* ── Collapsible trigger — keeps the card compact until the admin
+   actually wants to add/change an image ── */
+.cbm-image-trigger {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 9px 12px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  transition: border-color 0.15s, background 0.15s;
+}
+.cbm-image-trigger:hover {
+  border-color: #000080;
+  background: #fafbff;
+}
+.cbm-image-thumb {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.cbm-image-thumb.hidden {
+  display: none;
+}
+.cbm-image-trigger-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+}
+.cbm-image-trigger-text {
+  flex: 1;
+  text-align: left;
+}
+.cbm-image-chevron {
+  font-size: 11px;
+  color: #9ca3af;
+  transition: transform 0.15s;
+  flex-shrink: 0;
+}
+.cbm-image-chevron.expanded {
+  transform: rotate(180deg);
+}
+.cbm-dropzone-wrapper {
+  margin-top: 8px;
+}
+.cbm-dropzone-wrapper.hidden {
+  display: none;
+}

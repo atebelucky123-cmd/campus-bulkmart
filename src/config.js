@@ -104,10 +104,10 @@ const SITE_CONTENT_DEFAULTS = {
     { value: "₦0",    label: "Hidden Fees" }
   ],
   lowerBannerTitle: "Stock Up Smarter, Save More",
-  lowerBannerSubtext: "Join hundreds of LASU students already ordering in bulk with Campus Bulkmart.",
+  lowerBannerSubtext: "Join hundreds of LASUCOM students already ordering in bulk with Campus Bulkmart.",
   lowerBannerButtonText: "Shop Now →",
   lowerBannerButtonLink: "products.html",
-  footerDisclaimer: "Disclaimer: Campus Bulkmart is an independent, student-run delivery platform. We are not officially affiliated with, endorsed by, or partnered with Lagos State University (LASU) or its management. All services, logistics, and fulfillments are managed entirely by Campus Bulkmart.",
+  footerDisclaimer: "Disclaimer: Campus Bulkmart is an independent, student-run delivery platform. We are not officially affiliated with, endorsed by, or partnered with LASU (Lagos State University) or LASUCOM (Lagos State University College of Medicine), or their respective managements. All services, logistics, and fulfillments are managed entirely by Campus Bulkmart.",
   footerWhatsapp: "+2349169618353",
   footerEmail: "atebelucky123@gmail.com",
   footerHours: "Available daily 8AM – 8PM",

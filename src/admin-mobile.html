@@ -42,7 +42,7 @@
 
         <!-- Search trigger (opens full search sheet/overlay) -->
         <button onclick="openAdminSearchSheet()" class="flex-1 flex items-center gap-2 border border-gray-200 rounded-xl px-3 py-2 text-xs hover:bg-gray-50 hover:border-blue-200 transition">
-          <span>🔍</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
           <span id="adminSearchTriggerLabel" class="text-gray-400 truncate">Search products e.g. rice, soap…</span>
           <span id="adminSearchTriggerBadge" class="hidden text-[10px] font-bold px-1.5 py-0.5 rounded-full text-white" style="background:#000080;"></span>
         </button>
@@ -63,38 +63,42 @@
       <div class="admin-drawer-body">
         <nav class="flex flex-col gap-1 mb-2">
           <button class="tab-btn admin-nav-item active" onclick="switchTab('products', this); closeAdminMobileDrawer();">
-            <span class="nav-icon">📦</span><span class="nav-label">Products</span>
+            <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></span><span class="nav-label">Products</span>
           </button>
           <button class="tab-btn admin-nav-item" onclick="switchTab('services', this); closeAdminMobileDrawer();">
-            <span class="nav-icon">💅</span><span class="nav-label">Services</span>
+            <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17h13a3 3 0 0 0 3-3 6 6 0 0 0-6-6H8"/><path d="M8 8a4 4 0 0 1 4-4"/><line x1="2" y1="21" x2="20" y2="21"/></svg></span><span class="nav-label">Services</span>
           </button>
           <button class="tab-btn admin-nav-item" onclick="switchTab('orders', this); closeAdminMobileDrawer();">
-            <span class="nav-icon">🧾</span><span class="nav-label">Orders</span>
+            <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg></span><span class="nav-label">Orders</span>
             <span id="pendingOrdersBadge" class="hidden admin-nav-badge">0</span>
           </button>
           <button class="tab-btn admin-nav-item" onclick="switchTab('reviews', this); closeAdminMobileDrawer();">
-            <span class="nav-icon">⭐</span><span class="nav-label">Reviews</span>
+            <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span><span class="nav-label">Reviews</span>
           </button>
           <button class="tab-btn admin-nav-item" onclick="switchTab('users', this); closeAdminMobileDrawer();">
-            <span class="nav-icon">👤</span><span class="nav-label">Users</span>
+            <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span><span class="nav-label">Users</span>
           </button>
           <button class="tab-btn admin-nav-item" onclick="switchTab('categories', this); closeAdminMobileDrawer();">
-            <span class="nav-icon">🏷️</span><span class="nav-label">Categories</span>
+            <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41 13.42 20.58a2 2 0 0 1-2.83 0L2.59 12.58A2 2 0 0 1 2 11.17V4a2 2 0 0 1 2-2h7.17a2 2 0 0 1 1.41.59l8 8a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></span><span class="nav-label">Categories</span>
           </button>
           <button class="tab-btn admin-nav-item" onclick="switchTab('content', this); closeAdminMobileDrawer();">
-            <span class="nav-icon">🖼️</span><span class="nav-label">Content</span>
+            <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></span><span class="nav-label">Content</span>
+          </button>
+          <button class="tab-btn admin-nav-item" onclick="switchTab('waitlist', this); closeAdminMobileDrawer();">
+            <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></span><span class="nav-label">Waitlist</span>
+            <span id="waitlistNavBadge" class="hidden admin-nav-badge">0</span>
           </button>
         </nav>
 
         <button onclick="closeAdminMobileDrawer(); document.getElementById('addProductModal').classList.remove('hidden'); document.getElementById('addProductModal').classList.add('flex'); document.body.classList.add('modal-open');"
           class="admin-nav-action primary mb-2">
-          <span class="nav-icon">➕</span><span class="nav-label">Add Product</span>
+          <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span><span class="nav-label">Add Product</span>
         </button>
         <button onclick="closeAdminMobileDrawer(); generateMarketList();" class="admin-nav-action secondary mb-2">
-          <span class="nav-icon">🛒</span><span class="nav-label">Market List</span>
+          <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></span><span class="nav-label">Market List</span>
         </button>
         <button onclick="closeAdminMobileDrawer(); cleanDuplicates();" id="cleanDuplicatesBtn" class="admin-nav-action ghost">
-          <span class="nav-icon">🧹</span><span class="nav-label">Clean Duplicates</span>
+          <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg></span><span class="nav-label">Clean Duplicates</span>
         </button>
 
         <hr class="admin-sidebar-divider" style="margin:2px 4px 10px;">
@@ -126,7 +130,7 @@
 
       <div class="admin-drawer-footer">
         <a href="index.html" class="admin-footer-btn admin-footer-btn-outline">Exit Admin Panel</a>
-        <button onclick="adminSignOut()" class="admin-footer-btn admin-footer-btn-danger">⏻ Sign Out</button>
+        <button onclick="adminSignOut()" class="admin-footer-btn admin-footer-btn-danger"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Sign Out</button>
       </div>
     </aside>
 
@@ -257,23 +261,31 @@
           <p class="font-bold text-sm text-gray-800 mb-3">➕ Add New Service</p>
           <div class="grid sm:grid-cols-2 gap-3">
             <input id="svcName" type="text" placeholder="Service Name" class="admin-input" />
-            <div class="cbm-dropzone" id="svcImage_dropzone" data-target="svcImage">
-        <input type="hidden" id="svcImage" value="" />
-        <input type="file" id="svcImage_file" accept="image/*" style="display:none;" />
-        <div class="cbm-dropzone-placeholder" id="svcImage_placeholder">
-          <span class="cbm-icon">📷</span>
-          Drag & drop an image, or click to browse
+            <button type="button" class="cbm-image-trigger" id="svcImage_trigger" onclick="cbmToggleUploader('svcImage')">
+        <img id="svcImage_thumb" class="cbm-image-thumb hidden" src="" alt="" />
+        <span class="cbm-image-trigger-icon" id="svcImage_triggerIcon">📷</span>
+        <span class="cbm-image-trigger-text" id="svcImage_triggerText">Add Image</span>
+        <span class="cbm-image-chevron" id="svcImage_chevron">▾</span>
+      </button>
+      <div class="cbm-dropzone-wrapper hidden" id="svcImage_wrapper">
+        <div class="cbm-dropzone" id="svcImage_dropzone" data-target="svcImage">
+          <input type="hidden" id="svcImage" value="" />
+          <input type="file" id="svcImage_file" accept="image/*" style="display:none;" />
+          <div class="cbm-dropzone-placeholder" id="svcImage_placeholder">
+            <span class="cbm-icon">📷</span>
+            Drag & drop an image, or click to browse
+          </div>
+          <div class="cbm-dropzone-preview hidden" id="svcImage_preview">
+            <img id="svcImage_previewImg" src="" alt="Preview" />
+            <div class="cbm-dropzone-replace-hint">Click or drag to replace</div>
+            <button type="button" class="cbm-dropzone-remove" onclick="cbmRemoveImage('svcImage', event)">✕</button>
+          </div>
+          <div class="cbm-dropzone-uploading hidden" id="svcImage_uploading">
+            <span class="cbm-spinner"></span> Uploading...
+          </div>
         </div>
-        <div class="cbm-dropzone-preview hidden" id="svcImage_preview">
-          <img id="svcImage_previewImg" src="" alt="Preview" />
-          <div class="cbm-dropzone-replace-hint">Click or drag to replace</div>
-          <button type="button" class="cbm-dropzone-remove" onclick="cbmRemoveImage('svcImage', event)">✕</button>
-        </div>
-        <div class="cbm-dropzone-uploading hidden" id="svcImage_uploading">
-          <span class="cbm-spinner"></span> Uploading...
-        </div>
+        <p class="cbm-dropzone-error-text hidden" id="svcImage_error"></p>
       </div>
-      <p class="cbm-dropzone-error-text hidden" id="svcImage_error"></p>
             <textarea id="svcDesc" placeholder="Short description" class="admin-input sm:col-span-2" rows="2"></textarea>
           </div>
           <div class="flex items-center gap-5 mt-3 text-xs text-gray-600">
@@ -467,7 +479,7 @@
         <!-- Lower banner live preview -->
         <div class="rounded-2xl p-4 mb-4 text-center" style="background:#3B592D;">
           <p class="font-outfit font-black text-base leading-tight mb-1.5 text-white" id="lowerBannerPreviewTitle">Stock Up Smarter, Save More</p>
-          <p class="text-xs mb-3" style="color:rgba(255,255,255,0.85);" id="lowerBannerPreviewSubtext">Join hundreds of LASU students already ordering in bulk with Campus Bulkmart.</p>
+          <p class="text-xs mb-3" style="color:rgba(255,255,255,0.85);" id="lowerBannerPreviewSubtext">Join hundreds of LASUCOM students already ordering in bulk with Campus Bulkmart.</p>
           <span class="inline-block bg-white font-bold text-xs px-5 py-2 rounded-xl" style="color:#3B592D;" id="lowerBannerPreviewBtnText">Shop Now →</span>
         </div>
 
@@ -528,7 +540,7 @@
         <!-- About page live preview -->
         <div class="rounded-2xl p-4 mt-4 mb-3 text-white" style="background: linear-gradient(135deg, #000080 0%, #0000aa 60%, #00006a 100%);">
           <p class="font-outfit font-black text-lg leading-tight mb-1" id="aboutPreviewTitle">Our Story</p>
-          <p class="text-blue-100 text-xs" id="aboutPreviewSubtitle">From a simple idea to LASU's most trusted campus delivery platform — here's how Campus Bulkmart was born.</p>
+          <p class="text-blue-100 text-xs" id="aboutPreviewSubtitle">From a simple idea to LASUCOM's most trusted campus delivery platform — here's how Campus Bulkmart was born.</p>
         </div>
         <div class="admin-card no-lift p-3 mb-3">
           <p class="text-xs text-gray-700 leading-relaxed mb-2" id="aboutPreviewOriginP1"></p>
@@ -565,6 +577,44 @@
         </div>
       </section>
 
+      <!-- ============================================================
+           TAB: WAITLIST (coming-soon signups)
+           ============================================================ -->
+      <section id="tab-waitlist" class="admin-tab hidden">
+        <div class="flex items-center justify-between gap-3 mb-2 flex-wrap">
+          <h1 class="font-black text-xl text-gray-900">Waitlist <span id="waitlistCountBadge" class="text-sm font-semibold text-gray-400"></span></h1>
+          <div class="flex items-center gap-2">
+            <button onclick="loadWaitlist()" class="text-xs font-semibold px-3 py-2 rounded-lg border border-gray-200 hover:bg-gray-50 transition inline-flex items-center gap-1.5 text-gray-600">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+              Refresh
+            </button>
+            <button onclick="exportWaitlistCsv()" class="text-white text-xs font-bold px-3 py-2 rounded-lg shadow-sm hover:shadow-md transition inline-flex items-center gap-1.5" style="background:#000080;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Export CSV
+            </button>
+          </div>
+        </div>
+        <p class="text-[11px] text-gray-400 mb-4">Everyone who joined the coming-soon waitlist, newest first. Position (#) is their permanent place in line. New signups also sync automatically to the Brevo broadcast list.</p>
+        <div id="waitlistLoadingState" class="text-center py-10">
+          <div class="animate-spin inline-block w-6 h-6 border-[3px] border-current border-t-transparent rounded-full" style="color:#000080;"></div>
+        </div>
+        <p id="waitlistError" class="hidden admin-empty-state text-red-500"></p>
+        <div id="waitlistTableWrap" class="hidden admin-card no-lift overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="text-left text-[10px] uppercase tracking-wide text-gray-400 border-b border-gray-100">
+                <th class="py-3 px-4">#</th>
+                <th class="py-3 px-4">Email</th>
+                <th class="py-3 px-4">Source</th>
+                <th class="py-3 px-4">Joined</th>
+              </tr>
+            </thead>
+            <tbody id="waitlistTableBody"></tbody>
+          </table>
+        </div>
+        <div id="waitlistEmpty" class="hidden admin-empty-state">📭 No signups yet.</div>
+      </section>
+
     </div>
   </main>
 
@@ -595,23 +645,31 @@
       </select>
       <input id="newPrice" type="number" placeholder="Price (₦) — shown to customers" class="admin-input" />
       <textarea id="newDesc" placeholder="Description" class="admin-input" rows="2"></textarea>
-      <div class="cbm-dropzone" id="newImage_dropzone" data-target="newImage">
-        <input type="hidden" id="newImage" value="" />
-        <input type="file" id="newImage_file" accept="image/*" style="display:none;" />
-        <div class="cbm-dropzone-placeholder" id="newImage_placeholder">
-          <span class="cbm-icon">📷</span>
-          Drag & drop an image, or click to browse
+      <button type="button" class="cbm-image-trigger" id="newImage_trigger" onclick="cbmToggleUploader('newImage')">
+        <img id="newImage_thumb" class="cbm-image-thumb hidden" src="" alt="" />
+        <span class="cbm-image-trigger-icon" id="newImage_triggerIcon">📷</span>
+        <span class="cbm-image-trigger-text" id="newImage_triggerText">Add Image</span>
+        <span class="cbm-image-chevron" id="newImage_chevron">▾</span>
+      </button>
+      <div class="cbm-dropzone-wrapper hidden" id="newImage_wrapper">
+        <div class="cbm-dropzone" id="newImage_dropzone" data-target="newImage">
+          <input type="hidden" id="newImage" value="" />
+          <input type="file" id="newImage_file" accept="image/*" style="display:none;" />
+          <div class="cbm-dropzone-placeholder" id="newImage_placeholder">
+            <span class="cbm-icon">📷</span>
+            Drag & drop an image, or click to browse
+          </div>
+          <div class="cbm-dropzone-preview hidden" id="newImage_preview">
+            <img id="newImage_previewImg" src="" alt="Preview" />
+            <div class="cbm-dropzone-replace-hint">Click or drag to replace</div>
+            <button type="button" class="cbm-dropzone-remove" onclick="cbmRemoveImage('newImage', event)">✕</button>
+          </div>
+          <div class="cbm-dropzone-uploading hidden" id="newImage_uploading">
+            <span class="cbm-spinner"></span> Uploading...
+          </div>
         </div>
-        <div class="cbm-dropzone-preview hidden" id="newImage_preview">
-          <img id="newImage_previewImg" src="" alt="Preview" />
-          <div class="cbm-dropzone-replace-hint">Click or drag to replace</div>
-          <button type="button" class="cbm-dropzone-remove" onclick="cbmRemoveImage('newImage', event)">✕</button>
-        </div>
-        <div class="cbm-dropzone-uploading hidden" id="newImage_uploading">
-          <span class="cbm-spinner"></span> Uploading...
-        </div>
+        <p class="cbm-dropzone-error-text hidden" id="newImage_error"></p>
       </div>
-      <p class="cbm-dropzone-error-text hidden" id="newImage_error"></p>
 
       <p class="modal-section-label">Market List Info <span class="text-gray-400 font-normal normal-case">(optional — for shopping, not shown to customers)</span></p>
       <input id="newCostPrice" type="number" placeholder="Cost Price (₦) — what you pay at the market" class="admin-input" />
@@ -661,23 +719,31 @@
       </select>
       <input id="editPrice" type="number" placeholder="Price (₦) — shown to customers" class="admin-input" />
       <textarea id="editDesc" placeholder="Description" class="admin-input" rows="2"></textarea>
-      <div class="cbm-dropzone" id="editImage_dropzone" data-target="editImage">
-        <input type="hidden" id="editImage" value="" />
-        <input type="file" id="editImage_file" accept="image/*" style="display:none;" />
-        <div class="cbm-dropzone-placeholder" id="editImage_placeholder">
-          <span class="cbm-icon">📷</span>
-          Drag & drop an image, or click to browse
+      <button type="button" class="cbm-image-trigger" id="editImage_trigger" onclick="cbmToggleUploader('editImage')">
+        <img id="editImage_thumb" class="cbm-image-thumb hidden" src="" alt="" />
+        <span class="cbm-image-trigger-icon" id="editImage_triggerIcon">📷</span>
+        <span class="cbm-image-trigger-text" id="editImage_triggerText">Add Image</span>
+        <span class="cbm-image-chevron" id="editImage_chevron">▾</span>
+      </button>
+      <div class="cbm-dropzone-wrapper hidden" id="editImage_wrapper">
+        <div class="cbm-dropzone" id="editImage_dropzone" data-target="editImage">
+          <input type="hidden" id="editImage" value="" />
+          <input type="file" id="editImage_file" accept="image/*" style="display:none;" />
+          <div class="cbm-dropzone-placeholder" id="editImage_placeholder">
+            <span class="cbm-icon">📷</span>
+            Drag & drop an image, or click to browse
+          </div>
+          <div class="cbm-dropzone-preview hidden" id="editImage_preview">
+            <img id="editImage_previewImg" src="" alt="Preview" />
+            <div class="cbm-dropzone-replace-hint">Click or drag to replace</div>
+            <button type="button" class="cbm-dropzone-remove" onclick="cbmRemoveImage('editImage', event)">✕</button>
+          </div>
+          <div class="cbm-dropzone-uploading hidden" id="editImage_uploading">
+            <span class="cbm-spinner"></span> Uploading...
+          </div>
         </div>
-        <div class="cbm-dropzone-preview hidden" id="editImage_preview">
-          <img id="editImage_previewImg" src="" alt="Preview" />
-          <div class="cbm-dropzone-replace-hint">Click or drag to replace</div>
-          <button type="button" class="cbm-dropzone-remove" onclick="cbmRemoveImage('editImage', event)">✕</button>
-        </div>
-        <div class="cbm-dropzone-uploading hidden" id="editImage_uploading">
-          <span class="cbm-spinner"></span> Uploading...
-        </div>
+        <p class="cbm-dropzone-error-text hidden" id="editImage_error"></p>
       </div>
-      <p class="cbm-dropzone-error-text hidden" id="editImage_error"></p>
 
       <p class="modal-section-label">Market List Info <span class="text-gray-400 font-normal normal-case">(optional — for shopping, not shown to customers)</span></p>
       <input id="editCostPrice" type="number" placeholder="Cost Price (₦) — what you pay at the market" class="admin-input" />
@@ -720,23 +786,31 @@
     <div class="space-y-3">
       <input id="editSvcName" type="text" placeholder="Service Name" class="admin-input" />
       <textarea id="editSvcDesc" placeholder="Description" class="admin-input" rows="2"></textarea>
-      <div class="cbm-dropzone" id="editSvcImage_dropzone" data-target="editSvcImage">
-        <input type="hidden" id="editSvcImage" value="" />
-        <input type="file" id="editSvcImage_file" accept="image/*" style="display:none;" />
-        <div class="cbm-dropzone-placeholder" id="editSvcImage_placeholder">
-          <span class="cbm-icon">📷</span>
-          Drag & drop an image, or click to browse
+      <button type="button" class="cbm-image-trigger" id="editSvcImage_trigger" onclick="cbmToggleUploader('editSvcImage')">
+        <img id="editSvcImage_thumb" class="cbm-image-thumb hidden" src="" alt="" />
+        <span class="cbm-image-trigger-icon" id="editSvcImage_triggerIcon">📷</span>
+        <span class="cbm-image-trigger-text" id="editSvcImage_triggerText">Add Image</span>
+        <span class="cbm-image-chevron" id="editSvcImage_chevron">▾</span>
+      </button>
+      <div class="cbm-dropzone-wrapper hidden" id="editSvcImage_wrapper">
+        <div class="cbm-dropzone" id="editSvcImage_dropzone" data-target="editSvcImage">
+          <input type="hidden" id="editSvcImage" value="" />
+          <input type="file" id="editSvcImage_file" accept="image/*" style="display:none;" />
+          <div class="cbm-dropzone-placeholder" id="editSvcImage_placeholder">
+            <span class="cbm-icon">📷</span>
+            Drag & drop an image, or click to browse
+          </div>
+          <div class="cbm-dropzone-preview hidden" id="editSvcImage_preview">
+            <img id="editSvcImage_previewImg" src="" alt="Preview" />
+            <div class="cbm-dropzone-replace-hint">Click or drag to replace</div>
+            <button type="button" class="cbm-dropzone-remove" onclick="cbmRemoveImage('editSvcImage', event)">✕</button>
+          </div>
+          <div class="cbm-dropzone-uploading hidden" id="editSvcImage_uploading">
+            <span class="cbm-spinner"></span> Uploading...
+          </div>
         </div>
-        <div class="cbm-dropzone-preview hidden" id="editSvcImage_preview">
-          <img id="editSvcImage_previewImg" src="" alt="Preview" />
-          <div class="cbm-dropzone-replace-hint">Click or drag to replace</div>
-          <button type="button" class="cbm-dropzone-remove" onclick="cbmRemoveImage('editSvcImage', event)">✕</button>
-        </div>
-        <div class="cbm-dropzone-uploading hidden" id="editSvcImage_uploading">
-          <span class="cbm-spinner"></span> Uploading...
-        </div>
+        <p class="cbm-dropzone-error-text hidden" id="editSvcImage_error"></p>
       </div>
-      <p class="cbm-dropzone-error-text hidden" id="editSvcImage_error"></p>
       <label class="flex items-center gap-2 text-xs text-gray-600"><input id="editSvcIsTopPick" type="checkbox" /> Top Pick</label>
       <label class="flex items-center gap-2 text-xs text-gray-600"><input id="editSvcAllowGroupOrder" type="checkbox" /> Allow Group Order</label>
       <p id="editServiceError" class="text-red-500 text-xs hidden"></p>
@@ -932,5 +1006,6 @@
 <script src="admin-products-form.js"></script>
 <script src="admin-orders.js"></script>
 <script src="admin-csv-import.js"></script>
+<script src="admin-waitlist.js"></script>
 </body>
 </html>

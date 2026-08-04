@@ -22,6 +22,18 @@ function _mapReviewRow(row) {
     timestamp: d ? { seconds: d.getTime() / 1000, toDate: () => d } : null
   };
 }
+// Small inline icon set for review-moderation action buttons (SVG, replaces the
+// old emoji-string convention — see the Phase 1 icon library in ui-misc.js for
+// the toast equivalent). Uses currentColor so each icon inherits its button's
+// text color. Rating stars (★/☆ in the `stars` template variable below) are
+// intentionally left as characters — out of scope per the exclusion list.
+const _reviewIcon = {
+  close: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
+  up: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><polyline points="18 15 12 9 6 15"/></svg>',
+  down: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><polyline points="6 9 12 15 18 9"/></svg>',
+  starOutline: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="11" height="11" style="vertical-align:-1px;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>'
+};
+
 function loadAllReviews() {
   sb.from("reviews").select("*")
     .then(({ data, error }) => {
@@ -101,15 +113,15 @@ function renderAdminReviews() {
     const featureControls = isFeatured
       ? `
         <button onclick="moveReviewRank('${r.docId}','up')" ${atTop ? "disabled" : ""}
-          class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition ${atTop ? "text-gray-200 cursor-not-allowed" : "bg-gray-50 hover:bg-gray-100 text-gray-600"}">↑</button>
+          class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition ${atTop ? "text-gray-200 cursor-not-allowed" : "bg-gray-50 hover:bg-gray-100 text-gray-600"}">${_reviewIcon.up}</button>
         <button onclick="moveReviewRank('${r.docId}','down')" ${atBottom ? "disabled" : ""}
-          class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition ${atBottom ? "text-gray-200 cursor-not-allowed" : "bg-gray-50 hover:bg-gray-100 text-gray-600"}">↓</button>
+          class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition ${atBottom ? "text-gray-200 cursor-not-allowed" : "bg-gray-50 hover:bg-gray-100 text-gray-600"}">${_reviewIcon.down}</button>
         <button onclick="toggleFeatureReview('${r.docId}')"
           class="text-[10px] font-bold px-2 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-600 transition">Unfeature</button>
       `
       : `
         <button onclick="toggleFeatureReview('${r.docId}')"
-          class="text-[10px] font-bold px-2 py-1 rounded-lg bg-gray-50 hover:bg-amber-50 hover:text-amber-600 text-gray-500 transition">☆ Feature</button>
+          class="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-lg bg-gray-50 hover:bg-amber-50 hover:text-amber-600 text-gray-500 transition">${_reviewIcon.starOutline} Feature</button>
       `;
 
     return `
@@ -124,7 +136,7 @@ function renderAdminReviews() {
           </div>
           <button onclick="confirmDeleteReview('${r.docId}', '${escapeForAttr(r.userName || 'this review')}')"
             class="flex-shrink-0 w-7 h-7 bg-red-50 hover:bg-red-100 text-red-500 rounded-full flex items-center justify-center transition text-xs font-bold">
-            ✕
+            ${_reviewIcon.close}
           </button>
         </div>
         <div class="text-yellow-500 text-sm mb-2 tracking-wide">${stars}</div>
@@ -161,7 +173,7 @@ async function toggleFeatureReview(docId) {
           return sb.from("reviews").update({ rank: x.rank }).eq("id", x.docId);
         }));
       }
-      showAdminToast("☆", "Review unfeatured");
+      showAdminToast("star-outline", "Review unfeatured");
     } else {
       // Feature: put it at the end of the current featured list
       const maxRank = allReviews.reduce((m, x) => (x.featured && x.rank > m ? x.rank : m), 0);
@@ -170,11 +182,11 @@ async function toggleFeatureReview(docId) {
       if (error) throw error;
       r.featured = true;
       r.rank = newRank;
-      showAdminToast("⭐", "Review featured");
+      showAdminToast("star-filled", "Review featured");
     }
     renderAdminReviews();
   } catch (e) {
-    showAdminToast("❌", "Failed to update review: " + e.message);
+    showAdminToast("error", "Failed to update review: " + e.message);
   }
 }
 
@@ -198,7 +210,7 @@ async function moveReviewRank(docId, direction) {
     swap.rank = originalRank;
     renderAdminReviews();
   } catch (e) {
-    showAdminToast("❌", "Failed to reorder: " + e.message);
+    showAdminToast("error", "Failed to reorder: " + e.message);
   }
 }
 
@@ -238,9 +250,9 @@ async function executeDeleteReview(docId) {
 
     updateStats();
     renderAdminReviews();
-    showAdminToast("🗑️", "Review deleted");
+    showAdminToast("trash", "Review deleted");
   } catch (e) {
-    showAdminToast("❌", "Failed to delete review: " + e.message);
+    showAdminToast("error", "Failed to delete review: " + e.message);
   }
 }
 

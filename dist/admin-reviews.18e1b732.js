@@ -161,7 +161,7 @@ async function toggleFeatureReview(docId) {
           return sb.from("reviews").update({ rank: x.rank }).eq("id", x.docId);
         }));
       }
-      showAdminToast("☆", "Review unfeatured");
+      showAdminToast("star-outline", "Review unfeatured");
     } else {
       // Feature: put it at the end of the current featured list
       const maxRank = allReviews.reduce((m, x) => (x.featured && x.rank > m ? x.rank : m), 0);
@@ -170,11 +170,11 @@ async function toggleFeatureReview(docId) {
       if (error) throw error;
       r.featured = true;
       r.rank = newRank;
-      showAdminToast("⭐", "Review featured");
+      showAdminToast("star-filled", "Review featured");
     }
     renderAdminReviews();
   } catch (e) {
-    showAdminToast("❌", "Failed to update review: " + e.message);
+    showAdminToast("error", "Failed to update review: " + e.message);
   }
 }
 
@@ -198,7 +198,7 @@ async function moveReviewRank(docId, direction) {
     swap.rank = originalRank;
     renderAdminReviews();
   } catch (e) {
-    showAdminToast("❌", "Failed to reorder: " + e.message);
+    showAdminToast("error", "Failed to reorder: " + e.message);
   }
 }
 
@@ -238,9 +238,9 @@ async function executeDeleteReview(docId) {
 
     updateStats();
     renderAdminReviews();
-    showAdminToast("🗑️", "Review deleted");
+    showAdminToast("trash", "Review deleted");
   } catch (e) {
-    showAdminToast("❌", "Failed to delete review: " + e.message);
+    showAdminToast("error", "Failed to delete review: " + e.message);
   }
 }
 

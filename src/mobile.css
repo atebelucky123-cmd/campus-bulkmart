@@ -285,7 +285,7 @@ body {
   margin-top: 4px;
 }
 
-/* ── Product Grid (2-column) ── */
+/* ── Product Grid (2-column phones, 3-column tablet-portrait) ── */
 .m-product-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -293,13 +293,24 @@ body {
   padding: 10px 10px 16px;
 }
 
+/* Portrait tablets land on this mobile template on purpose (keeps the
+   mobile-style header/nav chrome, per product decision) but at their
+   width, 2 columns leaves cards oversized. 700px comfortably clears
+   phone widths (largest phones are ~430px) while catching real tablet
+   portrait widths (iPad mini 744px and up). */
+@media (min-width: 700px) {
+  .m-product-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
 /* Ensure product cards in mobile grid are thumb-friendly */
 .m-product-grid .product-card {
-  border-radius: 14px;
+  border-radius: 18px;
 }
 
 .m-product-grid .product-img-wrap {
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 3 / 2;
 }
 
 /* ── Cart Bottom Sheet ── */
@@ -360,6 +371,15 @@ button[style*="display: inline"] {
   min-height: 36px; /* category pills can be smaller — they're touch-scrollable */
 }
 
+/* Footer "Quick Links" anchors are simple text links, not tap targets
+   needing the 44px minimum — that rule was stretching each <a> into a
+   tall block box and leaving big dead gaps below the link text.
+   Excludes .footer-social-link, which needs its fixed 32px circle. */
+footer a:not(.footer-social-link) {
+  min-height: 0 !important;
+  height: auto !important;
+}
+
 /* ── Vault chip in header ── */
 #homepage-vault-chip {
   font-size: 11px;
@@ -368,11 +388,51 @@ button[style*="display: inline"] {
   max-width: 90px;
 }
 
-/* ── qty buttons stay touch-friendly ── */
-.qty-btn {
-  width: 34px !important;
-  height: 34px !important;
-  min-width: 34px !important;
+/* ── Mobile product card — stripped to the essentials per the sketch:
+   photo (with Top Pick badge kept on it), name, price + group-order
+   chip, qty stepper, Add to Cart. The category line, description, the
+   dashed divider and the photo quick-add circle are desktop-only —
+   they're what was making the mobile card feel tall. ── */
+.m-product-grid .card-body {
+  padding: 8px 10px 10px !important;
+}
+.m-product-grid .cbm-eyebrow,
+.m-product-grid .cbm-desc,
+.m-product-grid .cbm-tear,
+.m-product-grid .cbm-fab {
+  display: none !important;
+}
+.m-product-grid .cbm-name {
+  -webkit-line-clamp: 1;
+  margin-bottom: 4px !important;
+}
+
+/* Stepper — smaller and tighter; this was the "volume button that
+   feels too tall" */
+.m-product-grid .cbm-stepper {
+  width: 100%;
+  justify-content: space-between;
+  gap: 0;
+  padding: 3px 6px;
+  margin-bottom: 6px;
+}
+.m-product-grid .cbm-stepper-btn {
+  min-height: 0 !important;
+  width: 24px !important;
+  height: 24px !important;
+  min-width: 24px !important;
+  font-size: 13px;
+}
+.m-product-grid .cbm-stepper-input {
+  flex: 1;
+  font-size: 12px;
+}
+
+/* Add to Cart — shorter and smaller text, not a full-height pill */
+.m-product-grid .cbm-cta {
+  padding: 6px 0;
+  font-size: 11px;
+  min-height: 0 !important;
 }
 
 /* ── Animations ── */

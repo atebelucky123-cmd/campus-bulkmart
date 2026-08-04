@@ -6,7 +6,6 @@ require("dotenv").config();
 
 const express = require("express");
 const cors = require("cors");
-const rateLimit = require("express-rate-limit");
 
 const waitlistRoutes = require("./waitlist");
 
@@ -33,23 +32,12 @@ app.use(cors({
 
 app.use(express.json());
 
-// ── Rate limiting ──
-// Basic protection against someone hammering the endpoint directly
-// (the honeypot handles bots that go through the actual form).
-const waitlistLimiter = rateLimit({
-  windowMs: 10 * 60 * 1000, // 10 minutes
-  max: 8,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { success: false, error: "Too many attempts. Please try again later." },
-});
-
 // ── Routes ──
 app.get("/", (req, res) => {
   res.json({ status: "ok", service: "campus-bulkmart-api" });
 });
 
-app.use("/api", waitlistLimiter, waitlistRoutes);
+app.use("/api", waitlistRoutes);
 
 // Future payment routes will get mounted here once the redesign happens,
 // e.g. app.use("/api", paymentRoutes);

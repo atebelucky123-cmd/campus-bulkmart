@@ -300,7 +300,7 @@ function addToCartWithQty(productId) {
   // has group ordering disabled — previously this only showed a warning
   // toast but still let the product into the cart.
   if (orderMode === "group" && p.allowGroupOrder === false) {
-    showToast("⚠️", `${p.name} isn't available for Group Orders`);
+    showToast("warning", `${p.name} isn't available for Group Orders`);
     return;
   }
 
@@ -314,7 +314,7 @@ function addToCartWithQty(productId) {
   updateModalPrice(productId);
   updateCartUI();
   saveCartToStorage();
-  showToast("🛒", `${p.name} added to cart`);
+  showToast("cart", `${p.name} added to cart`);
 }
 
 function removeFromCart(productId) {
@@ -345,7 +345,7 @@ function clearCart() {
   cart = [];
   updateCartUI();
   clearCartStorage();
-  showToast("🗑️", "Cart cleared");
+  showToast("trash", "Cart cleared");
 }
 
 function updateCartUI() {
@@ -517,7 +517,7 @@ function updatePriceBreakdown(cartSubtotal) {
       </div>`;
     if (checkoutBtn) {
       checkoutBtn.disabled = false;
-      checkoutBtn.style.background = "#007BFF";
+      checkoutBtn.style.background = "#000080";
       checkoutBtn.style.cursor = "pointer";
     }
   }
@@ -541,13 +541,13 @@ function openPaymentModal() { document.getElementById("paymentModal").classList.
 function closePaymentModal() { document.getElementById("paymentModal").classList.add("hidden"); document.getElementById("paymentModal").classList.remove("flex"); document.getElementById("paymentModalError").classList.add("hidden"); document.getElementById("vaultInsufficientNotice")?.classList.add("hidden"); }
 
 async function checkout() {
-  if (!currentUser) { showToast("⚠️", "Please sign in to checkout"); return; }
-  if (cart.length === 0) { showToast("⚠️", "Your cart is empty"); return; }
+  if (!currentUser) { showToast("warning", "Please sign in to checkout"); return; }
+  if (cart.length === 0) { showToast("warning", "Your cart is empty"); return; }
 
   const cartSubtotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
   const result = calculateDeliveryFee(cartSubtotal, orderMode);
 
-  if (result.warning) { showToast("⚠️", result.warning); return; }
+  if (result.warning) { showToast("warning", result.warning); return; }
 
   const name    = document.getElementById("checkoutName")?.value.trim();
   const phone   = document.getElementById("checkoutPhone")?.value.trim();
@@ -621,7 +621,7 @@ async function checkoutVault() {
     clearCart();
     clearCartStorage();
     toggleCart();
-    showToast("✅", "Order placed! Payment deducted from vault.");
+    showToast("success", "Order placed! Payment deducted from vault.");
     _pendingOrderDetails = null;
 
   } catch (err) {
@@ -678,7 +678,7 @@ async function checkoutWhatsApp() {
   clearCart();
   clearCartStorage();
   toggleCart();
-  showToast("✅", "Order sent via WhatsApp!");
+  showToast("success", "Order sent via WhatsApp!");
   _pendingOrderDetails = null;
 }
 

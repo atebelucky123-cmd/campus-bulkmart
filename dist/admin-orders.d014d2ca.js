@@ -104,19 +104,19 @@ function renderAdminOrders() {
     let actions = "";
     if (status === "pending") {
       actions = `
-        <button onclick="openConfirmOrderModal('${order.docId}')" class="text-xs font-bold px-3 py-1.5 rounded-lg text-white transition" style="background:#007BFF;">✅ Confirm Payment</button>
+        <button onclick="openConfirmOrderModal('${order.docId}')" class="text-xs font-bold px-3 py-1.5 rounded-lg text-white transition" style="background:#000080;">✅ Confirm Payment</button>
         <button onclick="cancelOrder('${order.docId}')" class="text-xs font-bold px-3 py-1.5 rounded-lg bg-red-100 hover:bg-red-200 text-red-600 transition">✕ Cancel</button>
       `;
     } else if (status === "confirmed") {
       actions = `
         <button onclick="markCompleted('${order.docId}')" class="text-xs font-bold px-3 py-1.5 rounded-lg bg-green-500 hover:bg-green-600 text-white transition">📦 Mark Completed</button>
-        <button onclick="openReceiptModal('${order.docId}')" class="text-xs font-semibold px-4 py-1.5 rounded-lg border transition hover:bg-gray-50" style="color:#007BFF; border-color:#007BFF;">🧾 Receipt</button>
+        <button onclick="openReceiptModal('${order.docId}')" class="text-xs font-semibold px-4 py-1.5 rounded-lg border transition hover:bg-gray-50" style="color:#000080; border-color:#000080;">🧾 Receipt</button>
         <button onclick="revertToPending('${order.docId}')" class="text-xs font-bold px-3 py-1.5 rounded-lg bg-yellow-100 hover:bg-yellow-200 text-yellow-700 transition">↩ Revert to Pending</button>
         <button onclick="cancelOrder('${order.docId}')" class="text-xs font-bold px-3 py-1.5 rounded-lg bg-red-100 hover:bg-red-200 text-red-600 transition">✕ Cancel</button>
       `;
     } else if (status === "completed") {
       actions = `
-        <button onclick="openReceiptModal('${order.docId}')" class="text-xs font-semibold px-4 py-1.5 rounded-lg border transition hover:bg-gray-50" style="color:#007BFF; border-color:#007BFF;">🧾 Receipt</button>
+        <button onclick="openReceiptModal('${order.docId}')" class="text-xs font-semibold px-4 py-1.5 rounded-lg border transition hover:bg-gray-50" style="color:#000080; border-color:#000080;">🧾 Receipt</button>
         <button onclick="revertToConfirmed('${order.docId}')" class="text-xs font-bold px-3 py-1.5 rounded-lg bg-blue-100 hover:bg-blue-200 text-blue-700 transition">↩ Revert to Confirmed</button>
       `;
     } else if (status === "cancelled") {
@@ -193,9 +193,9 @@ async function updateOrderStatus(docId, newStatus, opts = {}) {
 
     updateStats();
     renderAdminOrders();
-    showAdminToast("✅", `Order marked as ${newStatus}`);
+    showAdminToast("success", `Order marked as ${newStatus}`);
   } catch (e) {
-    showAdminToast("❌", "Failed to update: " + e.message);
+    showAdminToast("error", "Failed to update: " + e.message);
   }
 }
 
@@ -262,7 +262,7 @@ function submitConfirmOrder() {
   const amountInput = document.getElementById("confirmAmountPaidInput");
   const amountPaid = Number(amountInput?.value);
   if (!amountPaid || amountPaid <= 0) {
-    showAdminToast("❌", "Enter a valid amount paid");
+    showAdminToast("error", "Enter a valid amount paid");
     return;
   }
 
@@ -437,9 +437,9 @@ async function downloadReceipt() {
     link.download = `CBM-Receipt-${orderIdShort}.png`;
     link.href = canvas.toDataURL("image/png");
     link.click();
-    showAdminToast("✅", "Receipt downloaded");
+    showAdminToast("success", "Receipt downloaded");
   } catch (e) {
-    showAdminToast("❌", "Could not generate receipt: " + e.message);
+    showAdminToast("error", "Could not generate receipt: " + e.message);
   } finally {
     if (btn) { btn.disabled = false; btn.textContent = originalText; }
   }
@@ -464,7 +464,7 @@ async function shareReceipt() {
 
     if (canShareFiles) {
       await navigator.share({ files: [file], text: captionText });
-      showAdminToast("✅", "Receipt ready to send");
+      showAdminToast("success", "Receipt ready to send");
     } else {
       // Fallback for browsers without file-sharing support: download the image,
       // then open a WhatsApp chat with the caption pre-filled so it's a one-drag
@@ -478,11 +478,11 @@ async function shareReceipt() {
         ? `https://wa.me/${phoneDigits}?text=${encodeURIComponent(captionText)}`
         : `https://wa.me/?text=${encodeURIComponent(captionText)}`;
       window.open(waUrl, "_blank");
-      showAdminToast("ℹ️", "Image downloaded — attach it in the WhatsApp chat that just opened");
+      showAdminToast("info", "Image downloaded — attach it in the WhatsApp chat that just opened");
     }
   } catch (e) {
     if (e.name !== "AbortError") { // user closed the native share sheet — not a real error
-      showAdminToast("❌", "Could not share receipt: " + e.message);
+      showAdminToast("error", "Could not share receipt: " + e.message);
     }
   } finally {
     if (btn) btn.disabled = false;

@@ -142,7 +142,7 @@ function loadProductsFromFirestore() {
       const grid = document.getElementById("productGrid");
       if (grid) {
         grid.innerHTML = `<div class="col-span-full text-center py-16 text-gray-400">
-          <div class="text-4xl mb-3">📶</div>
+          <div class="mb-3 flex justify-center"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="1" x2="23" y2="23"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.58 9"/><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg></div>
           <p class="font-semibold">Couldn't load products</p>
           <p class="text-sm mt-1">Check your connection and refresh the page</p>
           <button onclick="location.reload()" class="mt-4 px-5 py-2 rounded-xl text-white text-sm font-bold" style="background:#000080;">Retry</button>
@@ -300,7 +300,7 @@ function addToCartWithQty(productId) {
   // has group ordering disabled — previously this only showed a warning
   // toast but still let the product into the cart.
   if (orderMode === "group" && p.allowGroupOrder === false) {
-    showToast("⚠️", `${p.name} isn't available for Group Orders`);
+    showToast("warning", `${p.name} isn't available for Group Orders`);
     return;
   }
 
@@ -314,7 +314,7 @@ function addToCartWithQty(productId) {
   updateModalPrice(productId);
   updateCartUI();
   saveCartToStorage();
-  showToast("🛒", `${p.name} added to cart`);
+  showToast("cart", `${p.name} added to cart`);
 }
 
 function removeFromCart(productId) {
@@ -345,7 +345,7 @@ function clearCart() {
   cart = [];
   updateCartUI();
   clearCartStorage();
-  showToast("🗑️", "Cart cleared");
+  showToast("trash", "Cart cleared");
 }
 
 function updateCartUI() {
@@ -517,7 +517,7 @@ function updatePriceBreakdown(cartSubtotal) {
       </div>`;
     if (checkoutBtn) {
       checkoutBtn.disabled = false;
-      checkoutBtn.style.background = "#007BFF";
+      checkoutBtn.style.background = "#000080";
       checkoutBtn.style.cursor = "pointer";
     }
   }
@@ -541,13 +541,13 @@ function openPaymentModal() { document.getElementById("paymentModal").classList.
 function closePaymentModal() { document.getElementById("paymentModal").classList.add("hidden"); document.getElementById("paymentModal").classList.remove("flex"); document.getElementById("paymentModalError").classList.add("hidden"); document.getElementById("vaultInsufficientNotice")?.classList.add("hidden"); }
 
 async function checkout() {
-  if (!currentUser) { showToast("⚠️", "Please sign in to checkout"); return; }
-  if (cart.length === 0) { showToast("⚠️", "Your cart is empty"); return; }
+  if (!currentUser) { showToast("warning", "Please sign in to checkout"); return; }
+  if (cart.length === 0) { showToast("warning", "Your cart is empty"); return; }
 
   const cartSubtotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
   const result = calculateDeliveryFee(cartSubtotal, orderMode);
 
-  if (result.warning) { showToast("⚠️", result.warning); return; }
+  if (result.warning) { showToast("warning", result.warning); return; }
 
   const name    = document.getElementById("checkoutName")?.value.trim();
   const phone   = document.getElementById("checkoutPhone")?.value.trim();
@@ -621,7 +621,7 @@ async function checkoutVault() {
     clearCart();
     clearCartStorage();
     toggleCart();
-    showToast("✅", "Order placed! Payment deducted from vault.");
+    showToast("success", "Order placed! Payment deducted from vault.");
     _pendingOrderDetails = null;
 
   } catch (err) {
@@ -678,7 +678,7 @@ async function checkoutWhatsApp() {
   clearCart();
   clearCartStorage();
   toggleCart();
-  showToast("✅", "Order sent via WhatsApp!");
+  showToast("success", "Order sent via WhatsApp!");
   _pendingOrderDetails = null;
 }
 

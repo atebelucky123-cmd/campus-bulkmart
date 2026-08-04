@@ -29,6 +29,25 @@ function _mapOrderRow(row) {
   };
 }
 
+// Small inline icon set for order-card status badges and action buttons (SVG,
+// replaces the old emoji-string convention — see the Phase 1 icon library in
+// ui-misc.js for the toast equivalent). Uses currentColor so each icon inherits
+// its button/text color, with a small negative vertical-align to sit on the
+// text baseline the way the emoji did.
+const _orderIcon = {
+  money: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" style="vertical-align:-2px;"><circle cx="12" cy="12" r="9"/><path d="M9 12a3 3 0 1 0 6 0 3 3 0 1 0-6 0"/></svg>',
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" style="vertical-align:-2px;"><polyline points="20 6 9 17 4 12"/></svg>',
+  close: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="12" height="12" style="vertical-align:-1px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
+  package: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" style="vertical-align:-2px;"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>',
+  receipt: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" style="vertical-align:-2px;"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="16" y2="11"/><line x1="8" y1="15" x2="12" y2="15"/></svg>',
+  undo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" style="vertical-align:-2px;"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>',
+  phone: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="12" height="12" style="vertical-align:-1px;"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>',
+  mail: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="12" height="12" style="vertical-align:-1px;"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>',
+  home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="12" height="12" style="vertical-align:-1px;"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
+  send: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" style="vertical-align:-2px;"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>',
+  chat: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" style="vertical-align:-2px;"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>'
+};
+
 // ============================================================
 // ORDERS
 // ============================================================
@@ -98,30 +117,30 @@ function renderAdminOrders() {
       const confirmedDate = order.confirmedAt?.toDate
         ? order.confirmedAt.toDate().toLocaleString("en-NG", { day:"numeric", month:"short", hour:"2-digit", minute:"2-digit" })
         : "—";
-      paidLine = `<p class="text-xs text-green-700 mt-1">💰 Paid ₦${Number(order.amountPaid).toLocaleString()} · confirmed ${confirmedDate}</p>`;
+      paidLine = `<p class="text-xs text-green-700 mt-1">${_orderIcon.money} Paid ₦${Number(order.amountPaid).toLocaleString()} · confirmed ${confirmedDate}</p>`;
     }
 
     let actions = "";
     if (status === "pending") {
       actions = `
-        <button onclick="openConfirmOrderModal('${order.docId}')" class="text-xs font-bold px-3 py-1.5 rounded-lg text-white transition" style="background:#007BFF;">✅ Confirm Payment</button>
-        <button onclick="cancelOrder('${order.docId}')" class="text-xs font-bold px-3 py-1.5 rounded-lg bg-red-100 hover:bg-red-200 text-red-600 transition">✕ Cancel</button>
+        <button onclick="openConfirmOrderModal('${order.docId}')" class="text-xs font-bold px-3 py-1.5 rounded-lg text-white transition" style="background:#000080;">${_orderIcon.check} Confirm Payment</button>
+        <button onclick="cancelOrder('${order.docId}')" class="text-xs font-bold px-3 py-1.5 rounded-lg bg-red-100 hover:bg-red-200 text-red-600 transition">${_orderIcon.close} Cancel</button>
       `;
     } else if (status === "confirmed") {
       actions = `
-        <button onclick="markCompleted('${order.docId}')" class="text-xs font-bold px-3 py-1.5 rounded-lg bg-green-500 hover:bg-green-600 text-white transition">📦 Mark Completed</button>
-        <button onclick="openReceiptModal('${order.docId}')" class="text-xs font-semibold px-4 py-1.5 rounded-lg border transition hover:bg-gray-50" style="color:#007BFF; border-color:#007BFF;">🧾 Receipt</button>
-        <button onclick="revertToPending('${order.docId}')" class="text-xs font-bold px-3 py-1.5 rounded-lg bg-yellow-100 hover:bg-yellow-200 text-yellow-700 transition">↩ Revert to Pending</button>
-        <button onclick="cancelOrder('${order.docId}')" class="text-xs font-bold px-3 py-1.5 rounded-lg bg-red-100 hover:bg-red-200 text-red-600 transition">✕ Cancel</button>
+        <button onclick="markCompleted('${order.docId}')" class="text-xs font-bold px-3 py-1.5 rounded-lg bg-green-500 hover:bg-green-600 text-white transition">${_orderIcon.package} Mark Completed</button>
+        <button onclick="openReceiptModal('${order.docId}')" class="text-xs font-semibold px-4 py-1.5 rounded-lg border transition hover:bg-gray-50" style="color:#000080; border-color:#000080;">${_orderIcon.receipt} Receipt</button>
+        <button onclick="revertToPending('${order.docId}')" class="text-xs font-bold px-3 py-1.5 rounded-lg bg-yellow-100 hover:bg-yellow-200 text-yellow-700 transition">${_orderIcon.undo} Revert to Pending</button>
+        <button onclick="cancelOrder('${order.docId}')" class="text-xs font-bold px-3 py-1.5 rounded-lg bg-red-100 hover:bg-red-200 text-red-600 transition">${_orderIcon.close} Cancel</button>
       `;
     } else if (status === "completed") {
       actions = `
-        <button onclick="openReceiptModal('${order.docId}')" class="text-xs font-semibold px-4 py-1.5 rounded-lg border transition hover:bg-gray-50" style="color:#007BFF; border-color:#007BFF;">🧾 Receipt</button>
-        <button onclick="revertToConfirmed('${order.docId}')" class="text-xs font-bold px-3 py-1.5 rounded-lg bg-blue-100 hover:bg-blue-200 text-blue-700 transition">↩ Revert to Confirmed</button>
+        <button onclick="openReceiptModal('${order.docId}')" class="text-xs font-semibold px-4 py-1.5 rounded-lg border transition hover:bg-gray-50" style="color:#000080; border-color:#000080;">${_orderIcon.receipt} Receipt</button>
+        <button onclick="revertToConfirmed('${order.docId}')" class="text-xs font-bold px-3 py-1.5 rounded-lg bg-blue-100 hover:bg-blue-200 text-blue-700 transition">${_orderIcon.undo} Revert to Confirmed</button>
       `;
     } else if (status === "cancelled") {
       actions = `
-        <button onclick="revertToPending('${order.docId}')" class="text-xs font-bold px-3 py-1.5 rounded-lg bg-yellow-100 hover:bg-yellow-200 text-yellow-700 transition">↩ Reactivate to Pending</button>
+        <button onclick="revertToPending('${order.docId}')" class="text-xs font-bold px-3 py-1.5 rounded-lg bg-yellow-100 hover:bg-yellow-200 text-yellow-700 transition">${_orderIcon.undo} Reactivate to Pending</button>
       `;
     }
 
@@ -144,9 +163,9 @@ function renderAdminOrders() {
           <div>
             <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-2">Customer</p>
             <p class="text-sm font-semibold text-gray-800">${escapeHtml(order.customerName || "—")}</p>
-            <p class="text-xs text-gray-500 mt-0.5">📞 ${escapeHtml(order.customerPhone || "—")}</p>
-            <p class="text-xs text-gray-500 mt-0.5">✉️ ${escapeHtml(order.customerEmail || "—")}</p>
-            <p class="text-xs text-gray-500 mt-0.5">🏠 ${escapeHtml(order.deliveryAddress || "—")}</p>
+            <p class="text-xs text-gray-500 mt-0.5">${_orderIcon.phone} ${escapeHtml(order.customerPhone || "—")}</p>
+            <p class="text-xs text-gray-500 mt-0.5">${_orderIcon.mail} ${escapeHtml(order.customerEmail || "—")}</p>
+            <p class="text-xs text-gray-500 mt-0.5">${_orderIcon.home} ${escapeHtml(order.deliveryAddress || "—")}</p>
           </div>
 
           <!-- Items -->
@@ -193,9 +212,9 @@ async function updateOrderStatus(docId, newStatus, opts = {}) {
 
     updateStats();
     renderAdminOrders();
-    showAdminToast("✅", `Order marked as ${newStatus}`);
+    showAdminToast("success", `Order marked as ${newStatus}`);
   } catch (e) {
-    showAdminToast("❌", "Failed to update: " + e.message);
+    showAdminToast("error", "Failed to update: " + e.message);
   }
 }
 
@@ -262,7 +281,7 @@ function submitConfirmOrder() {
   const amountInput = document.getElementById("confirmAmountPaidInput");
   const amountPaid = Number(amountInput?.value);
   if (!amountPaid || amountPaid <= 0) {
-    showAdminToast("❌", "Enter a valid amount paid");
+    showAdminToast("error", "Enter a valid amount paid");
     return;
   }
 
@@ -404,7 +423,7 @@ function openReceiptModal(docId) {
     try {
       supportsFiles = !!(navigator.canShare && navigator.canShare({ files: [new File([""], "test.png", { type: "image/png" })] }));
     } catch (e) { supportsFiles = false; }
-    shareBtn.textContent = supportsFiles ? "📤 Send to Customer" : "💬 Open WhatsApp Chat";
+    shareBtn.innerHTML = supportsFiles ? `${_orderIcon.send} Send to Customer` : `${_orderIcon.chat} Open WhatsApp Chat`;
   }
 }
 
@@ -437,9 +456,9 @@ async function downloadReceipt() {
     link.download = `CBM-Receipt-${orderIdShort}.png`;
     link.href = canvas.toDataURL("image/png");
     link.click();
-    showAdminToast("✅", "Receipt downloaded");
+    showAdminToast("success", "Receipt downloaded");
   } catch (e) {
-    showAdminToast("❌", "Could not generate receipt: " + e.message);
+    showAdminToast("error", "Could not generate receipt: " + e.message);
   } finally {
     if (btn) { btn.disabled = false; btn.textContent = originalText; }
   }
@@ -464,7 +483,7 @@ async function shareReceipt() {
 
     if (canShareFiles) {
       await navigator.share({ files: [file], text: captionText });
-      showAdminToast("✅", "Receipt ready to send");
+      showAdminToast("success", "Receipt ready to send");
     } else {
       // Fallback for browsers without file-sharing support: download the image,
       // then open a WhatsApp chat with the caption pre-filled so it's a one-drag
@@ -478,11 +497,11 @@ async function shareReceipt() {
         ? `https://wa.me/${phoneDigits}?text=${encodeURIComponent(captionText)}`
         : `https://wa.me/?text=${encodeURIComponent(captionText)}`;
       window.open(waUrl, "_blank");
-      showAdminToast("ℹ️", "Image downloaded — attach it in the WhatsApp chat that just opened");
+      showAdminToast("info", "Image downloaded — attach it in the WhatsApp chat that just opened");
     }
   } catch (e) {
     if (e.name !== "AbortError") { // user closed the native share sheet — not a real error
-      showAdminToast("❌", "Could not share receipt: " + e.message);
+      showAdminToast("error", "Could not share receipt: " + e.message);
     }
   } finally {
     if (btn) btn.disabled = false;

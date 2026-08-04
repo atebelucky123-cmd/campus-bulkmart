@@ -3,6 +3,17 @@
 // Products table rendering, search/filter, product preview modal, mobile search fullscreen.
 // ============================================================
 
+// ============================================================
+// CLOUDINARY DELIVERY OPTIMIZATION (Phase 3)
+// See products.js for the full explanation — same helper, duplicated
+// here since the admin panel and storefront don't share JS scope.
+// ============================================================
+function cbmImg(url, w, h) {
+  if (!url || !url.includes("res.cloudinary.com") || !url.includes("/upload/")) return url || "";
+  const size = h ? `w_${w},h_${h},c_fill` : `w_${w},c_limit`;
+  return url.replace("/upload/", `/upload/f_auto,q_auto,${size}/`);
+}
+
 // RENDER PRODUCTS TABLE
 // ============================================================
 function renderAdminProducts() {
@@ -65,7 +76,7 @@ function renderAdminProducts() {
       </td>
       <td class="px-4 py-3">
         <div class="flex items-center gap-3">
-          <img src="${p.image || ''}" alt="${p.name}"
+          <img src="${cbmImg(p.image, 80, 80)}" alt="${p.name}"
             class="w-10 h-10 rounded-lg object-cover flex-shrink-0 bg-gray-100"
             onerror="this.src='https://placehold.co/80x80/e5e7eb/9ca3af?text=?'">
           <div class="min-w-0">
@@ -97,8 +108,8 @@ function renderAdminProducts() {
             Edit
           </button>
           <button onclick="cloneProduct('${p.id}')" title="Clone this product"
-            class="text-xs font-semibold text-purple-700 bg-purple-50 hover:bg-purple-100 px-3 py-1.5 rounded-lg transition">
-            ⧉
+            class="text-xs font-semibold text-purple-700 bg-purple-50 hover:bg-purple-100 px-3 py-1.5 rounded-lg transition flex items-center">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
           </button>
           <button onclick="toggleProductVisibility('${p.id}', ${!!p.isHidden})"
             title="${p.isHidden ? 'Show product' : 'Hide product'}"
@@ -132,7 +143,7 @@ function renderAdminProducts() {
       mobileEmpty?.classList.add("hidden");
       mobileCards.innerHTML = filtered.map(p => `
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-3 flex items-center gap-3">
-          <img src="${p.image || ''}" alt="${p.name}"
+          <img src="${cbmImg(p.image, 100, 100)}" alt="${p.name}"
             class="w-14 h-14 rounded-xl object-cover flex-shrink-0 bg-gray-100"
             onerror="this.src='https://placehold.co/80x80/e5e7eb/9ca3af?text=?'">
           <div class="flex-1 min-w-0">
@@ -154,8 +165,8 @@ function renderAdminProducts() {
               Edit
             </button>
             <button onclick="cloneProduct('${p.id}')" title="Clone"
-              class="text-xs font-semibold text-purple-700 bg-purple-50 hover:bg-purple-100 px-3 py-1.5 rounded-lg transition">
-              ⧉ Clone
+              class="text-xs font-semibold text-purple-700 bg-purple-50 hover:bg-purple-100 px-3 py-1.5 rounded-lg transition flex items-center gap-1">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Clone
             </button>
             <button onclick="toggleProductVisibility('${p.id}', ${!!p.isHidden})"
               title="${p.isHidden ? 'Show' : 'Hide'}"
@@ -236,7 +247,7 @@ function openAdminPreviewModal(id) {
 
   content.innerHTML = `
     <div class="aspect-video bg-gray-100 overflow-hidden rounded-t-3xl">
-      <img src="${p.image || ''}" alt="${escapeHtml(p.name)}" class="w-full h-full object-cover"
+      <img src="${cbmImg(p.image, 600)}" alt="${escapeHtml(p.name)}" class="w-full h-full object-cover"
         onerror="this.src='https://placehold.co/600x400/e5e7eb/9ca3af?text=Product'">
     </div>
     <div class="p-5 sm:p-6">
@@ -251,12 +262,12 @@ function openAdminPreviewModal(id) {
       <!-- Admin action buttons -->
       <div class="flex gap-3 mb-6">
         <button onclick="closeAdminPreviewModal(); openEditModal('${p.id}')"
-          class="flex-1 text-white font-bold py-3 rounded-xl transition text-sm" style="background:#000080;">
-          ✏️ Edit Product
+          class="flex-1 text-white font-bold py-3 rounded-xl transition text-sm flex items-center justify-center gap-2" style="background:#000080;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Edit Product
         </button>
         <button onclick="closeAdminPreviewModal(); confirmDeleteProduct('${p.id}', '${escapeForAttr(p.name)}')"
-          class="flex-1 bg-red-50 hover:bg-red-100 text-red-600 font-bold py-3 rounded-xl transition text-sm border border-red-200">
-          🗑️ Delete
+          class="flex-1 bg-red-50 hover:bg-red-100 text-red-600 font-bold py-3 rounded-xl transition text-sm border border-red-200 flex items-center justify-center gap-2">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Delete
         </button>
       </div>
 
@@ -419,7 +430,7 @@ function renderAdminSheetResults(query) {
     })(p.id));
 
     var img = document.createElement("img");
-    img.src = p.image || "";
+    img.src = cbmImg(p.image, 100, 100);
     img.alt = p.name;
     img.style.cssText = "width:48px;height:48px;border-radius:12px;object-fit:cover;flex-shrink:0;background:#f3f4f6;";
     img.onerror = function(){ this.src = "https://placehold.co/80x80/e5e7eb/9ca3af?text=?"; };

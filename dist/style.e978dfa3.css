@@ -7,7 +7,7 @@
   --cbm-pure-white: #FFFFFF;
   --cbm-olive-green: #3B592D;
   --cbm-cool-gray: #F4F4F4;
-  --cbm-electric-blue: #007BFF;
+  --cbm-electric-blue: #000080;
 }
 
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@700;800;900&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,900&display=swap');
@@ -85,6 +85,18 @@ h1 {
   flex-shrink: 0;
 }
 
+/* Soft scrim at the base of every product photo — keeps floating
+   chips/tags legible on light photos and blends the photo into the
+   white card body instead of a hard cut line */
+.product-img-wrap::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 42%;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.20), rgba(0, 0, 0, 0));
+  pointer-events: none;
+}
+
 /* Category button states */
 .category-btn {
   border-color: #e5e7eb;
@@ -105,10 +117,15 @@ h1 {
   display: flex;
   flex-direction: column;
   height: 100%;
+  border-radius: 20px;
+  background: #fff;
+  /* Soft ambient shadow instead of a hard border — a card should read
+     as a physical price-tag resting on the page, not a boxed div */
+  box-shadow: 0 1px 2px rgba(0, 0, 128, 0.05), 0 10px 24px -16px rgba(0, 0, 128, 0.35);
 }
 .product-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 40px rgba(0, 0, 128, 0.12);
+  transform: translateY(-4px);
+  box-shadow: 0 20px 44px -14px rgba(0, 0, 128, 0.28);
 }
 
 /* The text body of the card grows to push the CTA to the bottom */
@@ -223,7 +240,7 @@ h1 {
 
 /* ── Lower Banner — promo/CTA strip, admin-editable (settings/siteContent) ── */
 .lower-banner {
-  background: var(--cbm-olive-green);
+  background: linear-gradient(135deg, #000080 0%, #0000aa 60%, #00006a 100%);
   text-align: center;
 }
 .lower-banner-inner {
@@ -249,7 +266,7 @@ h1 {
 .lower-banner-btn {
   display: inline-block;
   background: #fff;
-  color: var(--cbm-olive-green);
+  color: var(--cbm-navy);
   font-weight: 700;
   font-size: 14px;
   padding: 11px 30px;
@@ -260,6 +277,166 @@ h1 {
 .lower-banner-btn:hover {
   background: #f4f4f4;
   transform: translateY(-2px);
+}
+
+/* ============================================================
+   Product card redesign — "price tag" motif
+   Campus Bulkmart cards are built like a market price tag: a photo,
+   a dashed tear-line where the tag would be torn off at the till, and
+   the price/CTA below it. A floating tag-button sits on the photo
+   itself for a one-tap quick action.
+   ============================================================ */
+
+/* Category eyebrow with a small "tag" dot */
+.cbm-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.cbm-eyebrow-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--cbm-electric-blue);
+  flex-shrink: 0;
+}
+.cbm-eyebrow-dot.olive {
+  background: var(--cbm-olive-green);
+}
+
+/* Dashed "tear line" between details and price — the moment a market
+   price tag would be torn off at checkout */
+.cbm-tear {
+  border-top: 1.5px dashed #e2e4ea;
+  margin: 2px 0 10px;
+}
+
+/* Floating tag-button on the photo — quick add for simple products,
+   quick view for anything that needs a choice made first */
+.cbm-fab {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(4px);
+  color: var(--cbm-navy);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+  flex-shrink: 0;
+  padding: 0;
+}
+.cbm-fab:hover {
+  background: var(--cbm-navy);
+  color: #fff;
+  transform: scale(1.08);
+}
+.cbm-fab svg {
+  width: 15px;
+  height: 15px;
+}
+
+/* Group-order chip — sits inline beside the price instead of its own
+   full-width banner line */
+.cbm-group-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: #f0f4ec;
+  color: var(--cbm-olive-green);
+  font-size: 9px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 20px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Glassy over-photo badges (top pick / service / low stock) */
+.cbm-chip {
+  backdrop-filter: blur(3px);
+  font-size: 9px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 20px;
+  color: #fff;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+
+/* Pill CTA — replaces the old rounded-lg button */
+.cbm-cta {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: var(--cbm-navy);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 9px 0;
+  border-radius: 9999px;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.15s ease, box-shadow 0.15s ease;
+}
+.cbm-cta:hover {
+  opacity: 0.92;
+  box-shadow: 0 8px 18px rgba(0, 0, 128, 0.3);
+}
+
+/* Segmented pill quantity stepper — compact and centered, not
+   stretched full-width (a full-width flex pill was pushing the −/+
+   buttons out to the card edges with a big dead gap around the
+   number, which read as oversized and "loose") */
+.cbm-stepper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: fit-content;
+  background: #f3f4f6;
+  border-radius: 9999px;
+  padding: 3px;
+  margin: 0 auto 8px;
+}
+.cbm-stepper-btn {
+  width: 26px;
+  height: 26px;
+  min-width: 26px;
+  border-radius: 50%;
+  background: #fff;
+  color: var(--cbm-navy);
+  border: none;
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+}
+.cbm-stepper-input {
+  flex: none;
+  width: 24px;
+  text-align: center;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--cbm-matte-black);
+  -moz-appearance: textfield;
 }
 
 /* ── Footer social links ── */

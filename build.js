@@ -29,6 +29,7 @@ const HASHABLE = [
   "admin-products-form.js",
   "admin-orders.js",
   "admin-csv-import.js",
+  "admin-waitlist.js",
   "wallet.js",
   "auth-modal.js",
   "style.css",

@@ -5,10 +5,26 @@
   },
   "hosting": {
     "public": "dist",
+    "cleanUrls": true,
     "ignore": [
       "firebase.json",
       "**/.*",
       "**/node_modules/**"
+    ],
+    "redirects": [
+      { "source": "/", "destination": "/coming-soon", "type": 302 },
+      { "source": "/index", "destination": "/coming-soon", "type": 302 },
+      { "source": "/desktop", "destination": "/coming-soon", "type": 302 },
+      { "source": "/mobile", "destination": "/coming-soon", "type": 302 },
+      { "source": "/products", "destination": "/coming-soon", "type": 302 },
+      { "source": "/products-desktop", "destination": "/coming-soon", "type": 302 },
+      { "source": "/products-mobile", "destination": "/coming-soon", "type": 302 },
+      { "source": "/order-history", "destination": "/coming-soon", "type": 302 },
+      { "source": "/dashboard", "destination": "/coming-soon", "type": 302 },
+      { "source": "/wallet", "destination": "/coming-soon", "type": 302 },
+      { "source": "/reviews", "destination": "/coming-soon", "type": 302 },
+      { "source": "/my-reviews", "destination": "/coming-soon", "type": 302 },
+      { "source": "/faqs", "destination": "/coming-soon", "type": 302 }
     ]
   }
 }

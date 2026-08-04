@@ -7,9 +7,9 @@
 <title>Admin — Campus Bulkmart</title>
 <!-- Desktop-only admin panel. Mobile version lives in admin-mobile.html — never merge them back into one responsive file. -->
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@700;800;900&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="tailwind.output.b89a00d9.css" />
-<link rel="stylesheet" href="style.93d43a7c.css" />
-<link rel="stylesheet" href="admin.f6b9d264.css" />
+<link rel="stylesheet" href="tailwind.output.578f9e74.css" />
+<link rel="stylesheet" href="style.e978dfa3.css" />
+<link rel="stylesheet" href="admin.65150b0e.css" />
 </head>
 <body class="bg-gray-50 font-montserrat">
 
@@ -94,20 +94,20 @@
       <div class="px-4 sm:px-6 py-3 flex flex-wrap items-center gap-3">
         <div class="flex items-center gap-2.5 flex-1 flex-wrap">
           <div class="admin-stat-card">
-            <p class="text-[10px] uppercase tracking-wide font-semibold" style="color:#007BFF;">Products</p>
+            <p class="text-[10px] uppercase tracking-wide font-semibold" style="color:#000080;">Products</p>
             <p id="statProducts" class="font-outfit font-black text-lg" style="color:#000080;">0</p>
           </div>
           <div class="admin-stat-card">
-            <p class="text-[10px] uppercase tracking-wide font-semibold" style="color:#007BFF;">Pending Orders</p>
+            <p class="text-[10px] uppercase tracking-wide font-semibold" style="color:#000080;">Pending Orders</p>
             <p id="statPendingOrders" class="font-outfit font-black text-lg" style="color:#000080;">0</p>
           </div>
           <div class="admin-stat-card">
-            <p class="text-[10px] uppercase tracking-wide font-semibold" style="color:#007BFF;">Reviews</p>
+            <p class="text-[10px] uppercase tracking-wide font-semibold" style="color:#000080;">Reviews</p>
             <p id="statReviews" class="font-outfit font-black text-lg" style="color:#000080;">0</p>
           </div>
           <div class="admin-stat-card flex items-center gap-2.5">
             <div>
-              <p class="text-[10px] uppercase tracking-wide font-semibold" style="color:#007BFF;">Wallet</p>
+              <p class="text-[10px] uppercase tracking-wide font-semibold" style="color:#000080;">Wallet</p>
               <p id="walletToggleLabel" class="font-outfit font-black text-sm" style="color:#000080;">On</p>
             </div>
             <button id="walletToggleBtn" onclick="toggleWalletSetting()" title="Turn wallet checkout on/off"
@@ -122,7 +122,7 @@
         <button onclick="openAdminSearchSheet()" class="flex-initial flex items-center gap-2 border border-gray-200 rounded-xl px-3 py-2 text-xs hover:bg-gray-50 hover:border-blue-200 transition max-w-[220px]">
           <span>🔍</span>
           <span id="adminSearchTriggerLabel" class="text-gray-400 truncate">Search products e.g. rice, soap…</span>
-          <span id="adminSearchTriggerBadge" class="hidden text-[10px] font-bold px-1.5 py-0.5 rounded-full text-white" style="background:#007BFF;"></span>
+          <span id="adminSearchTriggerBadge" class="hidden text-[10px] font-bold px-1.5 py-0.5 rounded-full text-white" style="background:#000080;"></span>
         </button>
       </div>
     </div>
@@ -141,7 +141,7 @@
                 class="border border-gray-200 rounded-lg px-3 py-2 text-xs w-40 focus:outline-none" />
               <button id="adminSearchClearBtn" onclick="clearAdminProductSearch()" style="display:none;" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 text-xs">✕</button>
             </div>
-            <select id="productCatFilter" onchange="renderAdminProducts()" class="border border-gray-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 transition" style="--tw-ring-color:#007BFF33;">
+            <select id="productCatFilter" onchange="renderAdminProducts()" class="border border-gray-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 transition" style="--tw-ring-color:#00008033;">
               <option value="all">All Categories</option>
               <option value="groceries">Groceries</option>
               <option value="stationeries">Stationeries</option>
@@ -264,7 +264,31 @@
           <p class="font-bold text-sm text-gray-800 mb-3">➕ Add New Service</p>
           <div class="grid sm:grid-cols-2 gap-3">
             <input id="svcName" type="text" placeholder="Service Name" class="admin-input" />
-            <input id="svcImage" type="text" placeholder="Image URL (Unsplash, etc.)" class="admin-input" />
+            <button type="button" class="cbm-image-trigger" id="svcImage_trigger" onclick="cbmToggleUploader('svcImage')">
+        <img id="svcImage_thumb" class="cbm-image-thumb hidden" src="" alt="" />
+        <span class="cbm-image-trigger-icon" id="svcImage_triggerIcon">📷</span>
+        <span class="cbm-image-trigger-text" id="svcImage_triggerText">Add Image</span>
+        <span class="cbm-image-chevron" id="svcImage_chevron">▾</span>
+      </button>
+      <div class="cbm-dropzone-wrapper hidden" id="svcImage_wrapper">
+        <div class="cbm-dropzone" id="svcImage_dropzone" data-target="svcImage">
+          <input type="hidden" id="svcImage" value="" />
+          <input type="file" id="svcImage_file" accept="image/*" style="display:none;" />
+          <div class="cbm-dropzone-placeholder" id="svcImage_placeholder">
+            <span class="cbm-icon">📷</span>
+            Drag & drop an image, or click to browse
+          </div>
+          <div class="cbm-dropzone-preview hidden" id="svcImage_preview">
+            <img id="svcImage_previewImg" src="" alt="Preview" />
+            <div class="cbm-dropzone-replace-hint">Click or drag to replace</div>
+            <button type="button" class="cbm-dropzone-remove" onclick="cbmRemoveImage('svcImage', event)">✕</button>
+          </div>
+          <div class="cbm-dropzone-uploading hidden" id="svcImage_uploading">
+            <span class="cbm-spinner"></span> Uploading...
+          </div>
+        </div>
+        <p class="cbm-dropzone-error-text hidden" id="svcImage_error"></p>
+      </div>
             <textarea id="svcDesc" placeholder="Short description" class="admin-input sm:col-span-2" rows="2"></textarea>
           </div>
           <div class="flex items-center gap-5 mt-3 text-xs text-gray-600">
@@ -294,7 +318,7 @@
       <section id="tab-orders" class="admin-tab hidden">
         <div class="flex items-center justify-between gap-3 mb-4">
           <h1 class="font-black text-xl text-gray-900">Orders</h1>
-          <select id="orderStatusFilter" onchange="renderAdminOrders()" class="border border-gray-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 transition" style="--tw-ring-color:#007BFF33;">
+          <select id="orderStatusFilter" onchange="renderAdminOrders()" class="border border-gray-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 transition" style="--tw-ring-color:#00008033;">
             <option value="all">All Statuses</option>
             <option value="pending">Pending</option>
             <option value="confirmed">Confirmed</option>
@@ -320,7 +344,7 @@
               <input type="checkbox" id="reviewFeaturedFilter" onchange="renderAdminReviews()" class="w-3.5 h-3.5" />
               Featured only
             </label>
-            <select id="reviewStarFilter" onchange="renderAdminReviews()" class="border border-gray-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 transition" style="--tw-ring-color:#007BFF33;">
+            <select id="reviewStarFilter" onchange="renderAdminReviews()" class="border border-gray-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 transition" style="--tw-ring-color:#00008033;">
               <option value="all">All Ratings</option>
               <option value="5">5 stars</option><option value="4">4 stars</option>
               <option value="3">3 stars</option><option value="2">2 stars</option><option value="1">1 star</option>
@@ -624,7 +648,31 @@
       </select>
       <input id="newPrice" type="number" placeholder="Price (₦) — shown to customers" class="admin-input" />
       <textarea id="newDesc" placeholder="Description" class="admin-input" rows="2"></textarea>
-      <input id="newImage" type="text" placeholder="Image URL (Unsplash, etc.)" class="admin-input" />
+      <button type="button" class="cbm-image-trigger" id="newImage_trigger" onclick="cbmToggleUploader('newImage')">
+        <img id="newImage_thumb" class="cbm-image-thumb hidden" src="" alt="" />
+        <span class="cbm-image-trigger-icon" id="newImage_triggerIcon">📷</span>
+        <span class="cbm-image-trigger-text" id="newImage_triggerText">Add Image</span>
+        <span class="cbm-image-chevron" id="newImage_chevron">▾</span>
+      </button>
+      <div class="cbm-dropzone-wrapper hidden" id="newImage_wrapper">
+        <div class="cbm-dropzone" id="newImage_dropzone" data-target="newImage">
+          <input type="hidden" id="newImage" value="" />
+          <input type="file" id="newImage_file" accept="image/*" style="display:none;" />
+          <div class="cbm-dropzone-placeholder" id="newImage_placeholder">
+            <span class="cbm-icon">📷</span>
+            Drag & drop an image, or click to browse
+          </div>
+          <div class="cbm-dropzone-preview hidden" id="newImage_preview">
+            <img id="newImage_previewImg" src="" alt="Preview" />
+            <div class="cbm-dropzone-replace-hint">Click or drag to replace</div>
+            <button type="button" class="cbm-dropzone-remove" onclick="cbmRemoveImage('newImage', event)">✕</button>
+          </div>
+          <div class="cbm-dropzone-uploading hidden" id="newImage_uploading">
+            <span class="cbm-spinner"></span> Uploading...
+          </div>
+        </div>
+        <p class="cbm-dropzone-error-text hidden" id="newImage_error"></p>
+      </div>
 
       <p class="modal-section-label">Market List Info <span class="text-gray-400 font-normal normal-case">(optional — for shopping, not shown to customers)</span></p>
       <input id="newCostPrice" type="number" placeholder="Cost Price (₦) — what you pay at the market" class="admin-input" />
@@ -674,7 +722,31 @@
       </select>
       <input id="editPrice" type="number" placeholder="Price (₦) — shown to customers" class="admin-input" />
       <textarea id="editDesc" placeholder="Description" class="admin-input" rows="2"></textarea>
-      <input id="editImage" type="text" placeholder="Image URL" class="admin-input" />
+      <button type="button" class="cbm-image-trigger" id="editImage_trigger" onclick="cbmToggleUploader('editImage')">
+        <img id="editImage_thumb" class="cbm-image-thumb hidden" src="" alt="" />
+        <span class="cbm-image-trigger-icon" id="editImage_triggerIcon">📷</span>
+        <span class="cbm-image-trigger-text" id="editImage_triggerText">Add Image</span>
+        <span class="cbm-image-chevron" id="editImage_chevron">▾</span>
+      </button>
+      <div class="cbm-dropzone-wrapper hidden" id="editImage_wrapper">
+        <div class="cbm-dropzone" id="editImage_dropzone" data-target="editImage">
+          <input type="hidden" id="editImage" value="" />
+          <input type="file" id="editImage_file" accept="image/*" style="display:none;" />
+          <div class="cbm-dropzone-placeholder" id="editImage_placeholder">
+            <span class="cbm-icon">📷</span>
+            Drag & drop an image, or click to browse
+          </div>
+          <div class="cbm-dropzone-preview hidden" id="editImage_preview">
+            <img id="editImage_previewImg" src="" alt="Preview" />
+            <div class="cbm-dropzone-replace-hint">Click or drag to replace</div>
+            <button type="button" class="cbm-dropzone-remove" onclick="cbmRemoveImage('editImage', event)">✕</button>
+          </div>
+          <div class="cbm-dropzone-uploading hidden" id="editImage_uploading">
+            <span class="cbm-spinner"></span> Uploading...
+          </div>
+        </div>
+        <p class="cbm-dropzone-error-text hidden" id="editImage_error"></p>
+      </div>
 
       <p class="modal-section-label">Market List Info <span class="text-gray-400 font-normal normal-case">(optional — for shopping, not shown to customers)</span></p>
       <input id="editCostPrice" type="number" placeholder="Cost Price (₦) — what you pay at the market" class="admin-input" />
@@ -717,7 +789,31 @@
     <div class="space-y-3">
       <input id="editSvcName" type="text" placeholder="Service Name" class="admin-input" />
       <textarea id="editSvcDesc" placeholder="Description" class="admin-input" rows="2"></textarea>
-      <input id="editSvcImage" type="text" placeholder="Image URL" class="admin-input" />
+      <button type="button" class="cbm-image-trigger" id="editSvcImage_trigger" onclick="cbmToggleUploader('editSvcImage')">
+        <img id="editSvcImage_thumb" class="cbm-image-thumb hidden" src="" alt="" />
+        <span class="cbm-image-trigger-icon" id="editSvcImage_triggerIcon">📷</span>
+        <span class="cbm-image-trigger-text" id="editSvcImage_triggerText">Add Image</span>
+        <span class="cbm-image-chevron" id="editSvcImage_chevron">▾</span>
+      </button>
+      <div class="cbm-dropzone-wrapper hidden" id="editSvcImage_wrapper">
+        <div class="cbm-dropzone" id="editSvcImage_dropzone" data-target="editSvcImage">
+          <input type="hidden" id="editSvcImage" value="" />
+          <input type="file" id="editSvcImage_file" accept="image/*" style="display:none;" />
+          <div class="cbm-dropzone-placeholder" id="editSvcImage_placeholder">
+            <span class="cbm-icon">📷</span>
+            Drag & drop an image, or click to browse
+          </div>
+          <div class="cbm-dropzone-preview hidden" id="editSvcImage_preview">
+            <img id="editSvcImage_previewImg" src="" alt="Preview" />
+            <div class="cbm-dropzone-replace-hint">Click or drag to replace</div>
+            <button type="button" class="cbm-dropzone-remove" onclick="cbmRemoveImage('editSvcImage', event)">✕</button>
+          </div>
+          <div class="cbm-dropzone-uploading hidden" id="editSvcImage_uploading">
+            <span class="cbm-spinner"></span> Uploading...
+          </div>
+        </div>
+        <p class="cbm-dropzone-error-text hidden" id="editSvcImage_error"></p>
+      </div>
       <label class="flex items-center gap-2 text-xs text-gray-600"><input id="editSvcIsTopPick" type="checkbox" /> Top Pick</label>
       <label class="flex items-center gap-2 text-xs text-gray-600"><input id="editSvcAllowGroupOrder" type="checkbox" /> Allow Group Order</label>
       <p id="editServiceError" class="text-red-500 text-xs hidden"></p>
@@ -802,7 +898,7 @@
 <div id="confirmOrderModal" class="fixed inset-0 z-[90] hidden items-center justify-center p-4">
   <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeConfirmOrderModal()"></div>
   <div class="relative modal-panel w-full max-w-sm p-6">
-    <div class="modal-icon mx-auto mb-3" style="width:52px;height:52px;border-radius:16px;font-size:22px; background:linear-gradient(135deg,#007BFF 0%,#0056b3 100%);">✅</div>
+    <div class="modal-icon mx-auto mb-3" style="width:52px;height:52px;border-radius:16px;font-size:22px; background:linear-gradient(135deg,#000080 0%,#0056b3 100%);">✅</div>
     <h2 class="font-black text-lg text-gray-900 mb-1 text-center">Confirm Payment</h2>
     <p class="text-gray-500 text-sm mb-5 text-center">Order <span id="confirmOrderIdText" class="font-bold text-gray-700">#——</span> · Total <span id="confirmOrderTotalText" class="font-bold text-gray-700">₦0</span></p>
 
@@ -811,7 +907,7 @@
     <p class="text-[11px] text-gray-400 mb-5">Defaults to the order total — edit if the customer paid a different amount.</p>
 
     <div class="flex gap-2">
-      <button onclick="submitConfirmOrder()" class="flex-1 text-white font-bold py-3 rounded-xl text-sm transition shadow-sm hover:shadow-md" style="background:#007BFF;">Confirm Payment</button>
+      <button onclick="submitConfirmOrder()" class="flex-1 text-white font-bold py-3 rounded-xl text-sm transition shadow-sm hover:shadow-md" style="background:#000080;">Confirm Payment</button>
       <button onclick="closeConfirmOrderModal()" class="flex-1 py-3 rounded-xl text-sm font-semibold text-gray-600 border border-gray-200 hover:bg-gray-50 transition">Cancel</button>
     </div>
   </div>
@@ -868,7 +964,7 @@
       <button id="btnPackView" onclick="toggleMarketView('pack')" class="flex-1 text-xs font-semibold py-2 rounded-lg border border-gray-200 text-gray-500 transition">Pack View</button>
     </div>
     <div id="marketBuyView">
-      <button id="marketListPrintBtn" onclick="downloadMarketBuyList()" class="w-full mb-3 text-xs font-semibold py-2 rounded-lg border transition hover:bg-gray-50" style="color:#007BFF; border-color:#007BFF;">🖨 Print Buy List</button>
+      <button id="marketListPrintBtn" onclick="downloadMarketBuyList()" class="w-full mb-3 text-xs font-semibold py-2 rounded-lg border transition hover:bg-gray-50" style="color:#000080; border-color:#000080;">🖨 Print Buy List</button>
       <div id="marketBuyList" class="space-y-2"></div>
     </div>
     <div id="marketPackView" class="hidden"><div id="marketPackList" class="space-y-3"></div></div>
@@ -906,12 +1002,12 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="admin-core.691eabc6.js"></script>
-<script src="admin-categories.cbadc822.js"></script>
-<script src="admin-products-table.a0c89550.js"></script>
-<script src="admin-reviews.582e82dd.js"></script>
-<script src="admin-products-form.0c2c74c6.js"></script>
-<script src="admin-orders.6770d545.js"></script>
-<script src="admin-csv-import.9ac4e52e.js"></script>
+<script src="admin-core.bbf62547.js"></script>
+<script src="admin-categories.d59762ef.js"></script>
+<script src="admin-products-table.08429c0f.js"></script>
+<script src="admin-reviews.18e1b732.js"></script>
+<script src="admin-products-form.25845e26.js"></script>
+<script src="admin-orders.d014d2ca.js"></script>
+<script src="admin-csv-import.adfc90a9.js"></script>
 </body>
 </html>

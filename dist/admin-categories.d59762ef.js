@@ -93,7 +93,7 @@ async function addCategory() {
     if (error) throw error;
     nameInput.value = "";
     emojiInput.value = "";
-    showAdminToast("✅", `"${name}" category added`);
+    showAdminToast("success", `"${name}" category added`);
     loadCategories();
   } catch (e) {
     if (errEl) { errEl.textContent = "Failed to add category: " + e.message; errEl.classList.remove("hidden"); }
@@ -113,10 +113,10 @@ async function deleteCategory(id) {
   try {
     const { error } = await sb.from("categories").delete().eq("id", id);
     if (error) throw error;
-    showAdminToast("✅", `"${cat.name}" category deleted`);
+    showAdminToast("success", `"${cat.name}" category deleted`);
     loadCategories();
   } catch (e) {
-    showAdminToast("❌", "Failed to delete category: " + e.message);
+    showAdminToast("error", "Failed to delete category: " + e.message);
   }
 }
 
@@ -219,7 +219,7 @@ async function executeBulkDelete(idsToDelete) {
   updateBulkDeleteBar();
   updateStats();
   renderAdminProducts();
-  showAdminToast("🗑️", `${deleted} product${deleted > 1 ? 's' : ''} deleted`);
+  showAdminToast("trash", `${deleted} product${deleted > 1 ? 's' : ''} deleted`);
 }
 
 // ============================================================

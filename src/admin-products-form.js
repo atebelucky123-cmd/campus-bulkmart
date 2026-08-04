@@ -4,6 +4,17 @@
 // ============================================================
 
 // ============================================================
+// CLOUDINARY DELIVERY OPTIMIZATION (Phase 3)
+// See products.js for the full explanation — same helper, duplicated
+// here since the admin panel and storefront don't share JS scope.
+// ============================================================
+function cbmImg(url, w, h) {
+  if (!url || !url.includes("res.cloudinary.com") || !url.includes("/upload/")) return url || "";
+  const size = h ? `w_${w},h_${h},c_fill` : `w_${w},c_limit`;
+  return url.replace("/upload/", `/upload/f_auto,q_auto,${size}/`);
+}
+
+// ============================================================
 // CLOUDINARY IMAGE UPLOADER
 // Replaces the old "paste an image URL" inputs. Each dropzone
 // wraps a hidden <input id="{baseId}"> that still holds the final
@@ -18,6 +29,29 @@ const CLOUDINARY_UPLOAD_PRESET = "campusbulkmart";
 const CLOUDINARY_MAX_FILE_MB = 8;
 
 const _cbmUploaders = {}; // baseId -> { initialized: bool }
+
+function cbmToggleUploader(baseId) {
+  const wrapper = document.getElementById(`${baseId}_wrapper`);
+  const chevron = document.getElementById(`${baseId}_chevron`);
+  if (!wrapper) return;
+  wrapper.classList.toggle("hidden");
+  chevron?.classList.toggle("expanded");
+}
+
+function _cbmUpdateTrigger(baseId, imageUrl) {
+  const thumb = document.getElementById(`${baseId}_thumb`);
+  const triggerIcon = document.getElementById(`${baseId}_triggerIcon`);
+  const triggerText = document.getElementById(`${baseId}_triggerText`);
+  if (imageUrl) {
+    if (thumb) { thumb.src = cbmImg(imageUrl, 80, 80); thumb.classList.remove("hidden"); }
+    triggerIcon?.classList.add("hidden");
+    if (triggerText) triggerText.textContent = "Change Image";
+  } else {
+    thumb?.classList.add("hidden");
+    triggerIcon?.classList.remove("hidden");
+    if (triggerText) triggerText.textContent = "Add Image";
+  }
+}
 
 function initImageUploader(baseId) {
   if (_cbmUploaders[baseId]?.initialized) return; // don't double-wire listeners
@@ -58,7 +92,7 @@ function initImageUploader(baseId) {
 
 // Call when opening/resetting a form. existingUrl prefills the preview
 // (Edit forms); leave blank for a fresh Add form.
-function resetImageUploader(baseId, existingUrl = "") {
+function resetImageUploader(baseId, existingUrl = "", collapse = true) {
   const hiddenInput = document.getElementById(baseId);
   const dropzone = document.getElementById(`${baseId}_dropzone`);
   const placeholder = document.getElementById(`${baseId}_placeholder`);
@@ -66,6 +100,8 @@ function resetImageUploader(baseId, existingUrl = "") {
   const previewImg = document.getElementById(`${baseId}_previewImg`);
   const uploading = document.getElementById(`${baseId}_uploading`);
   const errorEl = document.getElementById(`${baseId}_error`);
+  const wrapper = document.getElementById(`${baseId}_wrapper`);
+  const chevron = document.getElementById(`${baseId}_chevron`);
   if (!hiddenInput || !dropzone) return;
 
   hiddenInput.value = existingUrl || "";
@@ -76,16 +112,27 @@ function resetImageUploader(baseId, existingUrl = "") {
   if (existingUrl) {
     placeholder?.classList.add("hidden");
     preview?.classList.remove("hidden");
-    if (previewImg) previewImg.src = existingUrl;
+    if (previewImg) previewImg.src = cbmImg(existingUrl, 400);
   } else {
     preview?.classList.add("hidden");
     placeholder?.classList.remove("hidden");
+  }
+
+  _cbmUpdateTrigger(baseId, existingUrl);
+
+  // Collapsed by default when a form opens/resets — the whole point of
+  // the redesign is the card stays compact until the admin actually
+  // wants to look at or change the image. Skipped when collapse=false
+  // (e.g. removing an image mid-interaction shouldn't snap shut on them).
+  if (collapse) {
+    wrapper?.classList.add("hidden");
+    chevron?.classList.remove("expanded");
   }
 }
 
 function cbmRemoveImage(baseId, event) {
   event?.stopPropagation(); // don't trigger the dropzone's own click-to-browse
-  resetImageUploader(baseId, "");
+  resetImageUploader(baseId, "", /* collapse */ false);
 }
 
 function _cbmShowError(baseId, message) {
@@ -137,9 +184,14 @@ async function _cbmHandleFile(baseId, file) {
       throw new Error(data.error?.message || "Upload failed");
     }
 
-    // Swap the local blob preview for the real, permanent Cloudinary URL
-    if (previewImg) previewImg.src = data.secure_url;
+    // Swap the local blob preview for the real, permanent Cloudinary URL.
+    // NOTE: only the preview display gets the cbmImg() sizing treatment —
+    // the value actually saved to Supabase (hiddenInput) stays the raw
+    // URL, so every other place this image is displayed (storefront card,
+    // admin table row, product modal) can apply its own appropriate size.
+    if (previewImg) previewImg.src = cbmImg(data.secure_url, 400);
     if (hiddenInput) hiddenInput.value = data.secure_url;
+    _cbmUpdateTrigger(baseId, data.secure_url);
   } catch (err) {
     console.error("[Cloudinary] Upload failed:", err);
     _cbmShowError(baseId, "Upload failed — check your connection and try again.");
@@ -263,7 +315,7 @@ async function addService() {
     document.getElementById("svcAllowGroupOrder").checked = false;
 
     updateStats();
-    showAdminToast("✅", "Service added! Now add its price list from the Services tab.");
+    showAdminToast("success", "Service added! Now add its price list from the Services tab.");
     switchTab("services", document.querySelector(".tab-btn[onclick=\"switchTab('services', this)\"]"));
 
   } catch (e) {
@@ -433,7 +485,7 @@ async function saveEditService() {
     if (idx !== -1) allProducts[idx] = { ...allProducts[idx], ...updateData };
     closeEditServiceModal();
     renderAdminServices();
-    showAdminToast("✅", "Service updated!");
+    showAdminToast("success", "Service updated!");
   } catch (e) {
     errEl.textContent = "Failed to save: " + e.message;
     errEl.classList.remove("hidden");
@@ -589,9 +641,9 @@ async function savePriceList() {
     if (idx !== -1) allProducts[idx] = { ...allProducts[idx], ...updateData };
     closePriceListModal();
     renderAdminServices();
-    showAdminToast("✅", "Price list saved!");
+    showAdminToast("success", "Price list saved!");
   } catch (e) {
-    showAdminToast("❌", "Failed to save: " + e.message);
+    showAdminToast("error", "Failed to save: " + e.message);
   } finally {
     if (btn) { btn.disabled = false; btn.textContent = "💾 Save Price List"; }
   }
@@ -761,7 +813,7 @@ function applyPriceListCsv() {
   }
 
   updatePriceListSummary();
-  showAdminToast("✅", "CSV applied to builder — review and save when ready.");
+  showAdminToast("success", "CSV applied to builder — review and save when ready.");
 }
 
 async function addProduct() {
@@ -844,7 +896,7 @@ async function addProduct() {
     clearVariantRows("new");
 
     updateStats();
-    showAdminToast("✅", "Product added to store!");
+    showAdminToast("success", "Product added to store!");
 
     // Switch to products tab
     switchTab("products", document.querySelector(".tab-btn"));
@@ -947,7 +999,7 @@ async function saveEditProduct() {
 
     closeEditModal();
     renderAdminProducts();
-    showAdminToast("✅", "Product updated!");
+    showAdminToast("success", "Product updated!");
   } catch (e) {
     errEl.textContent = "Failed to save: " + e.message;
     errEl.classList.remove("hidden");
@@ -972,9 +1024,9 @@ async function toggleProductVisibility(productId, currentlyHidden) {
     const p = allProducts.find(x => x.id === productId);
     if (p) p.isHidden = !currentlyHidden;
     renderAdminProducts();
-    showAdminToast(currentlyHidden ? "👁" : "🙈", currentlyHidden ? "Product is now visible" : "Product hidden from customers");
+    showAdminToast(currentlyHidden ? "eye" : "eye-off", currentlyHidden ? "Product is now visible" : "Product hidden from customers");
   } catch (e) {
-    showAdminToast("❌", "Failed to update visibility: " + e.message);
+    showAdminToast("error", "Failed to update visibility: " + e.message);
   }
 }
 
@@ -998,13 +1050,13 @@ async function executeDeleteProduct(productId) {
     allProducts = allProducts.filter(p => p.id !== productId);
     updateStats();
     renderAdminProducts();
-    showAdminToast("🗑️", "Product deleted");
+    showAdminToast("trash", "Product deleted");
   } catch (e) {
     // If it's a local product not in Supabase, just remove from local state
     allProducts = allProducts.filter(p => p.id !== productId);
     updateStats();
     renderAdminProducts();
-    showAdminToast("🗑️", "Product removed");
+    showAdminToast("trash", "Product removed");
   }
 }
 
@@ -1035,7 +1087,7 @@ function cloneProduct(productId) {
     if (topPickEl) topPickEl.checked = !!p.isTopPick;
     if (groupEl)  groupEl.checked = p.allowGroupOrder !== false;
 
-    showAdminToast("⧉", "Product cloned — edit details and save");
+    showAdminToast("clone", "Product cloned — edit details and save");
   }, 120);
 }
 
@@ -1050,7 +1102,7 @@ function generateMarketList() {
   const openOrders = allOrders.filter(o => o.status === "pending" || o.status === "confirmed");
 
   if (openOrders.length === 0) {
-    showAdminToast("ℹ️", "No open orders to aggregate");
+    showAdminToast("info", "No open orders to aggregate");
     return;
   }
 
@@ -1116,7 +1168,7 @@ function generateMarketList() {
   subtitle.textContent = `${openOrders.length} open order${openOrders.length !== 1 ? 's' : ''} · ${marketListData.aggregated.length} unique item${marketListData.aggregated.length !== 1 ? 's' : ''}`;
 
   panel.scrollIntoView({ behavior: "smooth", block: "start" });
-  showAdminToast("🛒", `Market list generated — ${marketListData.aggregated.length} items`);
+  showAdminToast("cart", `Market list generated — ${marketListData.aggregated.length} items`);
 }
 
 function renderMarketBuyList() {
@@ -1208,7 +1260,7 @@ async function downloadMarketBuyList() {
   const items = marketListData.aggregated;
 
   if (!items || items.length === 0) {
-    showAdminToast("ℹ️", "Nothing to print yet — generate the list first");
+    showAdminToast("info", "Nothing to print yet — generate the list first");
     return;
   }
 
@@ -1245,9 +1297,9 @@ async function downloadMarketBuyList() {
       if (page < totalPages - 1) await new Promise(r => setTimeout(r, 400));
     }
 
-    showAdminToast("✅", totalPages > 1 ? `Downloaded ${totalPages} pages` : "Market list downloaded");
+    showAdminToast("success", totalPages > 1 ? `Downloaded ${totalPages} pages` : "Market list downloaded");
   } catch (e) {
-    showAdminToast("❌", "Could not generate market list: " + e.message);
+    showAdminToast("error", "Could not generate market list: " + e.message);
   } finally {
     if (btn) { btn.disabled = false; btn.textContent = originalText; }
   }

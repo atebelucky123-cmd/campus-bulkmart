@@ -242,6 +242,35 @@ function hideProductSkeleton() {
 // ============================================================
 // DELIVERY FEE CALCULATOR
 // ============================================================
+// Individual-order fee (Phase 3) now comes from the backend's
+// /api/delivery-quote — real distance-from-origin × weight formula,
+// resolved once the customer verifies their address below. Until
+// that happens, calculateDeliveryFee() returns a "pending" state
+// instead of a number, so the UI can prompt for verification rather
+// than guessing off subtotal like the old flat-tier system did.
+//
+// Group-order pricing is untouched here — still the flat subtotal
+// tier system, since Phase 4 (not yet built) is what extends it with
+// its own distance/weight-aware logic.
+// ============================================================
+const GEOCODE_BACKEND_URL = "https://campus-bulkmart.onrender.com";
+
+// Holds the last successfully resolved delivery quote for individual
+// orders: { source, distanceFromOriginKm, lat, lng, resolvedAddress,
+// landmark, fee: { total, baseFee, transportFee, weightSurcharge, breakdown } }
+// Reset to null any time the typed address changes, so a stale fee
+// can never silently ride along with a different address.
+let _resolvedDelivery = null;
+let _savedAddresses = [];
+
+function getCartWeightPoints() {
+  // Falls back to 3 (the DB's own backfill default — see
+  // add-weight-score-column.sql) for any cart item missing a
+  // weight_score, e.g. stale items cached in localStorage from
+  // before Phase 2a shipped.
+  return cart.reduce((sum, item) => sum + (Number(item.weight_score) || 3) * item.qty, 0);
+}
+
 function calculateDeliveryFee(cartSubtotal, mode) {
   if (mode === "group") {
     if (cartSubtotal < GROUP_MIN_THRESHOLD) {
@@ -249,19 +278,259 @@ function calculateDeliveryFee(cartSubtotal, mode) {
     }
     if (cartSubtotal >= 25000) return { fee: 0, label: "FREE (100% Group Discount!)", discount: 3000 };
     if (cartSubtotal >= 15000) return { fee: 1000, label: "₦1,000 (50% Group Discount)", discount: 1000 };
+    // Below both thresholds but past GROUP_MIN_THRESHOLD — standard rate,
+    // no discount yet. Reuses the individual rate table as the base;
+    // Phase 4 replaces this whole branch with the real group tier system.
+    return { fee: 1500, label: "₦1,500" };
   }
 
   // Individual mode
-  if (cartSubtotal < 2000) return { fee: null, warning: `Minimum order is ₦${MIN_ORDER.toLocaleString()}` };
-  if (cartSubtotal >= 25000)               return { fee: 3000, label: "₦3,000" };
-  if (cartSubtotal >= 15000)               return { fee: 2000, label: "₦2,000" };
-  if (cartSubtotal >= 10000)               return { fee: 1500, label: "₦1,500" };
-  if (cartSubtotal >= 9000)                return { fee: 700,  label: "₦700 (Buffer Saver!)" };
-  if (cartSubtotal >= 5000)                return { fee: 1000, label: "₦1,000" };
-  if (cartSubtotal >= 4500)                return { fee: 500,  label: "₦500 (Buffer Saver!)" };
-  if (cartSubtotal >= 3000)                return { fee: 750,  label: "₦750" };
-  if (cartSubtotal >= 2000)                return { fee: 500,  label: "₦500" };
-  return { fee: null, warning: "Minimum order ₦2,000" };
+  if (cartSubtotal < MIN_ORDER) return { fee: null, warning: `Minimum order is ₦${MIN_ORDER.toLocaleString()}` };
+
+  if (!_resolvedDelivery) {
+    return { fee: null, pending: true, label: "Verify your delivery address to see the fee" };
+  }
+
+  const feeTotal = _resolvedDelivery.fee.total;
+  return {
+    fee: feeTotal,
+    label: feeTotal === 0 ? "FREE" : `₦${feeTotal.toLocaleString()}`,
+    breakdown: _resolvedDelivery.fee.breakdown,
+    distanceFromOriginKm: _resolvedDelivery.distanceFromOriginKm,
+  };
+}
+
+function _invalidateDeliveryQuote() {
+  if (_resolvedDelivery) {
+    _resolvedDelivery = null;
+    const statusEl = document.getElementById("addressVerifyStatus");
+    if (statusEl) statusEl.innerHTML = "";
+    document.getElementById("saveAddressRow")?.classList.add("hidden");
+  }
+}
+
+// ============================================================
+// ADDRESS VERIFICATION — Phase 3
+// address input -> POST /api/delivery-quote -> boundary check +
+// distance + fee, OR a landmark-picker / WhatsApp fallback if the
+// address can't be resolved automatically.
+// ============================================================
+async function verifyDeliveryAddress() {
+  const addressEl = document.getElementById("checkoutAddress");
+  const btn = document.getElementById("verifyAddressBtn");
+  const statusEl = document.getElementById("addressVerifyStatus");
+  const address = (addressEl?.value || "").trim();
+
+  if (!address) { showToast("warning", "Enter your address first"); return; }
+  if (cart.length === 0) { showToast("warning", "Your cart is empty"); return; }
+
+  document.getElementById("landmarkFallbackWrapper")?.classList.add("hidden");
+  document.getElementById("whatsappFallbackWrapper")?.classList.add("hidden");
+  if (btn) { btn.disabled = true; btn.textContent = "Checking…"; }
+  if (statusEl) statusEl.innerHTML = `<p class="text-xs text-gray-400">📍 Verifying address…</p>`;
+
+  try {
+    const res = await fetch(`${GEOCODE_BACKEND_URL}/api/delivery-quote`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ address, weightPoints: getCartWeightPoints() }),
+    });
+    const data = await res.json();
+    _handleDeliveryQuoteResponse(data, address);
+  } catch (e) {
+    _renderDeliveryQuoteError("network_error", statusEl);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = "Verify Address"; }
+  }
+}
+
+async function selectLandmarkFallback(landmarkId) {
+  if (!landmarkId) return;
+  const statusEl = document.getElementById("addressVerifyStatus");
+  if (statusEl) statusEl.innerHTML = `<p class="text-xs text-gray-400">📍 Calculating fee…</p>`;
+
+  try {
+    const res = await fetch(`${GEOCODE_BACKEND_URL}/api/delivery-quote`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ landmarkId, weightPoints: getCartWeightPoints() }),
+    });
+    const data = await res.json();
+    _handleDeliveryQuoteResponse(data, null);
+  } catch (e) {
+    _renderDeliveryQuoteError("network_error", statusEl);
+  }
+}
+
+async function selectSavedAddress(id) {
+  const saved = _savedAddresses.find(a => a.id === id);
+  if (!saved) return;
+  const addressEl = document.getElementById("checkoutAddress");
+  if (addressEl) addressEl.value = saved.address;
+  const statusEl = document.getElementById("addressVerifyStatus");
+  if (statusEl) statusEl.innerHTML = `<p class="text-xs text-gray-400">📍 Calculating fee…</p>`;
+
+  try {
+    const res = await fetch(`${GEOCODE_BACKEND_URL}/api/delivery-quote`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ lat: saved.lat, lng: saved.lng, weightPoints: getCartWeightPoints() }),
+    });
+    const data = await res.json();
+    _handleDeliveryQuoteResponse(data, saved.address);
+    document.getElementById("saveAddressRow")?.classList.add("hidden"); // already saved, no need to re-offer
+  } catch (e) {
+    _renderDeliveryQuoteError("network_error", statusEl);
+  }
+}
+
+function _handleDeliveryQuoteResponse(data, typedAddress) {
+  const statusEl = document.getElementById("addressVerifyStatus");
+
+  if (data.success) {
+    _resolvedDelivery = {
+      source: data.source,
+      distanceFromOriginKm: data.distanceFromOriginKm,
+      lat: data.lat,
+      lng: data.lng,
+      resolvedAddress: data.resolvedAddress || typedAddress,
+      landmark: data.landmark,
+      fee: data.fee,
+    };
+    document.getElementById("landmarkFallbackWrapper")?.classList.add("hidden");
+    document.getElementById("whatsappFallbackWrapper")?.classList.add("hidden");
+    if (statusEl) {
+      statusEl.innerHTML = `<p class="text-xs font-semibold text-green-600">✅ Address verified — ${data.distanceFromOriginKm} km from base</p>`;
+    }
+    document.getElementById("saveAddressRow")?.classList.remove("hidden");
+    updateCartUI();
+    return;
+  }
+
+  _renderDeliveryQuoteError(data.reason, statusEl, data.error);
+}
+
+function _renderDeliveryQuoteError(reason, statusEl, errorDetail) {
+  _resolvedDelivery = null;
+
+  if (reason === "not_found") {
+    if (statusEl) statusEl.innerHTML = `<p class="text-xs font-semibold text-amber-600">Couldn't pinpoint that address — pick the nearest landmark below.</p>`;
+    renderLandmarkPicker();
+    document.getElementById("landmarkFallbackWrapper")?.classList.remove("hidden");
+  } else if (reason === "outside_boundary") {
+    if (statusEl) statusEl.innerHTML = `<p class="text-xs font-semibold text-red-500">That address is outside our current delivery area.</p>`;
+    document.getElementById("whatsappFallbackWrapper")?.classList.remove("hidden");
+  } else {
+    // network_error or bad_request — genuine failure, not a "no result"
+    if (statusEl) statusEl.innerHTML = `<p class="text-xs font-semibold text-red-500">Couldn't verify address right now — try again in a moment.</p>`;
+  }
+  document.getElementById("saveAddressRow")?.classList.add("hidden");
+  updateCartUI();
+}
+
+// Landmark picker — populated from the public `landmarks` table
+// (same one Phase 2d's admin CRUD manages), only fetched lazily the
+// first time a not_found response actually needs it.
+let _landmarksCache = null;
+async function renderLandmarkPicker() {
+  const wrapper = document.getElementById("landmarkFallbackWrapper");
+  const select = document.getElementById("landmarkFallbackSelect");
+  if (!wrapper || !select) return;
+
+  if (!_landmarksCache) {
+    try {
+      const { data, error } = await sb.from("landmarks").select("id, name").order("name", { ascending: true });
+      if (error) throw error;
+      _landmarksCache = data || [];
+    } catch (e) {
+      select.innerHTML = `<option value="">Couldn't load landmarks</option>`;
+      return;
+    }
+  }
+
+  select.innerHTML = `<option value="">Select the nearest landmark…</option>` +
+    _landmarksCache.map(lm => `<option value="${lm.id}">${lm.name}</option>`).join("");
+}
+
+function openWhatsAppDeliveryFallback() {
+  const address = (document.getElementById("checkoutAddress")?.value || "").trim();
+  const name = document.getElementById("checkoutName")?.value.trim() || "";
+  const phone = document.getElementById("checkoutPhone")?.value.trim() || "";
+  const cartSubtotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+
+  let text = `*Campus Bulkmart — DELIVERY OUTSIDE STANDARD AREA*%0A`;
+  text += `==============================%0A`;
+  text += `*Customer:* ${name || "(not entered)"}%0A`;
+  text += `*Phone:* ${phone || "(not entered)"}%0A`;
+  text += `*Typed Address:* ${address || "(not entered)"}%0A`;
+  text += `==============================%0A%0A*ORDER ITEMS:*%0A`;
+  cart.forEach((item, i) => { text += `${i + 1}. ${item.name} (x${item.qty}) — ₦${(item.price * item.qty).toLocaleString()}%0A`; });
+  text += `%0A*Subtotal:* ₦${cartSubtotal.toLocaleString()}%0A`;
+  text += `_Delivery fee to be worked out manually since this address is outside our automatic delivery zone._`;
+
+  window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${text}`, '_blank');
+}
+
+// ============================================================
+// SAVED ADDRESSES — Phase 3
+// ============================================================
+async function loadSavedAddresses() {
+  const wrapper = document.getElementById("savedAddressWrapper");
+  const select = document.getElementById("savedAddressSelect");
+  if (!wrapper || !select || !currentUser) return;
+
+  try {
+    const { data, error } = await sb.from("saved_addresses").select("*").eq("user_id", currentUser.uid).order("created_at", { ascending: false });
+    if (error) throw error;
+    _savedAddresses = data || [];
+  } catch (e) {
+    _savedAddresses = [];
+  }
+
+  if (_savedAddresses.length === 0) {
+    wrapper.classList.add("hidden");
+    return;
+  }
+  wrapper.classList.remove("hidden");
+  select.innerHTML = `<option value="">Use a saved address…</option>` +
+    _savedAddresses.map(a => `<option value="${a.id}">${a.label}${a.is_default ? " (default)" : ""}</option>`).join("");
+}
+
+async function saveCurrentAddress() {
+  if (!_resolvedDelivery || !currentUser) return;
+  const labelInput = document.getElementById("saveAddressLabel");
+  const label = (labelInput?.value || "").trim() || "Saved address";
+  const address = (document.getElementById("checkoutAddress")?.value || "").trim();
+
+  try {
+    const { error } = await sb.from("saved_addresses").insert({
+      user_id: currentUser.uid,
+      label,
+      address,
+      lat: _resolvedDelivery.lat,
+      lng: _resolvedDelivery.lng,
+      source: _resolvedDelivery.source === "landmark" ? "landmark" : "geocoded",
+      landmark_id: _resolvedDelivery.landmark?.id || null,
+    });
+    if (error) throw error;
+    showToast("success", "Address saved for next time");
+    document.getElementById("saveAddressRow")?.classList.add("hidden");
+    if (labelInput) labelInput.value = "";
+    loadSavedAddresses();
+  } catch (e) {
+    showToast("error", "Couldn't save address: " + e.message);
+  }
+}
+
+async function deleteSavedAddress(id) {
+  if (!confirm("Remove this saved address?")) return;
+  try {
+    const { error } = await sb.from("saved_addresses").delete().eq("id", id);
+    if (error) throw error;
+    loadSavedAddresses();
+  } catch (e) {
+    showToast("error", "Couldn't remove address: " + e.message);
+  }
 }
 
 // ============================================================
@@ -312,6 +581,7 @@ function addToCartWithQty(productId) {
   if (gridQtyEl) gridQtyEl.value = 1;
   updateCardPrice(productId);
   updateModalPrice(productId);
+  _invalidateDeliveryQuote(); // cart weight changed — old fee no longer valid
   updateCartUI();
   saveCartToStorage();
   showToast("cart", `${p.name} added to cart`);
@@ -319,6 +589,7 @@ function addToCartWithQty(productId) {
 
 function removeFromCart(productId) {
   cart = cart.filter(x => x.id !== productId);
+  _invalidateDeliveryQuote();
   updateCartUI();
   saveCartToStorage();
 }
@@ -327,6 +598,7 @@ function updateQty(productId, delta) {
   const item = cart.find(x => x.id === productId);
   if (!item) return;
   item.qty = Math.max(1, item.qty + delta);
+  _invalidateDeliveryQuote();
   updateCartUI();
   saveCartToStorage();
 }
@@ -336,6 +608,7 @@ function setCartQty(productId, value) {
   if (!item) return;
   const parsed = parseInt(value);
   item.qty = isNaN(parsed) || parsed < 1 ? 1 : parsed;
+  _invalidateDeliveryQuote();
   updateCartUI();
   saveCartToStorage();
 }
@@ -343,6 +616,7 @@ function setCartQty(productId, value) {
 function clearCart() {
   if (cart.length === 0) return;
   cart = [];
+  _invalidateDeliveryQuote();
   updateCartUI();
   clearCartStorage();
   showToast("trash", "Cart cleared");
@@ -451,19 +725,14 @@ function updatePriceBreakdown(cartSubtotal) {
         </div>`;
     }
   } else {
-    // Individual mode — show next tier hint
-    const tiers = [2000, 3000, 4500, 5000, 9000, 10000, 15000, 25000];
-    const nextTier = tiers.find(t => t > cartSubtotal);
-    if (nextTier) {
-      const diff = nextTier - cartSubtotal;
-      const nextResult = calculateDeliveryFee(nextTier, "individual");
-      const currentResult = calculateDeliveryFee(cartSubtotal, "individual");
-      if (currentResult.fee !== null && nextResult.fee !== null && nextResult.fee < currentResult.fee) {
-        groupProgressHTML = `
-          <div class="mb-3 bg-blue-50 border border-blue-100 rounded-xl p-2.5 text-center">
-            <p class="text-[11px] font-semibold" style="color:#000080;">Add ₦${diff.toLocaleString()} more → delivery drops to ${nextResult.label}</p>
-          </div>`;
-      }
+    // Individual mode — prompt to verify address until we have a real
+    // quote; no more "next subtotal tier" hint since fee no longer
+    // depends on subtotal at all (it's distance + weight now).
+    if (!_resolvedDelivery) {
+      groupProgressHTML = `
+        <div class="mb-3 bg-blue-50 border border-blue-100 rounded-xl p-2.5 text-center">
+          <p class="text-[11px] font-semibold" style="color:#000080;">📍 Verify your delivery address below to see your delivery fee</p>
+        </div>`;
     }
   }
 
@@ -491,10 +760,35 @@ function updatePriceBreakdown(cartSubtotal) {
       checkoutBtn.style.background = "#9ca3af";
       checkoutBtn.style.cursor = "not-allowed";
     }
+  } else if (result.pending) {
+    // Individual mode, above minimum, but address not yet verified —
+    // show subtotal only, block checkout until verifyDeliveryAddress()
+    // resolves a real fee.
+    breakdownHTML += `
+      <div class="space-y-2 text-sm">
+        <div class="flex justify-between">
+          <span class="text-gray-500">Subtotal</span>
+          <span class="font-semibold text-gray-800">₦${cartSubtotal.toLocaleString()}</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-gray-500">Delivery Fee</span>
+          <span class="text-gray-400 italic text-xs">Verify address below</span>
+        </div>
+        <div class="border-t pt-2 flex justify-between font-black text-base">
+          <span class="text-gray-800">Total</span>
+          <span class="text-gray-400">—</span>
+        </div>
+      </div>`;
+    if (checkoutBtn) {
+      checkoutBtn.disabled = true;
+      checkoutBtn.style.background = "#9ca3af";
+      checkoutBtn.style.cursor = "not-allowed";
+    }
   } else {
     const deliveryFee = result.fee;
     const finalTotal = cartSubtotal + deliveryFee;
     const hasDiscount = result.discount > 0;
+    const b = result.breakdown; // present for resolved individual-mode quotes
 
     breakdownHTML += `
       <div class="space-y-2 text-sm">
@@ -506,6 +800,9 @@ function updatePriceBreakdown(cartSubtotal) {
           <span class="text-gray-500">Delivery Fee</span>
           <span class="font-semibold ${deliveryFee === 0 ? 'text-green-600' : 'text-gray-800'}">${result.label}</span>
         </div>
+        ${b ? `<div class="text-[10px] text-gray-400 pl-2 -mt-1 space-y-0.5">
+          <div>${result.distanceFromOriginKm} km from base${b.excessWeight > 0 ? ` · ${b.excessWeight} pt weight surcharge` : ''}</div>
+        </div>` : ''}
         ${hasDiscount ? `<div class="flex justify-between text-green-600">
           <span class="font-semibold">Group Discount</span>
           <span class="font-bold">−₦${result.discount.toLocaleString()}</span>
@@ -528,6 +825,7 @@ function updatePriceBreakdown(cartSubtotal) {
 function toggleCart() {
   const overlay = document.getElementById("cartOverlay");
   overlay.classList.toggle("hidden");
+  if (currentUser && !overlay.classList.contains("hidden")) loadSavedAddresses();
 }
 
 // ============================================================
@@ -548,6 +846,7 @@ async function checkout() {
   const result = calculateDeliveryFee(cartSubtotal, orderMode);
 
   if (result.warning) { showToast("warning", result.warning); return; }
+  if (result.pending) { showToast("warning", "Please verify your delivery address first"); return; }
 
   const name    = document.getElementById("checkoutName")?.value.trim();
   const phone   = document.getElementById("checkoutPhone")?.value.trim();
@@ -681,5 +980,45 @@ async function checkoutWhatsApp() {
   showToast("success", "Order sent via WhatsApp!");
   _pendingOrderDetails = null;
 }
+
+// ============================================================
+// LOCATIONIQ ATTRIBUTION — checkout address field (Phase 2b)
+// Required by LocationIQ's free-tier terms wherever geocoded address
+// data is used — the address typed here is what Phase 2c/3 will
+// actually send to LocationIQ. Injected via JS right under the input
+// so it doesn't require editing the raw page HTML for #checkoutAddress.
+// ============================================================
+document.addEventListener("DOMContentLoaded", () => {
+  const addressInput = document.getElementById("checkoutAddress");
+  const addressRow = document.getElementById("checkoutAddressRow");
+  if (!addressInput || !addressRow) return;
+  if (addressRow.parentElement?.querySelector(".js-locationiq-checkout-attribution")) return;
+
+  const note = document.createElement("p");
+  note.className = "js-locationiq-checkout-attribution";
+  note.style.cssText = "font-size:11px;color:#9ca3af;margin-top:4px;";
+  note.innerHTML = '📍 Location search by <a href="https://locationiq.com" target="_blank" rel="noopener" style="color:#9ca3af;text-decoration:underline;">LocationIQ.com</a>';
+  // Insert after the WHOLE address row (input + Verify button), not
+  // after the input alone — the input lives inside a flex row with
+  // the Verify button, and "afterend" on the input would insert the
+  // note as a sibling INSIDE that same flex row, squeezing all three
+  // elements onto one line instead of the note sitting on its own
+  // line below. This was the actual bug behind the collapsed layout.
+  addressRow.insertAdjacentElement("afterend", note);
+
+  // Any manual edit to the typed address invalidates whatever fee was
+  // last resolved — a stale fee tied to the previous text must never
+  // silently carry over to a new (unverified) address.
+  addressInput.addEventListener("input", () => _invalidateDeliveryQuote());
+});
+
+// ============================================================
+// SAVED ADDRESSES — load once auth resolves, and again any time the
+// cart drawer opens (covers the case where the user signed in with
+// the drawer already open).
+// ============================================================
+document.addEventListener("DOMContentLoaded", () => {
+  auth.onAuthStateChanged(user => { if (user) loadSavedAddresses(); });
+});
 
 // ============================================================

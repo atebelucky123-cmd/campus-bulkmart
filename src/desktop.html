@@ -234,6 +234,7 @@
         <h3 class="font-outfit text-xl font-black" style="color:#fff; margin-bottom:14px;">
           Campus Bulkmart
         </h3>
+        <p class="text-white text-sm js-footer-tagline" style="margin:0 0 10px;">Your campus superstore. LASUCOM's favourite delivery platform.</p>
         <p class="text-white text-sm leading-relaxed js-footer-disclaimer" style="max-width:34rem;">Disclaimer: Campus Bulkmart is an independent, student-run delivery platform. We are not officially affiliated with, endorsed by, or partnered with LASU (Lagos State University) or LASUCOM (Lagos State University College of Medicine), or their respective managements. All services, logistics, and fulfillments are managed entirely by Campus Bulkmart.</p>
         <div class="js-footer-social" style="display:flex; gap:8px; margin-top:20px;"></div>
       </div>
@@ -245,15 +246,10 @@
       </div>
       <div>
         <h4 class="font-semibold text-gray-300" style="margin-bottom:16px;">Quick Links</h4>
-        <div style="display:flex; flex-direction:column; gap:10px;">
-          <a href="faqs.html" class="text-white hover:text-blue-300 transition text-sm">FAQs</a>
-          <a href="reviews.html" class="text-white hover:text-blue-300 transition text-sm">Reviews</a>
-          <a href="about.html" class="text-white hover:text-blue-300 transition text-sm">About Us</a>
-          <a href="about.html#policies?tab=privacy" class="text-white hover:text-blue-300 transition text-sm">Privacy Policy</a>
-        </div>
+        <div class="js-footer-quicklinks" data-link-class="text-white hover:text-blue-300 transition text-sm" style="display:flex; flex-direction:column; gap:10px;"></div>
       </div>
     </div>
-    <div class="border-t border-gray-800 px-4 py-5 text-center text-white/60 text-xs">
+    <div class="border-t border-gray-800 px-4 py-5 text-center text-white/60 text-xs js-footer-copyright">
       © 2025 Campus Bulkmart. All rights reserved.
     </div>
   </footer>
@@ -389,9 +385,44 @@
           <input id="checkoutPhone" type="tel" placeholder="Phone Number *" required
             class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none transition"
             onfocus="this.style.boxShadow='0 0 0 2px #000080'" onblur="this.style.boxShadow=''" />
-          <input id="checkoutAddress" type="text" placeholder="House/Hostel Address *" required
-            class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none transition"
-            onfocus="this.style.boxShadow='0 0 0 2px #000080'" onblur="this.style.boxShadow=''" />
+          <!-- Saved addresses — only shown once the user has at least one (Phase 3) -->
+          <div id="savedAddressWrapper" class="hidden">
+            <select id="savedAddressSelect" onchange="if(this.value) selectSavedAddress(this.value)"
+              class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none bg-white">
+            </select>
+          </div>
+
+          <div class="flex gap-2" id="checkoutAddressRow">
+            <input id="checkoutAddress" type="text" placeholder="House/Hostel Address *" required
+              class="flex-1 min-w-0 border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none transition"
+              onfocus="this.style.boxShadow='0 0 0 2px #000080'" onblur="this.style.boxShadow=''" />
+            <button id="verifyAddressBtn" type="button" onclick="verifyDeliveryAddress()"
+              class="flex-shrink-0 px-3 py-2 rounded-xl text-xs font-bold text-white" style="background:#000080;">Verify</button>
+          </div>
+          <div id="addressVerifyStatus"></div>
+
+          <!-- Landmark fallback — shown when the typed address can't be geocoded -->
+          <div id="landmarkFallbackWrapper" class="hidden">
+            <select id="landmarkFallbackSelect" onchange="if(this.value) selectLandmarkFallback(this.value)"
+              class="w-full border border-amber-300 rounded-xl px-3 py-2 text-sm focus:outline-none bg-amber-50">
+            </select>
+          </div>
+
+          <!-- WhatsApp fallback — shown when the address is outside the delivery boundary -->
+          <div id="whatsappFallbackWrapper" class="hidden">
+            <button type="button" onclick="openWhatsAppDeliveryFallback()"
+              class="w-full border border-green-300 bg-green-50 text-green-700 font-semibold text-xs py-2 rounded-xl">
+              💬 Can't find your landmark? Order via WhatsApp instead
+            </button>
+          </div>
+
+          <!-- Save this address — shown right after a successful verify -->
+          <div id="saveAddressRow" class="hidden space-y-1.5">
+            <input id="saveAddressLabel" type="text" placeholder="Label (e.g. Hostel)"
+              class="w-full border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none" />
+            <button type="button" onclick="saveCurrentAddress()"
+              class="w-full px-3 py-2 rounded-xl text-xs font-bold border" style="border-color:#000080;color:#000080;">💾 Save this address</button>
+          </div>
           <p id="checkoutError" class="text-red-500 text-xs hidden">Please fill all delivery details</p>
           <button id="checkoutBtn" onclick="checkout()" class="w-full text-white font-bold py-3 rounded-xl transition text-sm" style="background:#000080;">
             Checkout →

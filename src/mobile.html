@@ -368,7 +368,7 @@
 
     <!-- Brand -->
     <a href="mobile.html" style="display:flex; align-items:center; gap:7px; flex:1; min-width:0; text-decoration:none;">
-      <img src="2.png" alt="Campus Bulkmart" onerror="this.style.display='none'" style="height:28px; width:auto; object-fit:contain; flex-shrink:0;">
+      <img src="logo.png" alt="Campus Bulkmart" onerror="this.style.display='none'" style="height:28px; width:auto; object-fit:contain; flex-shrink:0;">
       <span class="font-outfit font-black" style="font-size:17px; letter-spacing:-0.3px; white-space:nowrap; color:#000080;">Campus Bulkmart</span>
     </a>
 
@@ -377,8 +377,8 @@
 
       <!-- Sign In button (guest only) — hidden by default, shown after auth check -->
       <button id="authBtn" onclick="openAuthModal()"
-        style="background:#000080; color:#fff; height:34px; padding:0 14px; border-radius:20px; border:none; cursor:pointer; display:none; align-items:center; justify-content:center; flex-shrink:0; font-size:12px; font-weight:700; font-family:inherit; white-space:nowrap; gap:5px;">
-        <svg width="13" height="13" fill="none" stroke="white" viewBox="0 0 24 24" stroke-width="2.2">
+        style="background:#000080; color:#fff; height:28px; min-height:28px; padding:0 11px; border-radius:16px; border:none; cursor:pointer; display:none; align-items:center; justify-content:center; flex-shrink:0; font-size:11px; font-weight:700; font-family:inherit; white-space:nowrap; gap:4px;">
+        <svg width="11" height="11" fill="none" stroke="white" viewBox="0 0 24 24" stroke-width="2.2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
         </svg>
         Sign In
@@ -492,6 +492,7 @@
         <h3 class="font-outfit text-lg font-black" style="margin-bottom:8px; color:#fff;">
           Campus Bulkmart
         </h3>
+        <p class="text-white text-xs js-footer-tagline" style="margin:0 0 8px;">Your campus superstore. LASUCOM's favourite delivery platform.</p>
         <p class="text-white text-xs leading-relaxed js-footer-disclaimer">Disclaimer: Campus Bulkmart is an independent, student-run delivery platform. We are not officially affiliated with, endorsed by, or partnered with LASU (Lagos State University) or LASUCOM (Lagos State University College of Medicine), or their respective managements. All services, logistics, and fulfillments are managed entirely by Campus Bulkmart.</p>
         <div class="js-footer-social" style="display:flex; gap:8px; margin-top:14px;"></div>
       </div>
@@ -505,15 +506,10 @@
       </div>
       <div style="border-top:1px solid #1f2937; padding-top:24px;">
         <p style="font-size:11px; font-weight:600; color:#9ca3af; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:12px;">Quick Links</p>
-        <div class="text-xs text-white" style="display:flex; flex-direction:column; gap:10px;">
-          <a href="faqs.html" class="hover:text-blue-300 transition">FAQs</a>
-          <a href="reviews.html" class="hover:text-blue-300 transition">Reviews</a>
-          <a href="about.html" class="hover:text-blue-300 transition">About Us</a>
-          <a href="about.html#policies?tab=privacy" class="hover:text-blue-300 transition">Privacy Policy</a>
-        </div>
+        <div class="js-footer-quicklinks text-xs text-white" data-link-class="hover:text-blue-300 transition" style="display:flex; flex-direction:column; gap:10px;"></div>
       </div>
     </div>
-    <div class="border-t border-gray-800 px-5 py-3 text-center text-white/60 text-xs" style="padding-bottom: calc(12px + 64px + env(safe-area-inset-bottom));">
+    <div class="border-t border-gray-800 px-5 py-3 text-center text-white/60 text-xs js-footer-copyright" style="padding-bottom: calc(12px + 64px + env(safe-area-inset-bottom));">
       © 2025 Campus Bulkmart. All rights reserved.
     </div>
   </footer>
@@ -572,7 +568,24 @@
         <h3 style="font-weight:700; color:#374151; font-size:13px; margin:0 0 10px;">Delivery Details</h3>
         <input id="checkoutName"    type="text" placeholder="Full Name *"          required class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none transition" onfocus="this.style.boxShadow='0 0 0 2px #000080'" onblur="this.style.boxShadow=''" />
         <input id="checkoutPhone"   type="tel"  placeholder="Phone Number *"       required class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none transition" onfocus="this.style.boxShadow='0 0 0 2px #000080'" onblur="this.style.boxShadow=''" />
-        <input id="checkoutAddress" type="text" placeholder="House/Hostel Address *" required class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none transition" onfocus="this.style.boxShadow='0 0 0 2px #000080'" onblur="this.style.boxShadow=''" />
+        <div id="savedAddressWrapper" class="hidden">
+          <select id="savedAddressSelect" onchange="if(this.value) selectSavedAddress(this.value)" class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none bg-white"></select>
+        </div>
+        <div class="flex gap-2" id="checkoutAddressRow">
+          <input id="checkoutAddress" type="text" placeholder="House/Hostel Address *" required class="flex-1 min-w-0 border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none transition" onfocus="this.style.boxShadow='0 0 0 2px #000080'" onblur="this.style.boxShadow=''" />
+          <button id="verifyAddressBtn" type="button" onclick="verifyDeliveryAddress()" class="flex-shrink-0 px-3 py-2 rounded-xl text-xs font-bold text-white" style="background:#000080;">Verify</button>
+        </div>
+        <div id="addressVerifyStatus"></div>
+        <div id="landmarkFallbackWrapper" class="hidden">
+          <select id="landmarkFallbackSelect" onchange="if(this.value) selectLandmarkFallback(this.value)" class="w-full border border-amber-300 rounded-xl px-3 py-2 text-sm focus:outline-none bg-amber-50"></select>
+        </div>
+        <div id="whatsappFallbackWrapper" class="hidden">
+          <button type="button" onclick="openWhatsAppDeliveryFallback()" class="w-full border border-green-300 bg-green-50 text-green-700 font-semibold text-xs py-2 rounded-xl">💬 Can't find your landmark? Order via WhatsApp instead</button>
+        </div>
+        <div id="saveAddressRow" class="hidden space-y-1.5">
+          <input id="saveAddressLabel" type="text" placeholder="Label (e.g. Hostel)" class="w-full border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none" />
+          <button type="button" onclick="saveCurrentAddress()" class="w-full px-3 py-2 rounded-xl text-xs font-bold border" style="border-color:#000080;color:#000080;">💾 Save this address</button>
+        </div>
         <p id="checkoutError" class="text-red-500 text-xs hidden">Please fill all delivery details</p>
         <button id="checkoutBtn" onclick="checkout()" class="w-full text-white font-bold py-3 rounded-xl text-sm transition" style="background:#000080; border:none; cursor:pointer; font-family:inherit;">
           Checkout

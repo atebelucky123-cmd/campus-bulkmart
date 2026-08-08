@@ -8,6 +8,8 @@ const express = require("express");
 const cors = require("cors");
 
 const waitlistRoutes = require("./waitlist");
+const geocodeRoutes = require("./geocode"); // Phase 2d — /api/geocode-address
+const deliveryQuoteRoutes = require("./delivery-quote"); // Phase 3 — /api/delivery-quote
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -38,6 +40,8 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api", waitlistRoutes);
+app.use("/api", geocodeRoutes); // Phase 2d — used by admin origin/landmark editor and Phase 3 checkout's address verification
+app.use("/api", deliveryQuoteRoutes); // Phase 3 — /api/delivery-quote, checkout's fee calculation
 
 // Future payment routes will get mounted here once the redesign happens,
 // e.g. app.use("/api", paymentRoutes);

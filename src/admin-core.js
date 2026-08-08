@@ -83,6 +83,7 @@ function _mapProductRow(row) {
     isTopPick: row.is_top_pick,
     isService: row.is_service,
     allowGroupOrder: row.allow_group_order,
+    weightScore: row.weight_score,
     stock: row.stock,
     variants: row.variants || [],
     variantGroups: row.variant_groups || [],
@@ -106,6 +107,7 @@ function _toProductRow(p) {
   if ("isTopPick" in p) row.is_top_pick = p.isTopPick;
   if ("isService" in p) row.is_service = p.isService;
   if ("allowGroupOrder" in p) row.allow_group_order = p.allowGroupOrder;
+  if ("weightScore" in p) row.weight_score = p.weightScore;
   if ("stock" in p) row.stock = p.stock;
   if ("variants" in p) row.variants = p.variants;
   if ("variantGroups" in p) row.variant_groups = p.variantGroups;
@@ -254,16 +256,86 @@ const SITE_CONTENT_DEFAULTS = {
   footerTiktok: "",
   footerTwitter: "",
   footerFacebook: "",
+  // ── Footer additions (Phase 6C) ──
+  footerTagline: "Your campus superstore. LASUCOM's favourite delivery platform.",
+  footerCopyright: "© 2025 Campus Bulkmart. All rights reserved.",
+  footerQuickLinks: [
+    { label: "FAQs", url: "faqs.html" },
+    { label: "Reviews", url: "reviews.html" },
+    { label: "About Us", url: "about.html" },
+    { label: "Privacy Policy", url: "about.html#policies?tab=privacy" }
+  ],
   aboutHeroTitle: "Our Story",
   aboutHeroSubtitle: "From a simple idea to LASUCOM's most trusted campus delivery platform — here's how Campus Bulkmart was born.",
   aboutOriginParagraph1: "Every LASUCOM student knows the struggle — you're mid-assignment, your data runs out, your toiletries are empty, and the market feels a world away. **Campus Bulkmart** was born from exactly that frustration.",
   aboutOriginParagraph2: "We built a digital procurement platform that acts as your personal campus runner — you browse, you order, we go to the market and deliver straight to your hostel door. No hidden fees, no long waits, no stress.",
   aboutOriginParagraph3: "What started as a simple idea has grown into a full-service campus superstore serving students across all LASUCOM hostels daily.",
   aboutMissionQuote: "Make campus life easier — one delivery at a time.",
-  aboutMissionText: "Our mission is simple: eliminate the friction between LASUCOM students and the essentials they need. We believe no student should lose study time to market runs or go without because the market is far."
+  aboutMissionText: "Our mission is simple: eliminate the friction between LASUCOM students and the essentials they need. We believe no student should lose study time to market runs or go without because the market is far.",
+  // ── About page — remaining sections (Phase 6C) ──
+  aboutStats: [
+    { value: "200+", label: "Products Available" },
+    { value: "1–2hr", label: "Delivery Turnaround" },
+    { value: "₦0", label: "Hidden Fees" },
+    { value: "8AM–8PM", label: "Daily Operations" }
+  ],
+  aboutStepsTitle: "How Campus Bulkmart Works",
+  aboutStepsIntro: "We're not a warehouse. We're your on-demand campus procurement team — we find it, buy it, and bring it to you.",
+  aboutSteps: [
+    { title: "Browse & Order", desc: "Search our catalog and place your order right from your phone." },
+    { title: "We Hit the Market", desc: "Our runners head to the nearest market and procure your exact items." },
+    { title: "Hostel Delivery", desc: "Your order lands at your hostel door within 1–2 hours. No excuses." },
+    { title: "Pay Securely", desc: "Top up your wallet via Paystack or pay on delivery. Zero hassle." }
+  ],
+  aboutValuesTitle: "Our Mission & Values",
+  aboutValues: [
+    { title: "Accuracy First", desc: "We procure the exact products you order — genuine, from trusted vendors." },
+    { title: "Speed", desc: "Orders processed within 30 minutes. Delivered within 1–2 hours. Every time." },
+    { title: "Transparency", desc: "No hidden fees. What you see is what you pay. Full stop." },
+    { title: "Student-First", desc: "Every decision is made with one question: does this make life better for LASUCOM students?" }
+  ],
+  aboutCtaHeading: "Ready to Order?",
+  aboutCtaSubtext: "Join hundreds of LASUCOM students already saving time and stress with Campus Bulkmart.",
+  // ── FAQs (Phase 6A schema, Phase 7A manager) ──
+  faqs: [
+    { question: "How does delivery work?", answer: "Once you place an order via WhatsApp, our team processes it within 30 minutes. Delivery to your hostel room typically takes 1–2 hours depending on demand and your location within campus.", order: 1 },
+    { question: "What are your delivery hours?", answer: "We operate daily from 8:00 AM to 8:00 PM. Orders placed outside these hours will be fulfilled first thing the next morning.", order: 2 },
+    { question: "Do you deliver to all LASUCOM hostels?", answer: "Yes! We deliver to all on-campus hostels and student accommodation facilities within LASUCOM.", order: 3 },
+    { question: "Is there a minimum order amount?", answer: "Yes, the minimum order amount is ₦3,000. This helps us cover logistics and keep delivery running smoothly for everyone.", order: 4 },
+    { question: "How do I pay for my order?", answer: "We currently accept payment on delivery. After placing your order via WhatsApp, our agent will collect payment when they deliver to your room. Bank transfer options are coming soon.", order: 5 },
+    { question: "Can I cancel or modify my order?", answer: "Yes, you can cancel or modify your order by contacting us on WhatsApp within 15 minutes of placing it. After that, cancellations may not be possible as preparation would have already begun.", order: 6 },
+    { question: "What if an item I ordered is out of stock?", answer: "We'll notify you immediately via WhatsApp if any item is unavailable and offer a suitable replacement or a full refund for that item.", order: 7 },
+    { question: "How do I track my order?", answer: "After placing your order, you'll receive a WhatsApp confirmation with updates. You can also check your Order History page on your dashboard for status updates.", order: 8 },
+    { question: "Are the products genuine?", answer: "Absolutely. All products are sourced directly from verified distributors and trusted wholesalers. Quality is our top priority.", order: 9 },
+    { question: "Do you offer bulk discounts?", answer: "Yes! For large orders, we offer special bulk pricing. Contact us on WhatsApp to discuss bulk orders for your hostel block or organization.", order: 10 }
+  ],
+  // ── Policies: Privacy & Refund/Return (Phase 6B schema, Phase 7B manager) ──
+  // about.html is the canonical copy — this is the exact text seeded from
+  // _aboutPolicyContent. auth-modal.js's policy modal pulls this same
+  // siteContent.policies field so both always show identical text instead
+  // of two hand-maintained copies drifting apart.
+  policies: {
+    effectiveDate: "June 1, 2026",
+    privacy: [
+      { heading: "1. Information We Collect", body: "We collect personal information you voluntarily provide: your name, phone number, email address, hostel/room details, and order history." },
+      { heading: "2. Payment Data & Processing", body: "Online payments are handled securely by Paystack — we never store your card details on our servers. WhatsApp payments are verified manually using the receipt you share with us." },
+      { heading: "3. How We Use Your Information", body: "Your data is used only to process and deliver your orders, calculate delivery fees, communicate order updates, and comply with payment processor requirements." },
+      { heading: "4. Data Sharing & Third Parties", body: "We do not sell your data. Information is shared only with our delivery team (to fulfill your order) and Paystack (to process online payments)." },
+      { heading: "5. Data Security", body: "We use Firebase security rules and strict technical measures to protect your personal information from unauthorized access." },
+      { heading: "6. Contact Us", body: "📧 <a href=\"mailto:atebelucky123@gmail.com\" style=\"color:#000080;font-weight:600;\">atebelucky123@gmail.com</a> &nbsp;·&nbsp; 📱 <a href=\"https://wa.me/2349169618353\" style=\"color:#000080;font-weight:600;\">+2349169618353</a>" }
+    ],
+    refund: [
+      { heading: "1. Eligibility for Refunds & Replacements", body: "We offer refunds or replacements for: items that arrive damaged or spoiled; incorrect items delivered; or items paid for but missing from your package." },
+      { heading: "2. Reporting Window", body: "All claims must be submitted within <strong>24 hours</strong> of delivery. Contact us via WhatsApp or email with your order number and a clear photo of the issue." },
+      { heading: "3. Processing of Refunds", body: "<strong>Paystack payments:</strong> reversed to your card within 3–7 business days. <strong>WhatsApp/manual payments:</strong> direct bank transfer within 24–48 hours, or store voucher credit — your choice." },
+      { heading: "4. Non-Refundable Situations", body: "Refunds are not available if the delivery address was incorrect or unreachable, or if the claim is made after the 24-hour window." },
+      { heading: "5. Contact Channels", body: "📧 <a href=\"mailto:atebelucky123@gmail.com\" style=\"color:#000080;font-weight:600;\">atebelucky123@gmail.com</a> &nbsp;·&nbsp; 📱 <a href=\"https://wa.me/2349169618353\" style=\"color:#000080;font-weight:600;\">+2349169618353</a>" }
+    ]
+  }
 };
 
 let siteContentLoaded = false;
+let deliverySettingsLoaded = false;
 
 // Escapes HTML then turns **text** into <strong>text</strong> — mirrors the
 // parser in about.html so the admin preview matches what visitors see.
@@ -319,6 +391,54 @@ function populateHeroForm(content) {
   if (ftwEl) ftwEl.value = c.footerTwitter || "";
   if (ffbEl) ffbEl.value = c.footerFacebook || "";
 
+  const ftgEl = document.getElementById("footerTaglineInput");
+  const fcpEl = document.getElementById("footerCopyrightInput");
+  if (ftgEl) ftgEl.value = c.footerTagline || SITE_CONTENT_DEFAULTS.footerTagline;
+  if (fcpEl) fcpEl.value = c.footerCopyright || SITE_CONTENT_DEFAULTS.footerCopyright;
+
+  const qLinks = (Array.isArray(c.footerQuickLinks) && c.footerQuickLinks.length) ? c.footerQuickLinks : SITE_CONTENT_DEFAULTS.footerQuickLinks;
+  qLinks.forEach((link, i) => {
+    const lblEl = document.getElementById(`footerLink${i + 1}LabelInput`);
+    const urlEl = document.getElementById(`footerLink${i + 1}UrlInput`);
+    if (lblEl) lblEl.value = link.label;
+    if (urlEl) urlEl.value = link.url;
+  });
+
+  const stats2 = (Array.isArray(c.aboutStats) && c.aboutStats.length === 4) ? c.aboutStats : SITE_CONTENT_DEFAULTS.aboutStats;
+  stats2.forEach((stat, i) => {
+    const valEl = document.getElementById(`aboutStat${i + 1}ValueInput`);
+    const lblEl = document.getElementById(`aboutStat${i + 1}LabelInput`);
+    if (valEl) valEl.value = stat.value;
+    if (lblEl) lblEl.value = stat.label;
+  });
+
+  const astEl = document.getElementById("aboutStepsTitleInput");
+  const asiEl = document.getElementById("aboutStepsIntroInput");
+  if (astEl) astEl.value = c.aboutStepsTitle || SITE_CONTENT_DEFAULTS.aboutStepsTitle;
+  if (asiEl) asiEl.value = c.aboutStepsIntro || SITE_CONTENT_DEFAULTS.aboutStepsIntro;
+  const steps = (Array.isArray(c.aboutSteps) && c.aboutSteps.length === 4) ? c.aboutSteps : SITE_CONTENT_DEFAULTS.aboutSteps;
+  steps.forEach((step, i) => {
+    const tEl = document.getElementById(`aboutStep${i + 1}TitleInput`);
+    const dEl = document.getElementById(`aboutStep${i + 1}DescInput`);
+    if (tEl) tEl.value = step.title;
+    if (dEl) dEl.value = step.desc;
+  });
+
+  const avtEl = document.getElementById("aboutValuesTitleInput");
+  if (avtEl) avtEl.value = c.aboutValuesTitle || SITE_CONTENT_DEFAULTS.aboutValuesTitle;
+  const values = (Array.isArray(c.aboutValues) && c.aboutValues.length === 4) ? c.aboutValues : SITE_CONTENT_DEFAULTS.aboutValues;
+  values.forEach((v, i) => {
+    const tEl = document.getElementById(`aboutValue${i + 1}TitleInput`);
+    const dEl = document.getElementById(`aboutValue${i + 1}DescInput`);
+    if (tEl) tEl.value = v.title;
+    if (dEl) dEl.value = v.desc;
+  });
+
+  const achEl = document.getElementById("aboutCtaHeadingInput");
+  const acsEl = document.getElementById("aboutCtaSubtextInput");
+  if (achEl) achEl.value = c.aboutCtaHeading || SITE_CONTENT_DEFAULTS.aboutCtaHeading;
+  if (acsEl) acsEl.value = c.aboutCtaSubtext || SITE_CONTENT_DEFAULTS.aboutCtaSubtext;
+
   const atEl  = document.getElementById("aboutHeroTitleInput");
   const asEl  = document.getElementById("aboutHeroSubtitleInput");
   const ap1El = document.getElementById("aboutOriginP1Input");
@@ -360,13 +480,36 @@ function readHeroFormValues() {
     footerTiktok: val("footerTiktokInput"),
     footerTwitter: val("footerTwitterInput"),
     footerFacebook: val("footerFacebookInput"),
+    footerTagline: val("footerTaglineInput") || SITE_CONTENT_DEFAULTS.footerTagline,
+    footerCopyright: val("footerCopyrightInput") || SITE_CONTENT_DEFAULTS.footerCopyright,
+    footerQuickLinks: [1, 2, 3, 4].map(i => ({
+      label: val(`footerLink${i}LabelInput`) || SITE_CONTENT_DEFAULTS.footerQuickLinks[i - 1].label,
+      url: val(`footerLink${i}UrlInput`) || SITE_CONTENT_DEFAULTS.footerQuickLinks[i - 1].url
+    })),
     aboutHeroTitle: val("aboutHeroTitleInput") || SITE_CONTENT_DEFAULTS.aboutHeroTitle,
     aboutHeroSubtitle: val("aboutHeroSubtitleInput") || SITE_CONTENT_DEFAULTS.aboutHeroSubtitle,
     aboutOriginParagraph1: val("aboutOriginP1Input") || SITE_CONTENT_DEFAULTS.aboutOriginParagraph1,
     aboutOriginParagraph2: val("aboutOriginP2Input") || SITE_CONTENT_DEFAULTS.aboutOriginParagraph2,
     aboutOriginParagraph3: val("aboutOriginP3Input") || SITE_CONTENT_DEFAULTS.aboutOriginParagraph3,
     aboutMissionQuote: val("aboutMissionQuoteInput") || SITE_CONTENT_DEFAULTS.aboutMissionQuote,
-    aboutMissionText: val("aboutMissionTextInput") || SITE_CONTENT_DEFAULTS.aboutMissionText
+    aboutMissionText: val("aboutMissionTextInput") || SITE_CONTENT_DEFAULTS.aboutMissionText,
+    aboutStats: [1, 2, 3, 4].map(i => ({
+      value: val(`aboutStat${i}ValueInput`) || SITE_CONTENT_DEFAULTS.aboutStats[i - 1].value,
+      label: val(`aboutStat${i}LabelInput`) || SITE_CONTENT_DEFAULTS.aboutStats[i - 1].label
+    })),
+    aboutStepsTitle: val("aboutStepsTitleInput") || SITE_CONTENT_DEFAULTS.aboutStepsTitle,
+    aboutStepsIntro: val("aboutStepsIntroInput") || SITE_CONTENT_DEFAULTS.aboutStepsIntro,
+    aboutSteps: [1, 2, 3, 4].map(i => ({
+      title: val(`aboutStep${i}TitleInput`) || SITE_CONTENT_DEFAULTS.aboutSteps[i - 1].title,
+      desc: val(`aboutStep${i}DescInput`) || SITE_CONTENT_DEFAULTS.aboutSteps[i - 1].desc
+    })),
+    aboutValuesTitle: val("aboutValuesTitleInput") || SITE_CONTENT_DEFAULTS.aboutValuesTitle,
+    aboutValues: [1, 2, 3, 4].map(i => ({
+      title: val(`aboutValue${i}TitleInput`) || SITE_CONTENT_DEFAULTS.aboutValues[i - 1].title,
+      desc: val(`aboutValue${i}DescInput`) || SITE_CONTENT_DEFAULTS.aboutValues[i - 1].desc
+    })),
+    aboutCtaHeading: val("aboutCtaHeadingInput") || SITE_CONTENT_DEFAULTS.aboutCtaHeading,
+    aboutCtaSubtext: val("aboutCtaSubtextInput") || SITE_CONTENT_DEFAULTS.aboutCtaSubtext
   };
 }
 
@@ -392,14 +535,21 @@ function updateHeroPreview() {
   if (bSubEl)   bSubEl.textContent = c.lowerBannerSubtext;
   if (bBtnEl)   bBtnEl.textContent = c.lowerBannerButtonText;
 
+  const ftgPrev = document.getElementById("footerPreviewTagline");
   const fdPrev = document.getElementById("footerPreviewDisclaimer");
   const fwPrev = document.getElementById("footerPreviewWhatsapp");
   const fePrev = document.getElementById("footerPreviewEmail");
   const fhPrev = document.getElementById("footerPreviewHours");
+  const fcpPrev = document.getElementById("footerPreviewCopyright");
+  if (ftgPrev) ftgPrev.textContent = c.footerTagline;
   if (fdPrev) fdPrev.textContent = c.footerDisclaimer;
   if (fwPrev) fwPrev.textContent = c.footerWhatsapp;
   if (fePrev) fePrev.textContent = c.footerEmail;
   if (fhPrev) fhPrev.textContent = c.footerHours;
+  if (fcpPrev) fcpPrev.textContent = c.footerCopyright;
+
+  const flPrev = document.getElementById("footerPreviewLinks");
+  if (flPrev) flPrev.textContent = c.footerQuickLinks.map(l => l.label).join(" · ");
 
   const socialPrev = document.getElementById("footerPreviewSocial");
   if (socialPrev) {
@@ -438,16 +588,27 @@ function updateHeroPreview() {
   if (ap3Prev) ap3Prev.innerHTML   = mdBoldToHtml(c.aboutOriginParagraph3);
   if (amqPrev) amqPrev.textContent = `"${c.aboutMissionQuote}"`;
   if (amtPrev) amtPrev.innerHTML   = mdBoldToHtml(c.aboutMissionText);
+
+  const achPrev = document.getElementById("aboutPreviewCtaHeading");
+  const acsPrev = document.getElementById("aboutPreviewCtaSubtext");
+  if (achPrev) achPrev.textContent = c.aboutCtaHeading;
+  if (acsPrev) acsPrev.textContent = c.aboutCtaSubtext;
 }
 
 async function loadSiteContentAdmin() {
   try {
     const value = await getSettingValue("siteContent");
     populateHeroForm(value);
+    faqManagerState = (value && Array.isArray(value.faqs) && value.faqs.length) ? value.faqs.map(f => ({ ...f })) : SITE_CONTENT_DEFAULTS.faqs.map(f => ({ ...f }));
+    policyManagerState = normalizePolicyManagerState(value && value.policies);
   } catch (e) {
     console.warn("[Admin] Could not load site content, using defaults:", e.message);
     populateHeroForm(null);
+    faqManagerState = SITE_CONTENT_DEFAULTS.faqs.map(f => ({ ...f }));
+    policyManagerState = normalizePolicyManagerState(null);
   }
+  renderFaqManager();
+  renderPolicyManager();
   siteContentLoaded = true;
 }
 
@@ -468,18 +629,225 @@ async function saveHeroContent() {
 }
 
 async function resetHeroContent() {
-  if (!confirm("Reset the hero banner, lower banner, footer, and About page text back to the original default copy? This saves immediately.")) return;
+  if (!confirm("Reset the hero banner, lower banner, footer (including Quick Links), About page text, FAQs, and Policies back to the original default copy? This saves immediately.")) return;
   const btn = document.getElementById("heroResetBtn");
   if (btn) btn.disabled = true;
   try {
     await mergeSettingValue("siteContent", SITE_CONTENT_DEFAULTS);
     populateHeroForm(SITE_CONTENT_DEFAULTS);
+    faqManagerState = SITE_CONTENT_DEFAULTS.faqs.map(f => ({ ...f }));
+    renderFaqManager();
+    policyManagerState = normalizePolicyManagerState(SITE_CONTENT_DEFAULTS.policies);
+    renderPolicyManager();
     showAdminToast("success", "Home page content reset to default");
   } catch (e) {
     console.error("[Admin] Failed to reset site content:", e);
     showAdminToast("error", "Could not reset — check your connection and try again");
   } finally {
     if (btn) btn.disabled = false;
+  }
+}
+
+// ============================================================
+// POLICY MANAGER (Phase 7B)
+// Same pattern as the FAQ Manager above: a variable-length list per
+// tab (privacy / refund), its own state + Save button, saved with
+// mergeSettingValue so it never touches hero/footer/about/FAQs.
+// This is the single source both about.html and auth-modal.js read
+// from, per the Phase 6B "kill the drift" decision.
+// ============================================================
+let policyManagerState = { effectiveDate: "", privacy: [], refund: [] };
+let policyManagerActiveTab = "privacy";
+
+function normalizePolicyManagerState(policies) {
+  const p = policies || {};
+  const defaults = SITE_CONTENT_DEFAULTS.policies;
+  return {
+    effectiveDate: p.effectiveDate || defaults.effectiveDate,
+    privacy: (Array.isArray(p.privacy) && p.privacy.length) ? p.privacy.map(s => ({ ...s })) : defaults.privacy.map(s => ({ ...s })),
+    refund: (Array.isArray(p.refund) && p.refund.length) ? p.refund.map(s => ({ ...s })) : defaults.refund.map(s => ({ ...s }))
+  };
+}
+
+function switchPolicyManagerTab(tab) {
+  policyManagerActiveTab = tab;
+  const tp = document.getElementById("policyManagerTabPrivacy");
+  const tr = document.getElementById("policyManagerTabRefund");
+  if (tp && tr) {
+    if (tab === "privacy") {
+      tp.style.background = "#000080"; tp.style.color = "#fff"; tp.style.border = "none";
+      tr.style.background = "#fff";    tr.style.color = "#6b7280"; tr.style.border = "1px solid #e5e7eb";
+    } else {
+      tr.style.background = "#000080"; tr.style.color = "#fff"; tr.style.border = "none";
+      tp.style.background = "#fff";    tp.style.color = "#6b7280"; tp.style.border = "1px solid #e5e7eb";
+    }
+  }
+  renderPolicyManager();
+}
+
+function renderPolicyManager() {
+  const dateEl = document.getElementById("policyEffDateInput");
+  if (dateEl && document.activeElement !== dateEl) dateEl.value = policyManagerState.effectiveDate;
+
+  const container = document.getElementById("policyManagerList");
+  if (!container) return;
+  const list = policyManagerState[policyManagerActiveTab] || [];
+  if (list.length === 0) {
+    container.innerHTML = '<p class="text-sm text-gray-400 text-center py-6">No sections yet — click "+ Add Section" to create one.</p>';
+    return;
+  }
+  container.innerHTML = list.map((s, i) => `
+    <div class="admin-card no-lift p-4 mb-3">
+      <div class="flex items-start justify-between gap-2 mb-2">
+        <span class="text-[11px] font-bold text-gray-400 uppercase tracking-wide pt-2">#${i + 1}</span>
+        <div class="flex gap-1">
+          <button type="button" onclick="movePolicyManagerItem(${i}, -1)" ${i === 0 ? "disabled" : ""} class="w-7 h-7 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed text-xs" title="Move up">↑</button>
+          <button type="button" onclick="movePolicyManagerItem(${i}, 1)" ${i === list.length - 1 ? "disabled" : ""} class="w-7 h-7 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed text-xs" title="Move down">↓</button>
+          <button type="button" onclick="removePolicyManagerItem(${i})" class="w-7 h-7 rounded-lg border border-red-200 text-red-500 hover:bg-red-50 text-xs" title="Delete">🗑</button>
+        </div>
+      </div>
+      <label class="block text-[10px] font-semibold text-gray-500 mb-1">Section Heading</label>
+      <input type="text" class="admin-input mb-2" value="${(s.heading || "").replace(/"/g, "&quot;")}" oninput="updatePolicyManagerField(${i}, 'heading', this.value)" />
+      <label class="block text-[10px] font-semibold text-gray-500 mb-1">Body (basic HTML like &lt;strong&gt; and &lt;a&gt; is allowed)</label>
+      <textarea class="admin-input" rows="3" oninput="updatePolicyManagerField(${i}, 'body', this.value)">${s.body || ""}</textarea>
+    </div>
+  `).join("");
+}
+
+function updatePolicyManagerField(i, field, value) {
+  const list = policyManagerState[policyManagerActiveTab];
+  if (!list || !list[i]) return;
+  list[i][field] = value;
+}
+
+function addPolicyManagerItem() {
+  policyManagerState[policyManagerActiveTab].push({ heading: "", body: "" });
+  renderPolicyManager();
+}
+
+function removePolicyManagerItem(i) {
+  if (!confirm("Delete this section? This doesn't save until you click \"Save Policies\".")) return;
+  policyManagerState[policyManagerActiveTab].splice(i, 1);
+  renderPolicyManager();
+}
+
+function movePolicyManagerItem(i, dir) {
+  const list = policyManagerState[policyManagerActiveTab];
+  const j = i + dir;
+  if (j < 0 || j >= list.length) return;
+  [list[i], list[j]] = [list[j], list[i]];
+  renderPolicyManager();
+}
+
+async function savePolicyManager() {
+  const btn = document.getElementById("policySaveBtn");
+  const dateEl = document.getElementById("policyEffDateInput");
+  const effectiveDate = (dateEl ? dateEl.value.trim() : "") || SITE_CONTENT_DEFAULTS.policies.effectiveDate;
+
+  const cleanTab = tab => (policyManagerState[tab] || [])
+    .map(s => ({ heading: (s.heading || "").trim(), body: (s.body || "").trim() }))
+    .filter(s => s.heading || s.body);
+
+  const privacy = cleanTab("privacy");
+  const refund = cleanTab("refund");
+  if (privacy.length === 0 || refund.length === 0) {
+    showAdminToast("error", "Both Privacy Policy and Refund & Return need at least one section before saving");
+    return;
+  }
+
+  const payload = { effectiveDate, privacy, refund };
+  if (btn) { btn.disabled = true; btn.textContent = "Saving…"; }
+  try {
+    await mergeSettingValue("siteContent", { policies: payload });
+    policyManagerState = { effectiveDate, privacy: privacy.map(s => ({ ...s })), refund: refund.map(s => ({ ...s })) };
+    renderPolicyManager();
+    showAdminToast("success", "Policies updated");
+  } catch (e) {
+    console.error("[Admin] Failed to save policies:", e);
+    showAdminToast("error", "Could not save policies — check your connection and try again");
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = "💾 Save Policies"; }
+  }
+}
+
+// ============================================================
+// FAQ MANAGER (Phase 7A)
+// FAQs are a variable-length list, unlike the fixed hero/footer/about
+// fields above, so they get their own state array + Save button rather
+// than living inside readHeroFormValues(). Saved with mergeSettingValue,
+// which shallow-merges — so saving FAQs never touches hero/footer/about.
+// ============================================================
+let faqManagerState = [];
+
+function renderFaqManager() {
+  const container = document.getElementById("faqManagerList");
+  if (!container) return;
+  if (faqManagerState.length === 0) {
+    container.innerHTML = '<p class="text-sm text-gray-400 text-center py-6">No FAQs yet — click "+ Add FAQ" to create one.</p>';
+    return;
+  }
+  container.innerHTML = faqManagerState.map((f, i) => `
+    <div class="admin-card no-lift p-4 mb-3">
+      <div class="flex items-start justify-between gap-2 mb-2">
+        <span class="text-[11px] font-bold text-gray-400 uppercase tracking-wide pt-2">#${i + 1}</span>
+        <div class="flex gap-1">
+          <button type="button" onclick="moveFaqManagerItem(${i}, -1)" ${i === 0 ? "disabled" : ""} class="w-7 h-7 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed text-xs" title="Move up">↑</button>
+          <button type="button" onclick="moveFaqManagerItem(${i}, 1)" ${i === faqManagerState.length - 1 ? "disabled" : ""} class="w-7 h-7 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed text-xs" title="Move down">↓</button>
+          <button type="button" onclick="removeFaqManagerItem(${i})" class="w-7 h-7 rounded-lg border border-red-200 text-red-500 hover:bg-red-50 text-xs" title="Delete">🗑</button>
+        </div>
+      </div>
+      <label class="block text-[10px] font-semibold text-gray-500 mb-1">Question</label>
+      <input type="text" class="admin-input mb-2" value="${(f.question || "").replace(/"/g, "&quot;")}" oninput="updateFaqManagerField(${i}, 'question', this.value)" />
+      <label class="block text-[10px] font-semibold text-gray-500 mb-1">Answer</label>
+      <textarea class="admin-input" rows="2" oninput="updateFaqManagerField(${i}, 'answer', this.value)">${f.answer || ""}</textarea>
+    </div>
+  `).join("");
+}
+
+function updateFaqManagerField(i, field, value) {
+  if (!faqManagerState[i]) return;
+  faqManagerState[i][field] = value;
+}
+
+function addFaqManagerItem() {
+  faqManagerState.push({ question: "", answer: "" });
+  renderFaqManager();
+}
+
+function removeFaqManagerItem(i) {
+  if (!confirm("Delete this FAQ? This doesn't save until you click \"Save FAQs\".")) return;
+  faqManagerState.splice(i, 1);
+  renderFaqManager();
+}
+
+function moveFaqManagerItem(i, dir) {
+  const j = i + dir;
+  if (j < 0 || j >= faqManagerState.length) return;
+  [faqManagerState[i], faqManagerState[j]] = [faqManagerState[j], faqManagerState[i]];
+  renderFaqManager();
+}
+
+async function saveFaqManager() {
+  const btn = document.getElementById("faqSaveBtn");
+  const cleaned = faqManagerState
+    .map(f => ({ question: (f.question || "").trim(), answer: (f.answer || "").trim() }))
+    .filter(f => f.question || f.answer);
+  if (cleaned.length === 0) {
+    showAdminToast("error", "Add at least one FAQ before saving");
+    return;
+  }
+  const withOrder = cleaned.map((f, i) => ({ ...f, order: i + 1 }));
+  if (btn) { btn.disabled = true; btn.textContent = "Saving…"; }
+  try {
+    await mergeSettingValue("siteContent", { faqs: withOrder });
+    faqManagerState = withOrder.map(f => ({ ...f }));
+    renderFaqManager();
+    showAdminToast("success", "FAQs updated");
+  } catch (e) {
+    console.error("[Admin] Failed to save FAQs:", e);
+    showAdminToast("error", "Could not save FAQs — check your connection and try again");
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = "💾 Save FAQs"; }
   }
 }
 
@@ -575,6 +943,7 @@ function switchTab(tabName, clickedBtn) {
   if (tabName === "services") renderAdminServices();
   if (tabName === "users") { /* ready on demand */ }
   if (tabName === "content" && !siteContentLoaded) loadSiteContentAdmin();
+  if (tabName === "delivery" && !deliverySettingsLoaded) loadDeliverySettingsTab();
 
   // Contextual category preset: if coming from products tab with a filter active, preset Add Product category
   if (tabName === "add-product") {

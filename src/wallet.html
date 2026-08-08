@@ -236,31 +236,12 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="config.js"></script>
   <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyDkbAls30xJVY4k7W8GV1nk397Qyu1ymLM",
-      authDomain: "campusbulkmart.firebaseapp.com",
-      projectId: "campusbulkmart",
-      storageBucket: "campusbulkmart.firebasestorage.app",
-      messagingSenderId: "397276211409",
-      appId: "1:397276211409:web:c8881eae2f5c61b1d33df0",
-      measurementId: "G-KJKTC6GCXB"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-
-    const SUPABASE_URL = "https://oiwgadfjrkuzjkvhugos.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9pd2dhZGZqcmt1emprdmh1Z29zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4ODU5MTUsImV4cCI6MjA5OTQ2MTkxNX0.QA0KFZLDbYZxT9wlPVRc2iz_-C7cnrAyFLGWdL9EcBM";
-    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      accessToken: async () => {
-        try {
-          const user = firebase.auth().currentUser;
-          return user ? await user.getIdToken() : null;
-        } catch (e) { return null; }
-      }
-    });
-
     // ── Wallet on/off setting (toggled from Admin Panel) ────────
+    // wallet.html-specific: hides #depositFormCard, shows #walletDisabledNotice —
+    // separate from config.js's own applyWalletVisibility(), which targets the
+    // header chip/nav tab/payment-modal button, not this page's own elements.
     sb.from("settings").select("value").eq("key", "appConfig").maybeSingle().then(({ data, error }) => {
       if (error) throw error;
       const walletEnabled = data ? (data.value?.walletEnabled !== false) : true;

@@ -1,9 +1,9 @@
 // ============================================================
 // wallet.js — Campus Bulkmart Wallet Module (Paystack Redirect Flow)
-// Backend: https://lhbm-api.onrender.com
+// Backend: https://campus-bulkmart.onrender.com
 // ============================================================
 
-const BACKEND_URL = "https://lhbm-api.onrender.com";
+const BACKEND_URL = "https://campus-bulkmart.onrender.com";
 
 // ============================================================
 // BOOTSTRAP — runs when page loads

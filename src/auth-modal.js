@@ -437,64 +437,64 @@ document.addEventListener("DOMContentLoaded", () => {
 
 var _currentPolicyTab = "privacy";
 
+// NOTE (Phase 6B/7B): this content is the FALLBACK only, shown before the
+// siteContent fetch below resolves (or if it fails). about.html is the
+// canonical source — this text is kept identical to about.html's copy on
+// purpose, and both are overwritten at runtime by the same admin-editable
+// siteContent.policies field so they can never drift apart again.
 var _policyContent = {
   privacy: {
     title: "Privacy Policy",
     effectiveDate: "June 1, 2026",
     sections: [
-      {
-        heading: "1. Information We Collect",
-        body: "We collect personal information that you voluntarily provide when you place an order, initialize a checkout, or contact us. This includes: <strong>Personal Identifiers</strong> (name, phone number, email address), <strong>Delivery Information</strong> (hostel name, room number, campus delivery location), and <strong>Order History</strong> (grocery items you purchase or intend to purchase)."
-      },
-      {
-        heading: "2. Payment Data & Processing",
-        body: "<strong>Online Payments (Paystack):</strong> We do not store your card details on our servers. All transactions are handled by Paystack, a certified third-party gateway. <strong>WhatsApp Payments:</strong> When you pay via WhatsApp, we collect your transaction receipt and order details to manually verify and fulfill your order."
-      },
-      {
-        heading: "3. How We Use Your Information",
-        body: "We use your data solely to: process and deliver your orders; calculate tiered delivery fees; communicate with you via SMS, phone, or WhatsApp about order updates; and comply with legal requirements from our payment processors."
-      },
-      {
-        heading: "4. Data Sharing & Third Parties",
-        body: "We do not sell or rent your personal information. We only share data with: <strong>Delivery Personnel</strong> (your name, phone, and location — only to fulfill your delivery) and <strong>Paystack</strong> (transaction details for payment authorization)."
-      },
-      {
-        heading: "5. Data Security",
-        body: "We implement Firebase database security rules and strict technical measures to protect your personal information from unauthorized access."
-      },
-      {
-        heading: "6. Contact Us",
-        body: "📧 <a href='mailto:atebelucky123@gmail.com' style='color:#000080;font-weight:600;'>atebelucky123@gmail.com</a><br>📱 <a href='https://wa.me/2349169618353' style='color:#000080;font-weight:600;'>+2349169618353</a>"
-      }
+      { heading: "1. Information We Collect", body: "We collect personal information you voluntarily provide: your name, phone number, email address, hostel/room details, and order history." },
+      { heading: "2. Payment Data & Processing", body: "Online payments are handled securely by Paystack — we never store your card details on our servers. WhatsApp payments are verified manually using the receipt you share with us." },
+      { heading: "3. How We Use Your Information", body: "Your data is used only to process and deliver your orders, calculate delivery fees, communicate order updates, and comply with payment processor requirements." },
+      { heading: "4. Data Sharing & Third Parties", body: "We do not sell your data. Information is shared only with our delivery team (to fulfill your order) and Paystack (to process online payments)." },
+      { heading: "5. Data Security", body: "We use Firebase security rules and strict technical measures to protect your personal information from unauthorized access." },
+      { heading: "6. Contact Us", body: "📧 <a href='mailto:atebelucky123@gmail.com' style='color:#000080;font-weight:600;'>atebelucky123@gmail.com</a> &nbsp;·&nbsp; 📱 <a href='https://wa.me/2349169618353' style='color:#000080;font-weight:600;'>+2349169618353</a>" }
     ]
   },
   refund: {
     title: "Refund & Return Policy",
     effectiveDate: "June 1, 2026",
     sections: [
-      {
-        heading: "1. Eligibility for Refunds & Replacements",
-        body: "We offer refunds or replacements for: <strong>Damaged/Spoiled Goods</strong> — items that arrive damaged, broken, or spoiled; <strong>Incorrect Orders</strong> — items that don't match what you ordered; <strong>Missing Items</strong> — items you paid for that were omitted from your delivery."
-      },
-      {
-        heading: "2. Reporting Window",
-        body: "All complaints must be reported <strong>within 24 hours</strong> of receiving your delivery. Contact us via WhatsApp or email with your Order Number (or full name) and a clear photo of the damaged or incorrect item."
-      },
-      {
-        heading: "3. Processing of Refunds",
-        body: "<strong>Paystack Payments:</strong> Approved refunds are reversed to your original card/account via Paystack within 3–7 business days. <strong>WhatsApp/Manual Payments:</strong> Refunds are sent via direct bank transfer within 24–48 hours, or credited as a store voucher — your choice."
-      },
-      {
-        heading: "4. Non-Refundable Situations",
-        body: "We cannot issue refunds if: the delivery address was incorrect or unreachable after repeated contact attempts, or the complaint is made after the 24-hour reporting window."
-      },
-      {
-        heading: "5. Contact Channels",
-        body: "📧 <a href='mailto:atebelucky123@gmail.com' style='color:#000080;font-weight:600;'>atebelucky123@gmail.com</a><br>📱 <a href='https://wa.me/2349169618353' style='color:#000080;font-weight:600;'>+2349169618353</a>"
-      }
+      { heading: "1. Eligibility for Refunds & Replacements", body: "We offer refunds or replacements for: items that arrive damaged or spoiled; incorrect items delivered; or items paid for but missing from your package." },
+      { heading: "2. Reporting Window", body: "All claims must be submitted within <strong>24 hours</strong> of delivery. Contact us via WhatsApp or email with your order number and a clear photo of the issue." },
+      { heading: "3. Processing of Refunds", body: "<strong>Paystack payments:</strong> reversed to your card within 3–7 business days. <strong>WhatsApp/manual payments:</strong> direct bank transfer within 24–48 hours, or store voucher credit — your choice." },
+      { heading: "4. Non-Refundable Situations", body: "Refunds are not available if the delivery address was incorrect or unreachable, or if the claim is made after the 24-hour window." },
+      { heading: "5. Contact Channels", body: "📧 <a href='mailto:atebelucky123@gmail.com' style='color:#000080;font-weight:600;'>atebelucky123@gmail.com</a> &nbsp;·&nbsp; 📱 <a href='https://wa.me/2349169618353' style='color:#000080;font-weight:600;'>+2349169618353</a>" }
     ]
   }
 };
+
+// ============================================================
+// POLICY CONTENT SYNC (Phase 7B)
+// Pulls the same admin-editable siteContent.policies field
+// about.html reads, so this popup always mirrors whatever
+// about.html / the admin panel shows. `sb` is the Supabase client
+// set up in config.js, which loads before this file on every page
+// that includes the auth modal. If the fetch fails or the field
+// doesn't exist yet, the hardcoded defaults above are shown as-is.
+// ============================================================
+(function () {
+  if (typeof sb === "undefined") return;
+  sb.from("settings").select("value").eq("key", "siteContent").maybeSingle()
+    .then(function (result) {
+      if (result.error) throw result.error;
+      var p = result.data && result.data.value && result.data.value.policies;
+      if (!p) return;
+      if (Array.isArray(p.privacy) && p.privacy.length) _policyContent.privacy.sections = p.privacy;
+      if (Array.isArray(p.refund) && p.refund.length) _policyContent.refund.sections = p.refund;
+      if (p.effectiveDate) {
+        _policyContent.privacy.effectiveDate = p.effectiveDate;
+        _policyContent.refund.effectiveDate = p.effectiveDate;
+      }
+      // Re-render in case the modal is already open when this resolves
+      if (typeof _renderPolicyBody === "function") _renderPolicyBody(_currentPolicyTab);
+    })
+    .catch(function (e) { console.warn("[AuthModal] Could not load policy content, using defaults:", e.message); });
+})();
 
 function _renderPolicyBody(tab) {
   var data = _policyContent[tab];

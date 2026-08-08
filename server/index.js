@@ -10,6 +10,7 @@ const cors = require("cors");
 const waitlistRoutes = require("./waitlist");
 const geocodeRoutes = require("./geocode"); // Phase 2d — /api/geocode-address
 const deliveryQuoteRoutes = require("./delivery-quote"); // Phase 3 — /api/delivery-quote
+const addressAutocompleteRoutes = require("./address-autocomplete"); // standalone — /api/address-autocomplete
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -42,6 +43,7 @@ app.get("/", (req, res) => {
 app.use("/api", waitlistRoutes);
 app.use("/api", geocodeRoutes); // Phase 2d — used by admin origin/landmark editor and Phase 3 checkout's address verification
 app.use("/api", deliveryQuoteRoutes); // Phase 3 — /api/delivery-quote, checkout's fee calculation
+app.use("/api", addressAutocompleteRoutes); // standalone, built ahead of Phase 4b — typeahead suggestions, not yet wired into any page
 
 // Future payment routes will get mounted here once the redesign happens,
 // e.g. app.use("/api", paymentRoutes);

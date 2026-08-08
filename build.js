@@ -23,6 +23,7 @@ const HASHABLE = [
   "auth.js",
   "ui-misc.js",
   "admin-core.js",
+  "admin-delivery-settings.js",
   "admin-categories.js",
   "admin-products-table.js",
   "admin-reviews.js",
@@ -35,6 +36,9 @@ const HASHABLE = [
   "style.css",
   "admin.css",
   "tailwind.output.css",
+  "mobile.css",
+  "coming-soon-desktop.css",
+  "coming-soon-mobile.css",
 ];
 
 // ── HTML files that reference those assets ──────────────────
@@ -56,6 +60,9 @@ const HTML_FILES = [
   "products-desktop.html",
   "products-mobile.html",
   "404.html",
+  "coming-soon.html",
+  "coming-soon-desktop.html",
+  "coming-soon-mobile.html",
 ];
 
 // ── Helpers ─────────────────────────────────────────────────

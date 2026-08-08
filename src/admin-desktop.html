@@ -61,6 +61,9 @@
       <button class="tab-btn admin-nav-item" onclick="switchTab('content', this)">
         <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></span><span class="nav-label">Content</span>
       </button>
+      <button class="tab-btn admin-nav-item" onclick="switchTab('delivery', this)">
+        <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span><span class="nav-label">Delivery</span>
+      </button>
       <button class="tab-btn admin-nav-item" onclick="switchTab('waitlist', this)">
         <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></span><span class="nav-label">Waitlist</span>
         <span id="waitlistNavBadge" class="hidden admin-nav-badge">0</span>
@@ -242,13 +245,14 @@
                 <th class="px-4 py-3 text-left">Product</th>
                 <th class="px-4 py-3 text-left hidden sm:table-cell">Category</th>
                 <th class="px-4 py-3 text-left">Price</th>
+                <th class="px-4 py-3 text-left hidden sm:table-cell">Weight</th>
                 <th class="px-4 py-3 text-left hidden md:table-cell">Top Pick</th>
                 <th class="px-4 py-3 text-left hidden md:table-cell">Group Order</th>
                 <th class="px-4 py-3 text-right">Actions</th>
               </tr>
             </thead>
             <tbody id="productTableBody"></tbody>
-            <tbody><tr id="productEmptyRow" class="hidden"><td colspan="6" class="text-center text-gray-400 text-sm py-10">🗂️ No products found.</td></tr></tbody>
+            <tbody><tr id="productEmptyRow" class="hidden"><td colspan="7" class="text-center text-gray-400 text-sm py-10">🗂️ No products found.</td></tr></tbody>
           </table>
         </div>
 
@@ -401,6 +405,140 @@
       </section>
 
       <!-- ============================================================
+           TAB: DELIVERY SETTINGS (Phase 2d)
+           Origin editor, landmarks CRUD, delivery fee settings.
+           All values read live by Phase 3's checkout — editing here
+           takes effect immediately, no redeploy needed.
+           ============================================================ -->
+      <section id="tab-delivery" class="admin-tab hidden">
+        <h1 class="font-black text-xl text-gray-900 mb-1">Delivery Settings</h1>
+        <p class="text-sm text-gray-400 mb-5">Origin address, landmarks, and the delivery fee formula — all editable here, no code changes needed.</p>
+
+        <!-- ORIGIN -->
+        <div class="admin-card no-lift p-5 max-w-xl mb-5">
+          <h2 class="font-bold text-sm text-gray-800 mb-3">📍 Delivery Origin</h2>
+          <p class="text-xs text-gray-400 mb-3">The point every delivery distance is measured from. Landmark distances recalculate automatically the moment you save a change here.</p>
+          <div class="mb-3">
+            <label class="block text-[10px] font-semibold text-gray-500 mb-1">Address</label>
+            <input id="originAddressInput" type="text" placeholder="e.g. 1-5 Oba Akinjobi Way, Ikeja GRA, Lagos" class="admin-input" />
+          </div>
+          <div class="grid grid-cols-2 gap-3 mb-3">
+            <div>
+              <label class="block text-[10px] font-semibold text-gray-500 mb-1">Latitude</label>
+              <input id="originLatInput" type="number" step="any" placeholder="6.590565" class="admin-input" />
+            </div>
+            <div>
+              <label class="block text-[10px] font-semibold text-gray-500 mb-1">Longitude</label>
+              <input id="originLngInput" type="number" step="any" placeholder="3.342276" class="admin-input" />
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="reGeocodeOriginBtn" onclick="reGeocodeOrigin()" class="text-xs font-semibold px-4 py-2 rounded-lg border transition hover:bg-gray-50" style="color:#000080; border-color:#000080;">🔍 Re-geocode from address</button>
+            <button onclick="saveOrigin()" class="text-white font-bold px-5 py-2.5 rounded-xl text-sm shadow-sm hover:shadow-md transition ml-auto" style="background:#000080;">💾 Save Origin</button>
+          </div>
+        </div>
+
+        <!-- LANDMARKS -->
+        <div class="admin-card no-lift p-5 max-w-xl mb-5">
+          <h2 class="font-bold text-sm text-gray-800 mb-3">🏛️ Landmarks</h2>
+          <p class="text-xs text-gray-400 mb-3">Used as a fallback when a customer's address can't be geocoded — they pick the nearest one instead. Distance shown is live, calculated from the origin above.</p>
+          <div id="landmarksList" class="mb-4"></div>
+
+          <div class="border-t border-gray-100 pt-4">
+            <p class="text-[10px] font-semibold text-gray-500 mb-2 uppercase">Add a landmark</p>
+            <div class="mb-2">
+              <input id="newLandmarkName" type="text" placeholder="Landmark name (e.g. Toyin Street)" class="admin-input" />
+            </div>
+            <div class="mb-2">
+              <input id="newLandmarkAddress" type="text" placeholder="Address (optional, helps with re-geocode)" class="admin-input" />
+            </div>
+            <div class="grid grid-cols-2 gap-3 mb-2">
+              <input id="newLandmarkLat" type="number" step="any" placeholder="Latitude" class="admin-input" />
+              <input id="newLandmarkLng" type="number" step="any" placeholder="Longitude" class="admin-input" />
+            </div>
+            <div class="flex items-center gap-2">
+              <button id="reGeocodeLandmarkBtn" onclick="reGeocodeNewLandmark()" class="text-xs font-semibold px-4 py-2 rounded-lg border transition hover:bg-gray-50" style="color:#000080; border-color:#000080;">🔍 Re-geocode</button>
+              <button onclick="addLandmark()" class="text-white font-bold px-5 py-2.5 rounded-xl text-sm shadow-sm hover:shadow-md transition ml-auto" style="background:#000080;">➕ Add Landmark</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- DELIVERY FEE SETTINGS -->
+        <div class="admin-card no-lift p-5 max-w-xl">
+          <h2 class="font-bold text-sm text-gray-800 mb-3">💰 Delivery Fee Settings</h2>
+          <p class="text-xs text-gray-400 mb-3">These four values drive every delivery fee calculation at checkout. Update them once you know your real numbers — takes effect immediately, no redeploy needed.</p>
+          <div class="grid grid-cols-2 gap-3 mb-2">
+            <div>
+              <label class="block text-[10px] font-semibold text-gray-500 mb-1">Base Fee (₦)</label>
+              <input id="feeBaseFeeInput" type="number" step="any" min="0" class="admin-input" />
+            </div>
+            <div>
+              <label class="block text-[10px] font-semibold text-gray-500 mb-1">Transport Rate (₦/km)</label>
+              <input id="feeTransportRateInput" type="number" step="any" min="0" class="admin-input" />
+            </div>
+            <div>
+              <label class="block text-[10px] font-semibold text-gray-500 mb-1">Weight-Free Threshold (points)</label>
+              <input id="feeWeightThresholdInput" type="number" step="any" min="0" class="admin-input" />
+            </div>
+            <div>
+              <label class="block text-[10px] font-semibold text-gray-500 mb-1">Weight Surcharge (₦ per unit)</label>
+              <input id="feeWeightSurchargeInput" type="number" step="any" min="0" class="admin-input" />
+            </div>
+            <div class="col-span-2">
+              <label class="block text-[10px] font-semibold text-gray-500 mb-1">Points per Surcharge Unit</label>
+              <input id="feeWeightSurchargeUnitInput" type="number" step="any" min="1" class="admin-input" />
+              <p class="text-[10px] text-gray-400 mt-1">E.g. set this to 5 to charge the rate above once per every 5 weight points past the free threshold, instead of per single point.</p>
+            </div>
+          </div>
+          <button onclick="saveFeeSettings()" class="text-white font-bold px-5 py-2.5 rounded-xl text-sm shadow-sm hover:shadow-md transition w-full mt-2" style="background:#000080;">💾 Save Fee Settings</button>
+        </div>
+
+        <!-- GROUP ORDER FEE SETTINGS (Phase 4a) -->
+        <div class="admin-card no-lift p-5 max-w-xl mt-5">
+          <h2 class="font-bold text-sm text-gray-800 mb-3">👥 Group Order Fee Settings</h2>
+          <p class="text-xs text-gray-400 mb-3">Base fee and transport rate always come from the Delivery Fee Settings card above — these tiers apply a modifier on top of that real formula, they never replace it with a flat number.</p>
+          <div class="grid grid-cols-2 gap-3 mb-2">
+            <div>
+              <label class="block text-[10px] font-semibold text-gray-500 mb-1">Tier 1 Max (₦) — below this = standard</label>
+              <input id="groupTier1MaxInput" type="number" step="any" min="0" class="admin-input" />
+            </div>
+            <div>
+              <label class="block text-[10px] font-semibold text-gray-500 mb-1">Discount Tier Max (₦)</label>
+              <input id="groupDiscountTierMaxInput" type="number" step="any" min="0" class="admin-input" />
+            </div>
+            <div>
+              <label class="block text-[10px] font-semibold text-gray-500 mb-1">Discount %</label>
+              <input id="groupDiscountPercentInput" type="number" step="any" min="0" max="100" class="admin-input" />
+            </div>
+            <div>
+              <label class="block text-[10px] font-semibold text-gray-500 mb-1">Free Tier Max (₦)</label>
+              <input id="groupFreeTierMaxInput" type="number" step="any" min="0" class="admin-input" />
+            </div>
+            <div class="col-span-2">
+              <label class="block text-[10px] font-semibold text-gray-500 mb-1">Above-Cap Extra Fee (₦) — added on top of standard fee when pool ≥ Free Tier Max</label>
+              <input id="groupAboveCapFeeInput" type="number" step="any" min="0" class="admin-input" />
+            </div>
+          </div>
+          <p class="text-[10px] font-semibold text-gray-500 mb-2 uppercase pt-2 border-t border-gray-100">Group Weight Surcharge (separate from individual orders — a pooled cart naturally carries more weight)</p>
+          <div class="grid grid-cols-2 gap-3 mb-2">
+            <div>
+              <label class="block text-[10px] font-semibold text-gray-500 mb-1">Weight-Free Threshold (points)</label>
+              <input id="groupWeightThresholdInput" type="number" step="any" min="0" class="admin-input" />
+            </div>
+            <div>
+              <label class="block text-[10px] font-semibold text-gray-500 mb-1">Weight Surcharge (₦ per unit)</label>
+              <input id="groupWeightSurchargeInput" type="number" step="any" min="0" class="admin-input" />
+            </div>
+            <div class="col-span-2">
+              <label class="block text-[10px] font-semibold text-gray-500 mb-1">Points per Surcharge Unit</label>
+              <input id="groupWeightSurchargeUnitInput" type="number" step="any" min="1" class="admin-input" />
+            </div>
+          </div>
+          <button onclick="saveGroupFeeSettings()" class="text-white font-bold px-5 py-2.5 rounded-xl text-sm shadow-sm hover:shadow-md transition w-full mt-2" style="background:#000080;">💾 Save Group Order Fee Settings</button>
+        </div>
+      </section>
+
+      <!-- ============================================================
            TAB: CONTENT (Hero Banner editor)
            ============================================================ -->
       <section id="tab-content" class="admin-tab hidden">
@@ -520,6 +658,8 @@
         <div class="grid lg:grid-cols-2 gap-5 items-start mt-5">
           <div class="admin-card no-lift p-5">
             <p class="modal-section-label">Footer</p>
+            <label class="block text-[10px] font-semibold text-gray-500 mb-1">Tagline (short blurb under the brand name)</label>
+            <input id="footerTaglineInput" type="text" class="admin-input mb-4" oninput="updateHeroPreview()" />
             <label class="block text-[10px] font-semibold text-gray-500 mb-1">Disclaimer</label>
             <textarea id="footerDisclaimerInput" class="admin-input mb-4" rows="3" oninput="updateHeroPreview()"></textarea>
 
@@ -557,7 +697,22 @@
               </div>
             </div>
 
-            <p class="text-[11px] text-gray-400 mt-3">Saved with the same <strong>Save Changes</strong> button above — this all lives in one Content save.</p>
+            <p class="modal-section-label">Quick Links <span class="text-gray-400 font-normal normal-case">(shown on every page's footer)</span></p>
+            <div class="grid grid-cols-2 gap-3 mb-1">
+              <div><label class="block text-[10px] font-semibold text-gray-500 mb-1">Link 1 Label</label><input id="footerLink1LabelInput" type="text" class="admin-input" oninput="updateHeroPreview()" /></div>
+              <div><label class="block text-[10px] font-semibold text-gray-500 mb-1">Link 1 URL</label><input id="footerLink1UrlInput" type="text" class="admin-input" oninput="updateHeroPreview()" /></div>
+              <div><label class="block text-[10px] font-semibold text-gray-500 mb-1">Link 2 Label</label><input id="footerLink2LabelInput" type="text" class="admin-input" oninput="updateHeroPreview()" /></div>
+              <div><label class="block text-[10px] font-semibold text-gray-500 mb-1">Link 2 URL</label><input id="footerLink2UrlInput" type="text" class="admin-input" oninput="updateHeroPreview()" /></div>
+              <div><label class="block text-[10px] font-semibold text-gray-500 mb-1">Link 3 Label</label><input id="footerLink3LabelInput" type="text" class="admin-input" oninput="updateHeroPreview()" /></div>
+              <div><label class="block text-[10px] font-semibold text-gray-500 mb-1">Link 3 URL</label><input id="footerLink3UrlInput" type="text" class="admin-input" oninput="updateHeroPreview()" /></div>
+              <div><label class="block text-[10px] font-semibold text-gray-500 mb-1">Link 4 Label</label><input id="footerLink4LabelInput" type="text" class="admin-input" oninput="updateHeroPreview()" /></div>
+              <div><label class="block text-[10px] font-semibold text-gray-500 mb-1">Link 4 URL</label><input id="footerLink4UrlInput" type="text" class="admin-input" oninput="updateHeroPreview()" /></div>
+            </div>
+
+            <label class="block text-[10px] font-semibold text-gray-500 mb-1 mt-4">Copyright line</label>
+            <input id="footerCopyrightInput" type="text" class="admin-input" oninput="updateHeroPreview()" />
+
+            <p class="text-[11px] text-gray-400 mt-3">Saved with the same <strong>Save Changes</strong> button above — this all lives in one Content save, and shows up on every page's footer (Home, Products, About, FAQs).</p>
           </div>
 
           <!-- Footer live preview -->
@@ -565,13 +720,16 @@
             <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wide mb-2">Footer Preview</p>
             <div class="rounded-2xl p-5 bg-gray-900 text-white">
               <h3 class="font-outfit text-lg font-black mb-2" style="color:#fff;">Campus Bulkmart</h3>
+              <p class="text-gray-300 text-xs mb-1" id="footerPreviewTagline"></p>
               <p class="text-gray-400 text-xs leading-relaxed" id="footerPreviewDisclaimer"></p>
               <div id="footerPreviewSocial" style="display:flex; gap:8px; margin-top:12px;"></div>
               <div class="border-t border-gray-800 mt-4 pt-4 text-xs text-gray-400" style="display:flex; flex-direction:column; gap:6px;">
                 <p>📞 WhatsApp: <span id="footerPreviewWhatsapp"></span></p>
                 <p>✉️ <span id="footerPreviewEmail"></span></p>
                 <p id="footerPreviewHours"></p>
+                <p>🔗 <span id="footerPreviewLinks"></span></p>
               </div>
+              <div class="border-t border-gray-800 mt-4 pt-3 text-center text-[10px] text-gray-500" id="footerPreviewCopyright"></div>
             </div>
           </div>
         </div>
@@ -598,7 +756,55 @@
             <label class="block text-[10px] font-semibold text-gray-500 mb-1">Mission Quote</label>
             <input id="aboutMissionQuoteInput" type="text" class="admin-input mb-3" oninput="updateHeroPreview()" />
             <label class="block text-[10px] font-semibold text-gray-500 mb-1">Mission Text</label>
-            <textarea id="aboutMissionTextInput" class="admin-input" rows="3" oninput="updateHeroPreview()"></textarea>
+            <textarea id="aboutMissionTextInput" class="admin-input mb-4" rows="3" oninput="updateHeroPreview()"></textarea>
+
+            <p class="modal-section-label">About Page — Stats Banner</p>
+            <div class="grid grid-cols-2 gap-3 mb-4">
+              <div><label class="block text-[10px] font-semibold text-gray-500 mb-1">Stat 1 Value</label><input id="aboutStat1ValueInput" type="text" class="admin-input" oninput="updateHeroPreview()" /></div>
+              <div><label class="block text-[10px] font-semibold text-gray-500 mb-1">Stat 1 Label</label><input id="aboutStat1LabelInput" type="text" class="admin-input" oninput="updateHeroPreview()" /></div>
+              <div><label class="block text-[10px] font-semibold text-gray-500 mb-1">Stat 2 Value</label><input id="aboutStat2ValueInput" type="text" class="admin-input" oninput="updateHeroPreview()" /></div>
+              <div><label class="block text-[10px] font-semibold text-gray-500 mb-1">Stat 2 Label</label><input id="aboutStat2LabelInput" type="text" class="admin-input" oninput="updateHeroPreview()" /></div>
+              <div><label class="block text-[10px] font-semibold text-gray-500 mb-1">Stat 3 Value</label><input id="aboutStat3ValueInput" type="text" class="admin-input" oninput="updateHeroPreview()" /></div>
+              <div><label class="block text-[10px] font-semibold text-gray-500 mb-1">Stat 3 Label</label><input id="aboutStat3LabelInput" type="text" class="admin-input" oninput="updateHeroPreview()" /></div>
+              <div><label class="block text-[10px] font-semibold text-gray-500 mb-1">Stat 4 Value</label><input id="aboutStat4ValueInput" type="text" class="admin-input" oninput="updateHeroPreview()" /></div>
+              <div><label class="block text-[10px] font-semibold text-gray-500 mb-1">Stat 4 Label</label><input id="aboutStat4LabelInput" type="text" class="admin-input" oninput="updateHeroPreview()" /></div>
+            </div>
+
+            <p class="modal-section-label">About Page — How It Works</p>
+            <label class="block text-[10px] font-semibold text-gray-500 mb-1">Section Title</label>
+            <input id="aboutStepsTitleInput" type="text" class="admin-input mb-3" oninput="updateHeroPreview()" />
+            <label class="block text-[10px] font-semibold text-gray-500 mb-1">Section Intro</label>
+            <textarea id="aboutStepsIntroInput" class="admin-input mb-3" rows="2" oninput="updateHeroPreview()"></textarea>
+            <div class="grid grid-cols-2 gap-3 mb-4">
+              <div><label class="block text-[10px] font-semibold text-gray-500 mb-1">Step 1 Title</label><input id="aboutStep1TitleInput" type="text" class="admin-input" oninput="updateHeroPreview()" /></div>
+              <div><label class="block text-[10px] font-semibold text-gray-500 mb-1">Step 1 Description</label><input id="aboutStep1DescInput" type="text" class="admin-input" oninput="updateHeroPreview()" /></div>
+              <div><label class="block text-[10px] font-semibold text-gray-500 mb-1">Step 2 Title</label><input id="aboutStep2TitleInput" type="text" class="admin-input" oninput="updateHeroPreview()" /></div>
+              <div><label class="block text-[10px] font-semibold text-gray-500 mb-1">Step 2 Description</label><input id="aboutStep2DescInput" type="text" class="admin-input" oninput="updateHeroPreview()" /></div>
+              <div><label class="block text-[10px] font-semibold text-gray-500 mb-1">Step 3 Title</label><input id="aboutStep3TitleInput" type="text" class="admin-input" oninput="updateHeroPreview()" /></div>
+              <div><label class="block text-[10px] font-semibold text-gray-500 mb-1">Step 3 Description</label><input id="aboutStep3DescInput" type="text" class="admin-input" oninput="updateHeroPreview()" /></div>
+              <div><label class="block text-[10px] font-semibold text-gray-500 mb-1">Step 4 Title</label><input id="aboutStep4TitleInput" type="text" class="admin-input" oninput="updateHeroPreview()" /></div>
+              <div><label class="block text-[10px] font-semibold text-gray-500 mb-1">Step 4 Description</label><input id="aboutStep4DescInput" type="text" class="admin-input" oninput="updateHeroPreview()" /></div>
+            </div>
+
+            <p class="modal-section-label">About Page — Values Section</p>
+            <label class="block text-[10px] font-semibold text-gray-500 mb-1">Section Title</label>
+            <input id="aboutValuesTitleInput" type="text" class="admin-input mb-3" oninput="updateHeroPreview()" />
+            <div class="grid grid-cols-2 gap-3 mb-4">
+              <div><label class="block text-[10px] font-semibold text-gray-500 mb-1">Value 1 Title</label><input id="aboutValue1TitleInput" type="text" class="admin-input" oninput="updateHeroPreview()" /></div>
+              <div><label class="block text-[10px] font-semibold text-gray-500 mb-1">Value 1 Description</label><input id="aboutValue1DescInput" type="text" class="admin-input" oninput="updateHeroPreview()" /></div>
+              <div><label class="block text-[10px] font-semibold text-gray-500 mb-1">Value 2 Title</label><input id="aboutValue2TitleInput" type="text" class="admin-input" oninput="updateHeroPreview()" /></div>
+              <div><label class="block text-[10px] font-semibold text-gray-500 mb-1">Value 2 Description</label><input id="aboutValue2DescInput" type="text" class="admin-input" oninput="updateHeroPreview()" /></div>
+              <div><label class="block text-[10px] font-semibold text-gray-500 mb-1">Value 3 Title</label><input id="aboutValue3TitleInput" type="text" class="admin-input" oninput="updateHeroPreview()" /></div>
+              <div><label class="block text-[10px] font-semibold text-gray-500 mb-1">Value 3 Description</label><input id="aboutValue3DescInput" type="text" class="admin-input" oninput="updateHeroPreview()" /></div>
+              <div><label class="block text-[10px] font-semibold text-gray-500 mb-1">Value 4 Title</label><input id="aboutValue4TitleInput" type="text" class="admin-input" oninput="updateHeroPreview()" /></div>
+              <div><label class="block text-[10px] font-semibold text-gray-500 mb-1">Value 4 Description</label><input id="aboutValue4DescInput" type="text" class="admin-input" oninput="updateHeroPreview()" /></div>
+            </div>
+
+            <p class="modal-section-label">About Page — Closing CTA</p>
+            <label class="block text-[10px] font-semibold text-gray-500 mb-1">Heading</label>
+            <input id="aboutCtaHeadingInput" type="text" class="admin-input mb-3" oninput="updateHeroPreview()" />
+            <label class="block text-[10px] font-semibold text-gray-500 mb-1">Subtext</label>
+            <textarea id="aboutCtaSubtextInput" class="admin-input" rows="2" oninput="updateHeroPreview()"></textarea>
 
             <p class="text-[11px] text-gray-400 mt-3">Saved with the same <strong>Save Changes</strong> button above.</p>
           </div>
@@ -619,7 +825,46 @@
               <p class="font-outfit font-black text-base mb-1" style="color:#000080;" id="aboutPreviewMissionQuote"></p>
               <p class="text-xs text-gray-500 leading-relaxed" id="aboutPreviewMissionText"></p>
             </div>
+            <div class="admin-card no-lift p-4 mt-3 text-center">
+              <p class="font-outfit font-black text-sm mb-1" style="color:#000080;" id="aboutPreviewCtaHeading"></p>
+              <p class="text-xs text-gray-500" id="aboutPreviewCtaSubtext"></p>
+            </div>
           </div>
+        </div>
+
+        <!-- FAQ Manager (Phase 7A) -->
+        <div class="admin-card no-lift p-5 mt-5">
+          <div class="flex items-center justify-between mb-1">
+            <p class="modal-section-label mb-0">FAQs</p>
+            <button type="button" onclick="addFaqManagerItem()" class="text-xs font-semibold px-3 py-1.5 rounded-lg border border-gray-200 hover:bg-gray-50 transition" style="color:#000080;">+ Add FAQ</button>
+          </div>
+          <p class="text-[11px] text-gray-400 mb-3">Shown on the FAQs page, in the order below. Use ↑ / ↓ to reorder.</p>
+          <div id="faqManagerList"></div>
+          <button id="faqSaveBtn" onclick="saveFaqManager()" class="text-white font-bold px-5 py-2.5 rounded-xl text-sm shadow-sm hover:shadow-md transition mt-2" style="background:#000080;">💾 Save FAQs</button>
+          <p class="text-[11px] text-gray-400 mt-2">Saves separately from the button at the top of this page — FAQs have their own Save.</p>
+        </div>
+
+        <!-- Policy Editor (Phase 7B) -->
+        <div class="admin-card no-lift p-5 mt-5">
+          <div class="flex items-center justify-between mb-1 flex-wrap gap-2">
+            <p class="modal-section-label mb-0">Policies</p>
+            <button type="button" onclick="addPolicyManagerItem()" class="text-xs font-semibold px-3 py-1.5 rounded-lg border border-gray-200 hover:bg-gray-50 transition" style="color:#000080;">+ Add Section</button>
+          </div>
+          <p class="text-[11px] text-gray-400 mb-3">Shown on the About page's Policies section and in the sign-in/sign-up policy popup — both read from here, so an edit here updates both. Use ↑ / ↓ to reorder.</p>
+
+          <div class="flex gap-2 mb-3">
+            <button type="button" id="policyManagerTabPrivacy" onclick="switchPolicyManagerTab('privacy')"
+              class="px-4 py-1.5 rounded-full text-xs font-bold transition" style="background:#000080; color:#fff; border:none;">🔒 Privacy Policy</button>
+            <button type="button" id="policyManagerTabRefund" onclick="switchPolicyManagerTab('refund')"
+              class="px-4 py-1.5 rounded-full text-xs font-bold transition" style="background:#fff; color:#6b7280; border:1px solid #e5e7eb;">🔄 Refund &amp; Return</button>
+          </div>
+
+          <label class="block text-[10px] font-semibold text-gray-500 mb-1">Effective Date (shown on both)</label>
+          <input id="policyEffDateInput" type="text" class="admin-input mb-4" style="max-width:260px;" placeholder="e.g. June 1, 2026" />
+
+          <div id="policyManagerList"></div>
+          <button id="policySaveBtn" onclick="savePolicyManager()" class="text-white font-bold px-5 py-2.5 rounded-xl text-sm shadow-sm hover:shadow-md transition mt-2" style="background:#000080;">💾 Save Policies</button>
+          <p class="text-[11px] text-gray-400 mt-2">Saves separately — Policies have their own Save. Switching tabs above keeps unsaved edits on the other tab.</p>
         </div>
       </section>
 
@@ -689,6 +934,14 @@
         <option value="hostel-services">Hostel Services</option>
       </select>
       <input id="newPrice" type="number" placeholder="Price (₦) — shown to customers" class="admin-input" />
+      <select id="newWeightScore" class="admin-input">
+        <option value="" disabled selected>Weight Score (1–5) — required for delivery fee</option>
+        <option value="1">1 — Very Light (e.g. seasoning, sachets)</option>
+        <option value="2">2 — Light</option>
+        <option value="3">3 — Medium</option>
+        <option value="4">4 — Heavy</option>
+        <option value="5">5 — Very Heavy (e.g. rice bag, crate)</option>
+      </select>
       <textarea id="newDesc" placeholder="Description" class="admin-input" rows="2"></textarea>
       <button type="button" class="cbm-image-trigger" id="newImage_trigger" onclick="cbmToggleUploader('newImage')">
         <img id="newImage_thumb" class="cbm-image-thumb hidden" src="" alt="" />
@@ -763,6 +1016,14 @@
         <option value="hostel-services">Hostel Services</option>
       </select>
       <input id="editPrice" type="number" placeholder="Price (₦) — shown to customers" class="admin-input" />
+      <select id="editWeightScore" class="admin-input">
+        <option value="" disabled selected>Weight Score (1–5) — required for delivery fee</option>
+        <option value="1">1 — Very Light (e.g. seasoning, sachets)</option>
+        <option value="2">2 — Light</option>
+        <option value="3">3 — Medium</option>
+        <option value="4">4 — Heavy</option>
+        <option value="5">5 — Very Heavy (e.g. rice bag, crate)</option>
+      </select>
       <textarea id="editDesc" placeholder="Description" class="admin-input" rows="2"></textarea>
       <button type="button" class="cbm-image-trigger" id="editImage_trigger" onclick="cbmToggleUploader('editImage')">
         <img id="editImage_thumb" class="cbm-image-thumb hidden" src="" alt="" />
@@ -1045,6 +1306,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="admin-core.js"></script>
+<script src="admin-delivery-settings.js"></script>
 <script src="admin-categories.js"></script>
 <script src="admin-products-table.js"></script>
 <script src="admin-reviews.js"></script>

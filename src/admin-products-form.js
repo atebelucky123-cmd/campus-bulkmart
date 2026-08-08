@@ -820,6 +820,7 @@ async function addProduct() {
   const name     = document.getElementById("newName")?.value.trim();
   const category = document.getElementById("newCategory")?.value;
   const priceRaw = document.getElementById("newPrice")?.value;
+  const weightScoreRaw = document.getElementById("newWeightScore")?.value;
   const desc     = document.getElementById("newDesc")?.value.trim();
   let image = document.getElementById("newImage")?.value.trim() || "";
   const costPriceRaw = document.getElementById("newCostPrice")?.value;
@@ -840,6 +841,16 @@ async function addProduct() {
   const price = parseFloat(priceRaw);
   if (isNaN(price) || price <= 0) {
     errEl.textContent = "Please enter a valid price.";
+    errEl.classList.remove("hidden");
+    return;
+  }
+
+  // Weight score is mandatory (Phase 2a) — feeds the delivery-fee weight
+  // surcharge downstream. The select has no default value, so an empty
+  // string here means the admin genuinely hasn't picked one yet.
+  const weightScore = parseInt(weightScoreRaw, 10);
+  if (!weightScoreRaw || isNaN(weightScore) || weightScore < 1 || weightScore > 5) {
+    errEl.textContent = "Please select a weight score (1–5).";
     errEl.classList.remove("hidden");
     return;
   }
@@ -877,7 +888,7 @@ async function addProduct() {
     const newProductData = {
       name, category, price, desc,
       image: image || "https://placehold.co/400x400/e5e7eb/9ca3af?text=Product",
-      costPrice, marketName, isTopPick, allowGroupOrder, variants
+      costPrice, marketName, isTopPick, allowGroupOrder, weightScore, variants
     };
     const { error: insertErr } = await sb.from("products").insert({ id: newId, ..._toProductRow(newProductData) });
     if (insertErr) throw insertErr;
@@ -891,6 +902,7 @@ async function addProduct() {
     resetImageUploader("newImage", "");
     document.getElementById("newCategory").value = "";
     document.getElementById("newPrice").value = "";
+    document.getElementById("newWeightScore").value = "";
     document.getElementById("newIsTopPick").checked = false;
     document.getElementById("newAllowGroupOrder").checked = true;
     clearVariantRows("new");
@@ -921,6 +933,7 @@ function openEditModal(productId) {
   document.getElementById("editName").value     = p.name || "";
   document.getElementById("editCategory").value = p.category || "groceries";
   document.getElementById("editPrice").value    = p.price || "";
+  document.getElementById("editWeightScore").value = p.weightScore || "";
   document.getElementById("editDesc").value     = p.desc || "";
   resetImageUploader("editImage", p.image || "");
   document.getElementById("editCostPrice").value  = (p.costPrice ?? "") === null ? "" : (p.costPrice ?? "");
@@ -948,6 +961,7 @@ async function saveEditProduct() {
   const name     = document.getElementById("editName")?.value.trim();
   const category = document.getElementById("editCategory")?.value;
   const priceRaw = document.getElementById("editPrice")?.value;
+  const weightScoreRaw = document.getElementById("editWeightScore")?.value;
   const desc     = document.getElementById("editDesc")?.value.trim();
   let image = document.getElementById("editImage")?.value.trim() || "";
   const costPriceRaw = document.getElementById("editCostPrice")?.value;
@@ -972,6 +986,15 @@ async function saveEditProduct() {
     return;
   }
 
+  // Weight score is mandatory (Phase 2a) — existing legacy products carry
+  // the DB default (3) until an admin explicitly sets a real value here.
+  const weightScore = parseInt(weightScoreRaw, 10);
+  if (!weightScoreRaw || isNaN(weightScore) || weightScore < 1 || weightScore > 5) {
+    errEl.textContent = "Please select a weight score (1–5).";
+    errEl.classList.remove("hidden");
+    return;
+  }
+
   let costPrice = null;
   if (costPriceRaw && costPriceRaw.trim() !== "") {
     costPrice = parseFloat(costPriceRaw);
@@ -986,7 +1009,7 @@ async function saveEditProduct() {
   if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = "Saving..."; }
 
   const variants = getVariantsFromForm("edit");
-  const updateData = { name, category, price, desc, image, costPrice, marketName, isTopPick, allowGroupOrder, variants };
+  const updateData = { name, category, price, desc, image, costPrice, marketName, isTopPick, allowGroupOrder, weightScore, variants };
 
   try {
     // Upsert works for both local-seed-id and real Supabase-id products
@@ -1075,6 +1098,7 @@ function cloneProduct(productId) {
     const nameEl = document.getElementById("newName");
     const catEl  = document.getElementById("newCategory");
     const priceEl = document.getElementById("newPrice");
+    const weightEl = document.getElementById("newWeightScore");
     const descEl  = document.getElementById("newDesc");
     const topPickEl = document.getElementById("newIsTopPick");
     const groupEl = document.getElementById("newAllowGroupOrder");
@@ -1082,6 +1106,7 @@ function cloneProduct(productId) {
     if (nameEl)   nameEl.value   = "Copy of " + (p.name || "");
     if (catEl)    catEl.value    = p.category || "";
     if (priceEl)  priceEl.value  = p.price || "";
+    if (weightEl) weightEl.value = p.weightScore || "";
     if (descEl)   descEl.value   = p.desc || "";
     resetImageUploader("newImage", p.image || "");
     if (topPickEl) topPickEl.checked = !!p.isTopPick;

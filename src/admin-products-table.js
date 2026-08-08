@@ -14,6 +14,30 @@ function cbmImg(url, w, h) {
   return url.replace("/upload/", `/upload/f_auto,q_auto,${size}/`);
 }
 
+// ============================================================
+// WEIGHT SCORE BADGE (Phase 2a)
+// Color-coded 1 (lightest) -> 5 (heaviest). Falls back to a
+// neutral "not set" badge for any product that somehow still
+// lacks a value (shouldn't happen post-migration, but defensive
+// against stale cached data mid-rollout).
+// ============================================================
+const WEIGHT_BADGE_STYLES = {
+  1: "bg-green-50 text-green-700 border-green-200",
+  2: "bg-lime-50 text-lime-700 border-lime-200",
+  3: "bg-yellow-50 text-yellow-700 border-yellow-200",
+  4: "bg-orange-50 text-orange-700 border-orange-200",
+  5: "bg-red-50 text-red-700 border-red-200"
+};
+
+function weightBadgeHtml(weightScore) {
+  const s = Number(weightScore);
+  if (!s || s < 1 || s > 5) {
+    return '<span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full border bg-gray-50 text-gray-400 border-gray-200">⚠️ Not set</span>';
+  }
+  const cls = WEIGHT_BADGE_STYLES[s] || WEIGHT_BADGE_STYLES[3];
+  return `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full border ${cls}">⚖️ ${s}</span>`;
+}
+
 // RENDER PRODUCTS TABLE
 // ============================================================
 function renderAdminProducts() {
@@ -91,6 +115,9 @@ function renderAdminProducts() {
       <td class="px-4 py-3">
         <span class="font-bold text-gray-800 text-sm">₦${Number(p.price || 0).toLocaleString()}</span>
       </td>
+      <td class="px-4 py-3 hidden sm:table-cell">
+        ${weightBadgeHtml(p.weightScore)}
+      </td>
       <td class="px-4 py-3 hidden md:table-cell">
         <span class="text-xs ${p.isTopPick ? 'text-green-600' : 'text-gray-300'}">${p.isTopPick ? '✓ Yes' : '— No'}</span>
       </td>
@@ -152,6 +179,7 @@ function renderAdminProducts() {
               <span class="text-xs text-gray-400 capitalize">${(p.category || '').replace(/-/g,' ')}</span>
               ${p.isTopPick ? '<span class="text-[10px] font-bold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded-full">⚡</span>' : ''}
               ${p.allowGroupOrder !== false ? '<span class="text-[10px] font-bold text-green-700 bg-green-50 px-1.5 py-0.5 rounded-full">🤝</span>' : ''}
+              ${weightBadgeHtml(p.weightScore)}
             </div>
             <p class="font-black text-sm mt-0.5" style="color:#000080;">₦${Number(p.price || 0).toLocaleString()}</p>
           </div>
